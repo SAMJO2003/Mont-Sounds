@@ -3,20 +3,26 @@ import Reveal from "./Reveal";
 
 type Accent = "crystal" | "bronze" | "woodwinds";
 
-const swatches: Record<Accent, { label: string; gradient: string }[]> = {
+const swatches: Record<
+  Accent,
+  { label: string; gradient: string; image?: string }[]
+> = {
   crystal: [
     {
       label: "Struck Glass",
+      image: "/images/crystal-sounds-struck-glass.png",
       gradient:
         "radial-gradient(circle at 30% 20%, rgba(147,216,208,0.35), transparent 60%), linear-gradient(160deg, #0e2b2c, #0a0d0a)",
     },
     {
       label: "Cracking Ice",
+      image: "/images/crystal-sounds-cracking-ice.png",
       gradient:
         "radial-gradient(circle at 70% 70%, rgba(169,198,204,0.3), transparent 60%), linear-gradient(200deg, #12242a, #0a0d0a)",
     },
     {
       label: "Glass Resonance",
+      image: "/images/crystal-sounds-glass-resonance.png",
       gradient:
         "radial-gradient(circle at 50% 40%, rgba(242,239,228,0.18), transparent 65%), linear-gradient(180deg, #0d1f20, #0a0d0a)",
     },
@@ -79,7 +85,16 @@ export default function Gallery({
             className="relative flex aspect-square items-end overflow-hidden rounded-sm border border-crystal-white/10 p-3"
             style={{ background: s.gradient }}
           >
-            <span className="text-[11px] uppercase tracking-[0.15em] text-crystal-white/60">
+            {s.image && (
+              <Image
+                src={s.image}
+                alt={s.label}
+                fill
+                sizes="25vw"
+                className="object-cover"
+              />
+            )}
+            <span className="relative z-10 text-[11px] uppercase tracking-[0.15em] text-crystal-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
               {s.label}
             </span>
           </div>
