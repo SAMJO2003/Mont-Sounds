@@ -51,7 +51,7 @@ export default async function ProductPage({
       <section className="relative flex min-h-[70svh] items-end overflow-hidden bg-forest-black pt-24">
         <div className="absolute inset-0">
           <Image
-            src={product.image}
+            src={product.heroImage ?? product.image}
             alt={product.name}
             fill
             sizes="100vw"

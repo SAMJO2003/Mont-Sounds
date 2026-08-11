@@ -17,6 +17,7 @@ export type Product = {
   tagline: string;
   price: number;
   image: string;
+  heroImage?: string;
   screenshot?: string;
   accent: "crystal" | "bronze" | "woodwinds";
   origin: string;
@@ -62,6 +63,7 @@ export const products: Product[] = [
     tagline: "The music hidden inside light and ice",
     price: 40,
     image: "/images/crystal-sounds.png",
+    heroImage: "/images/crystal-sounds-hero.png",
     screenshot: "/images/crystal-sounds-instrument.png",
     accent: "crystal",
     origin: "Recorded from struck, rubbed and shattered crystal goblets, carved crystal bottles and cracking ice",
