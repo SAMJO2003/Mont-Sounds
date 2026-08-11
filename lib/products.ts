@@ -17,6 +17,7 @@ export type Product = {
   tagline: string;
   price: number;
   image: string;
+  screenshot?: string;
   accent: "crystal" | "bronze" | "woodwinds";
   origin: string;
   description: string;
@@ -61,13 +62,14 @@ export const products: Product[] = [
     tagline: "The music hidden inside light and ice",
     price: 40,
     image: "/images/crystal-sounds.png",
+    screenshot: "/images/crystal-sounds-instrument.png",
     accent: "crystal",
-    origin: "Recorded from struck, rubbed and shattered crystal glasses, carved crystal bottles and cracking ice",
+    origin: "Recorded from struck, rubbed and shattered crystal goblets, carved crystal bottles and cracking ice",
     description:
-      "A cinematic collection crafted from struck and rubbed crystal glasses, glass-flute bottles and cracking ice, capturing the delicate beauty of light reflected through crystal.",
+      "A cinematic collection crafted from struck and rubbed crystal goblets, glass-flute bottles and cracking ice, capturing the delicate beauty of light reflected through crystal.",
     longDescription: [
-      "Crystal Sounds began with a single struck glass that rang out and refused to fade. That resonance — thin, pure, endlessly sustaining — became the seed of this entire library.",
-      "Every layer was captured from real crystal glasses struck, rubbed and shattered by hand, crystal bottles carved and played as glass flutes, and ice recorded as hot water cracked it apart. Natural textures — flowing water, colliding rocks — round out the palette. Nothing here is synthesized from nothing; every texture began as a vibration in the physical world.",
+      "Crystal Sounds began with a single struck goblet that rang out and refused to fade. That resonance — thin, pure, endlessly sustaining — became the seed of this entire library.",
+      "Every layer was captured from real crystal goblets struck, rubbed and shattered by hand, crystal bottles carved and played as glass flutes, and ice recorded as it cracked apart. Natural textures — flowing water, colliding rocks — round out the palette. Nothing here is synthesized from nothing; every texture began as a vibration in the physical world.",
       "The result is an instrument for moments of clarity and wonder — for scenes where light seems to make a sound of its own.",
     ],
     features: [

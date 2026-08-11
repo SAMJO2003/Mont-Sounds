@@ -135,6 +135,33 @@ export default async function ProductPage({
         </div>
       </section>
 
+      {/* Instrument screenshot */}
+      {product.screenshot && (
+        <section className="bg-forest-black py-24 md:py-32">
+          <div className="mx-auto max-w-4xl px-6 md:px-10">
+            <Reveal>
+              <p className="text-center text-xs uppercase tracking-[0.3em] text-crystal-cyan/80">
+                Inside The Instrument
+              </p>
+              <h2 className="mt-4 text-center font-display text-3xl italic text-crystal-white md:text-4xl">
+                The real {product.name} interface
+              </h2>
+            </Reveal>
+            <Reveal delay={100}>
+              <div className="mt-10 overflow-hidden rounded-sm border border-crystal-white/10 bg-stone-black">
+                <Image
+                  src={product.screenshot}
+                  alt={`${product.name} Kontakt instrument interface`}
+                  width={1448}
+                  height={1186}
+                  className="w-full object-contain"
+                />
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
       {/* Audio demos */}
       <section className="bg-stone-black py-24 md:py-32">
         <div className="mx-auto max-w-3xl px-6 md:px-10">
