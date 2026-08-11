@@ -6,12 +6,12 @@ type Accent = "crystal" | "bronze" | "woodwinds";
 const swatches: Record<Accent, { label: string; gradient: string }[]> = {
   crystal: [
     {
-      label: "Quartz Formation",
+      label: "Struck Glass",
       gradient:
         "radial-gradient(circle at 30% 20%, rgba(147,216,208,0.35), transparent 60%), linear-gradient(160deg, #0e2b2c, #0a0d0a)",
     },
     {
-      label: "Mountain Ice",
+      label: "Cracking Ice",
       gradient:
         "radial-gradient(circle at 70% 70%, rgba(169,198,204,0.3), transparent 60%), linear-gradient(200deg, #12242a, #0a0d0a)",
     },
