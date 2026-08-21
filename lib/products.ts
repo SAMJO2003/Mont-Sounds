@@ -40,13 +40,6 @@ export type ComingSoonLibrary = {
 
 const crystalSoundsDemos: DemoTrack[] = [
   {
-    id: "crystal-drums",
-    title: "Crystal Drums",
-    category: "Field Recordings",
-    duration: "1:39",
-    src: "/audio/crystal-drums.m4a",
-  },
-  {
     id: "crystal-echo-cave",
     title: "Crystal Echo Cave",
     category: "Atmospheres",

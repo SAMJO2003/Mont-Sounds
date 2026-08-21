@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Reveal from "./Reveal";
 
 export default function About() {
@@ -5,26 +6,14 @@ export default function About() {
     <section id="about" className="relative bg-stone-black py-28 md:py-36">
       <div className="mx-auto grid max-w-6xl gap-16 px-6 md:grid-cols-[0.85fr_1.15fr] md:px-10">
         <Reveal>
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-sm border border-ancient-bronze/30 bg-gradient-to-b from-dark-moss to-forest-black">
-            <div
-              className="absolute inset-0 opacity-70"
-              style={{
-                background:
-                  "radial-gradient(circle at 50% 35%, rgba(147,216,208,0.12) 0%, transparent 60%)",
-              }}
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-sm border border-ancient-bronze/30">
+            <Image
+              src="/images/santiago-agramont-portrait.png"
+              alt="Santiago Agramont playing piano"
+              fill
+              sizes="(min-width: 768px) 30vw, 90vw"
+              className="object-cover"
             />
-            <svg
-              viewBox="0 0 200 200"
-              className="absolute inset-0 m-auto h-1/2 w-1/2 text-ancient-bronze/50"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.2"
-            >
-              <path d="M20 150 L70 60 L100 110 L130 40 L180 150 Z" />
-            </svg>
-            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.3em] text-crystal-white/35">
-              Portrait — Santiago Agramont
-            </span>
           </div>
         </Reveal>
 
