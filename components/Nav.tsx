@@ -61,10 +61,7 @@ export default function Nav() {
         </nav>
 
         <div className="hidden md:block">
-          <Link
-            href="/#libraries"
-            className="rounded-full border border-ancient-bronze/60 px-5 py-2 text-sm uppercase tracking-[0.18em] text-crystal-white/90 transition-colors hover:border-crystal-cyan hover:text-crystal-cyan"
-          >
+          <Link href="/#libraries" className="btn btn-outline !py-2">
             Explore Libraries
           </Link>
         </div>

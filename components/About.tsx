@@ -29,7 +29,7 @@ export default function About() {
         </Reveal>
 
         <Reveal delay={150}>
-          <p className="text-xs uppercase tracking-[0.3em] text-crystal-cyan/80">
+          <p className="text-xs uppercase tracking-[0.3em] text-ancient-bronze/80">
             The Founder
           </p>
           <h2 className="mt-4 font-display text-4xl italic text-crystal-white md:text-5xl">

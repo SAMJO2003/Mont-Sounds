@@ -1,16 +1,16 @@
 const PARTICLES = [
-  { left: "8%", top: "20%", size: 3, duration: "24s", delay: "0s" },
-  { left: "18%", top: "70%", size: 2, duration: "30s", delay: "-4s" },
-  { left: "27%", top: "35%", size: 4, duration: "26s", delay: "-9s" },
-  { left: "41%", top: "80%", size: 2, duration: "22s", delay: "-2s" },
-  { left: "53%", top: "15%", size: 3, duration: "28s", delay: "-13s" },
-  { left: "64%", top: "55%", size: 2, duration: "25s", delay: "-6s" },
-  { left: "72%", top: "25%", size: 4, duration: "32s", delay: "-16s" },
-  { left: "81%", top: "68%", size: 3, duration: "27s", delay: "-8s" },
-  { left: "90%", top: "40%", size: 2, duration: "23s", delay: "-11s" },
-  { left: "35%", top: "10%", size: 2, duration: "29s", delay: "-19s" },
-  { left: "60%", top: "85%", size: 3, duration: "26s", delay: "-3s" },
-  { left: "12%", top: "50%", size: 2, duration: "31s", delay: "-14s" },
+  { left: "6%", top: "18%", size: 2, duration: "21s", delay: "-1s" },
+  { left: "17%", top: "73%", size: 4, duration: "38s", delay: "-4s" },
+  { left: "26%", top: "31%", size: 2, duration: "19s", delay: "-14s" },
+  { left: "39%", top: "84%", size: 3, duration: "27s", delay: "-2s" },
+  { left: "51%", top: "9%", size: 2, duration: "44s", delay: "-21s" },
+  { left: "63%", top: "58%", size: 4, duration: "23s", delay: "-7s" },
+  { left: "74%", top: "22%", size: 2, duration: "33s", delay: "-16s" },
+  { left: "83%", top: "71%", size: 3, duration: "20s", delay: "-9s" },
+  { left: "92%", top: "37%", size: 2, duration: "41s", delay: "-27s" },
+  { left: "33%", top: "6%", size: 3, duration: "25s", delay: "-19s" },
+  { left: "58%", top: "89%", size: 2, duration: "36s", delay: "-3s" },
+  { left: "10%", top: "47%", size: 3, duration: "29s", delay: "-24s" },
 ];
 
 export default function ParticleField({ className = "" }: { className?: string }) {

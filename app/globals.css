@@ -13,6 +13,8 @@
   --color-oxidized-bronze: #5f4527;
   --color-fire-orange: #c46a35;
   --color-natural-moss: #4c5a3c;
+  --color-raven-violet: #6a58a8;
+  --color-night-indigo: #2c2447;
 
   --font-display: var(--font-cormorant);
   --font-body: var(--font-garamond);
@@ -80,12 +82,26 @@ html {
 }
 
 body {
+  position: relative;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body), "EB Garamond", serif;
   font-size: 1.0625rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Film-grain overlay — the single biggest lever for making flat digital
+   gradients read as a physical, textured surface instead of a render. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
 h1,
@@ -177,11 +193,47 @@ h4,
 .card-glass {
   background: linear-gradient(
     160deg,
-    rgba(242, 239, 228, 0.05),
-    rgba(242, 239, 228, 0.015)
+    rgba(242, 239, 228, 0.045),
+    rgba(242, 239, 228, 0.01)
   );
   border: 1px solid rgba(242, 239, 228, 0.1);
-  backdrop-filter: blur(6px);
+}
+
+/* Editorial button treatment — a bordered, textured mark rather than a
+   gradient pill, so calls to action read as boutique print rather than
+   generic SaaS. */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.85rem 2.1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  border-radius: 2px;
+  transition: border-color 0.4s ease, color 0.4s ease, background-color 0.4s ease;
+}
+
+.btn-primary {
+  background: var(--color-crystal-white);
+  color: var(--color-forest-black);
+  border: 1px solid var(--color-crystal-white);
+}
+
+.btn-primary:hover {
+  background: var(--color-crystal-cyan);
+  border-color: var(--color-crystal-cyan);
+}
+
+.btn-outline {
+  border: 1px solid rgba(242, 239, 228, 0.28);
+  color: rgba(242, 239, 228, 0.85);
+}
+
+.btn-outline:hover {
+  border-color: var(--color-crystal-cyan);
+  color: var(--color-crystal-cyan);
 }
 
 .text-balance {

@@ -29,173 +29,85 @@ export type Product = {
   faq: FaqItem[];
 };
 
-const demoCategories = [
-  "Field Recordings",
-  "Atmospheres",
-  "Textures",
-  "Pads",
-  "Playable Instruments",
-  "One Shots",
-] as const;
+export type ComingSoonLibrary = {
+  slug: string;
+  name: string;
+  tagline: string;
+  accent: "bronze" | "woodwinds" | "wings";
+  background: string;
+  daw: string;
+};
 
-function buildDemos(prefix: string): DemoTrack[] {
-  const titles: Record<(typeof demoCategories)[number], string> = {
-    "Field Recordings": `${prefix} — Source Recording`,
-    Atmospheres: `${prefix} — Distant Atmosphere`,
-    Textures: `${prefix} — Resonant Texture`,
-    Pads: `${prefix} — Sustained Pad`,
-    "Playable Instruments": `${prefix} — Solo Performance`,
-    "One Shots": `${prefix} — Impact & Hits`,
-  };
-  const durations = ["1:42", "2:15", "1:58", "2:40", "1:33", "0:47"];
-  return demoCategories.map((category, i) => ({
-    id: `${prefix.toLowerCase()}-${i}`,
-    title: titles[category],
-    category,
-    duration: durations[i],
-  }));
-}
+const crystalSoundsDemos: DemoTrack[] = [
+  {
+    id: "crystal-drums",
+    title: "Crystal Drums",
+    category: "Field Recordings",
+    duration: "1:39",
+    src: "/audio/crystal-drums.m4a",
+  },
+  {
+    id: "crystal-echo-cave",
+    title: "Crystal Echo Cave",
+    category: "Atmospheres",
+    duration: "1:18",
+    src: "/audio/crystal-echo-cave.m4a",
+  },
+  {
+    id: "crystal-fracture-crystals",
+    title: "Fracture Crystals",
+    category: "Textures",
+    duration: "1:17",
+    src: "/audio/crystal-fracture-crystals.m4a",
+  },
+  {
+    id: "crystal-glass-tink",
+    title: "Glass Tink",
+    category: "Playable Instruments",
+    duration: "1:44",
+    src: "/audio/crystal-glass-tink.m4a",
+  },
+];
 
 export const products: Product[] = [
   {
     slug: "crystal-sounds",
     name: "Crystal Sounds",
     tagline: "The music hidden inside light and ice",
-    price: 40,
-    image: "/images/crystal-sounds.png",
-    heroImage: "/images/crystal-sounds-hero.png",
-    screenshot: "/images/crystal-sounds-instrument.png",
+    price: 49,
+    image: "/images/crystal-sounds-background.png",
+    heroImage: "/images/crystal-sounds-background.png",
+    screenshot: "/images/crystal-sounds-daw.png",
     accent: "crystal",
-    origin: "Recorded from struck, rubbed and shattered crystal goblets, carved crystal bottles and cracking ice",
+    origin: "Recorded from crystal goblets struck, rubbed and shattered by hand, layered with natural elemental textures",
     description:
-      "A cinematic collection crafted from struck and rubbed crystal goblets, glass-flute bottles and cracking ice, capturing the delicate beauty of light reflected through crystal.",
+      "A cinematic collection crafted from real crystal goblets — struck, rubbed and shattered by hand — layered with natural elemental textures: falling rocks, cracking ice, wind, colliding crystals and running water.",
     longDescription: [
       "Crystal Sounds began with a single struck goblet that rang out and refused to fade. That resonance — thin, pure, endlessly sustaining — became the seed of this entire library.",
-      "Every layer was captured from real crystal goblets struck, rubbed and shattered by hand, crystal bottles carved and played as glass flutes, and ice recorded as it cracked apart. Natural textures — flowing water, colliding rocks — round out the palette. Nothing here is synthesized from nothing; every texture began as a vibration in the physical world.",
+      "Every layer was captured from real crystal goblets — struck, rubbed and shattered by hand — and layered with natural elemental textures: falling rocks, cracking ice, wind, colliding crystals and running water. Nothing here is synthesized from nothing; every texture began as a vibration in the physical world.",
       "The result is an instrument for moments of clarity and wonder — for scenes where light seems to make a sound of its own.",
     ],
     features: [
-      "20 deep-sampled crystal instruments",
-      "40+ evolving pads built from bowed glass resonance",
-      "Multi-mic'd recordings of cracking ice and natural textures",
-      "Custom Kontakt UI with curve, envelope and reverb macros",
-      "Round-robin and velocity layers for natural performance",
-      "Includes dry and processed convolution reverb variants",
+      "12 deep-sampled instruments built from crystal goblets — struck, rubbed and shattered by hand",
+      "Elemental texture layers: falling rocks, cracking ice, wind, colliding crystals and running water",
+      "Custom Kontakt UI with Attack, Release, Sustain and Decay performance macros",
+      "Built-in Texture, Delay and Reverb effects macros for instant sound design",
     ],
     requirements: [
-      "Kontakt 7 or later (Player compatible, free)",
+      "Kontakt 7 or later — Full version required (runs in Demo mode on Kontakt Player)",
       "16 GB RAM recommended",
-      "4.2 GB free disk space",
+      "Free disk space for the full sample content",
       "macOS 12+ or Windows 10+",
     ],
-    demos: buildDemos("Crystal").map((d) =>
-      d.category === "Field Recordings"
-        ? {
-            ...d,
-            title: "Crystal Drums",
-            duration: "1:39",
-            src: "/audio/crystal-drums.m4a",
-          }
-        : d
-    ),
+    demos: crystalSoundsDemos,
     faq: [
       {
         q: "Do I need the full version of Kontakt?",
-        a: "No. Crystal Sounds runs in the free Kontakt Player using Native Instruments' licensing.",
+        a: "Yes. Crystal Sounds requires the full version of Kontakt 7 or later — it will run in Demo mode (time-limited, with audio interruptions) in the free Kontakt Player.",
       },
       {
         q: "Are the field recordings included as raw files?",
         a: "Yes — the raw, unprocessed source recordings are included alongside the finished instruments.",
-      },
-      {
-        q: "Can I use this in commercial media?",
-        a: "Yes. A single-user license covers use in any commercial composition, game, or media project.",
-      },
-    ],
-  },
-  {
-    slug: "bronze-sounds",
-    name: "Bronze Sounds",
-    tagline: "Ancient metal, forged into music",
-    price: 40,
-    image: "/images/bronze-sounds.png",
-    accent: "bronze",
-    origin: "Recorded at a working forge, hammer on bronze, fire and ancient bells",
-    description:
-      "Ancient bronze transformed into expressive instruments through recordings of forging, hammering, fire, resonance and handcrafted metal textures inspired by Celtic craftsmanship.",
-    longDescription: [
-      "Bronze Sounds was recorded inside a working forge — the same kind of fire and hammer that has shaped bronze for thousands of years. Every strike, scrape and resonant ring was captured as it happened, unrehearsed.",
-      "We recorded hammers on hot and cold bronze, coals settling in a firepit, and cast bells left to ring to complete silence. Those recordings were then shaped into playable instruments that keep the warmth and imperfection of the original metal.",
-      "This library is built for themes of craft, ritual and ancient strength — anything that needs the sound of something built by hand, not by machine.",
-    ],
-    features: [
-      "96 hammered and resonant bronze instruments",
-      "Fire and coal textures for tension and atmosphere",
-      "Deep bell and gong hits with natural long tails",
-      "Rhythmic hammer-on-metal percussion kits",
-      "Celtic-inspired tuned metal scales",
-      "Custom Kontakt UI with curve, envelope and reverb macros",
-    ],
-    requirements: [
-      "Kontakt 7 or later (Player compatible, free)",
-      "16 GB RAM recommended",
-      "3.8 GB free disk space",
-      "macOS 12+ or Windows 10+",
-    ],
-    demos: buildDemos("Bronze"),
-    faq: [
-      {
-        q: "Do I need the full version of Kontakt?",
-        a: "No. Bronze Sounds runs in the free Kontakt Player using Native Instruments' licensing.",
-      },
-      {
-        q: "Is this tuned to a specific scale?",
-        a: "Core bells and tuned metal instruments are mapped chromatically, with a curated set of Celtic-inspired scale presets available from the UI.",
-      },
-      {
-        q: "Can I use this in commercial media?",
-        a: "Yes. A single-user license covers use in any commercial composition, game, or media project.",
-      },
-    ],
-  },
-  {
-    slug: "woodwinds-sounds",
-    name: "Woodwinds Sounds",
-    tagline: "The forest, breathing through wood",
-    price: 40,
-    image: "/images/woodwinds-sounds.png",
-    accent: "woodwinds",
-    origin: "Recorded in Costa Rican cloud forest, alongside rivers and waterfalls",
-    description:
-      "Organic woodwinds blended with handcrafted wooden instruments, forests, waterfalls and the living resonance of Costa Rican nature.",
-    longDescription: [
-      "Woodwinds Sounds was recorded at the edge of a cloud forest waterfall, where handcrafted flutes and pan pipes were played into open, living air rather than a studio booth.",
-      "Every instrument was chosen for its wooden, breath-driven character — bamboo flutes, carved wooden whistles, reed pipes — and layered with the forest itself: rain, water, wind through leaves, distant birdsong.",
-      "The result feels less like a sample library and more like a living forest that happens to know how to play a melody.",
-    ],
-    features: [
-      "80+ deep-sampled wooden woodwind instruments",
-      "Legato and true-performance scripting for natural phrasing",
-      "Layered forest, river and waterfall atmospheres",
-      "Breath and key-noise controls for realism",
-      "Field-recorded bird and rain textures as bonus one-shots",
-      "Custom Kontakt UI with curve, envelope and reverb macros",
-    ],
-    requirements: [
-      "Kontakt 7 or later (Player compatible, free)",
-      "16 GB RAM recommended",
-      "4.6 GB free disk space",
-      "macOS 12+ or Windows 10+",
-    ],
-    demos: buildDemos("Woodwinds"),
-    faq: [
-      {
-        q: "Do I need the full version of Kontakt?",
-        a: "No. Woodwinds Sounds runs in the free Kontakt Player using Native Instruments' licensing.",
-      },
-      {
-        q: "Does it include the ambient forest recordings separately?",
-        a: "Yes — atmospheres and field recordings are included as their own playable category alongside the instruments.",
       },
       {
         q: "Can I use this in commercial media?",
@@ -209,11 +121,32 @@ export function getProduct(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
 }
 
-export const comingSoon = [
-  { name: "Stone Sounds", note: "Carved rock, cave resonance & ancient weight" },
-  { name: "Rain Sounds", note: "Storm textures across the cloud forest canopy" },
-  { name: "Volcano Sounds", note: "Deep earth resonance & volcanic stone" },
-  { name: "Wing Sounds", note: "Feather, flight & the movement of birds" },
-  { name: "Leaf Sounds", note: "Rustling canopy & the language of the forest floor" },
-  { name: "Ocean Sounds", note: "Pacific tides along the Costa Rican coast" },
+export const comingSoon: ComingSoonLibrary[] = [
+  {
+    slug: "bronze-sounds",
+    name: "Bronze Sounds",
+    tagline:
+      "Percussive metal — struck, scraped and bent by hand in an artisan metal workshop, layered with sparks, fire and blowtorch wind.",
+    accent: "bronze",
+    background: "/images/bronze-sounds-background.png",
+    daw: "/images/bronze-sounds-daw.png",
+  },
+  {
+    slug: "wood-and-wind-sounds",
+    name: "Wood and Wind Sounds",
+    tagline:
+      "Ethnic flutes, pan pipes and wooden percussion, recorded in the forest to capture their natural, indigenous textures.",
+    accent: "woodwinds",
+    background: "/images/wood-and-wind-sounds-background.png",
+    daw: "/images/wood-and-wind-sounds-daw.png",
+  },
+  {
+    slug: "wings-and-whispers-sounds",
+    name: "Wings & Whispers Sounds",
+    tagline:
+      "Costa Rican birdsong and organic bird sounds, recorded alongside the natural textures of their habitat.",
+    accent: "wings",
+    background: "/images/wings-and-whispers-sounds-background.png",
+    daw: "/images/wings-and-whispers-sounds-daw.png",
+  },
 ];

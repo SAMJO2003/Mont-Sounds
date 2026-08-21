@@ -38,7 +38,7 @@ export default function Philosophy() {
     <section id="philosophy" className="relative bg-forest-black py-28 md:py-36">
       <div className="mx-auto max-w-6xl px-6 md:px-10">
         <Reveal>
-          <p className="text-center text-xs uppercase tracking-[0.3em] text-crystal-cyan/80">
+          <p className="text-center text-xs uppercase tracking-[0.3em] text-natural-moss">
             Philosophy
           </p>
           <h2 className="mt-4 text-center font-display text-4xl italic text-crystal-white md:text-5xl">

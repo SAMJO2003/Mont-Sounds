@@ -7,7 +7,7 @@ export default function Footer() {
   return (
     <footer id="contact" className="relative border-t border-crystal-white/10 bg-stone-black">
       <div className="mx-auto max-w-7xl px-6 py-16 md:px-10">
-        <div className="grid gap-12 md:grid-cols-4">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <div className="flex items-center gap-3">
               <span className="relative block h-9 w-9 shrink-0">
@@ -52,6 +52,29 @@ export default function Footer() {
 
           <div>
             <h4 className="font-display text-sm uppercase tracking-[0.2em] text-crystal-white/70">
+              Legal
+            </h4>
+            <ul className="mt-4 space-y-2 text-sm text-crystal-white/55">
+              <li>
+                <Link href="/terminos-y-condiciones" className="hover:text-crystal-cyan">
+                  Términos y Condiciones
+                </Link>
+              </li>
+              <li>
+                <Link href="/politica-de-privacidad" className="hover:text-crystal-cyan">
+                  Política de Privacidad
+                </Link>
+              </li>
+              <li>
+                <Link href="/politica-de-reembolso" className="hover:text-crystal-cyan">
+                  Política de Reembolso
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-display text-sm uppercase tracking-[0.2em] text-crystal-white/70">
               Libraries
             </h4>
             <ul className="mt-4 space-y-2 text-sm text-crystal-white/55">
@@ -71,12 +94,17 @@ export default function Footer() {
             </h4>
             <ul className="mt-4 space-y-2 text-sm text-crystal-white/55">
               <li>
-                <a href="mailto:hello@montsounds.com" className="hover:text-crystal-cyan">
-                  hello@montsounds.com
+                <a href="mailto:info@montsounds.com" className="hover:text-crystal-cyan">
+                  info@montsounds.com
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-crystal-cyan">
+                <a
+                  href="https://www.instagram.com/montsounds"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-crystal-cyan"
+                >
                   Instagram
                 </a>
               </li>

@@ -42,16 +42,10 @@ export default function Hero() {
         </p>
 
         <div className="animate-fade-up mt-10 flex flex-col gap-4 sm:flex-row [animation-delay:550ms]">
-          <Link
-            href="/#libraries"
-            className="rounded-full bg-gradient-to-r from-forest-green to-deep-emerald px-8 py-3 text-sm uppercase tracking-[0.2em] text-crystal-white shadow-[0_0_30px_rgba(28,74,53,0.5)] transition-transform hover:scale-[1.03]"
-          >
+          <Link href="/#libraries" className="btn btn-primary">
             Explore Libraries
           </Link>
-          <Link
-            href="#trailer"
-            className="rounded-full border border-crystal-white/25 px-8 py-3 text-sm uppercase tracking-[0.2em] text-crystal-white/85 transition-colors hover:border-crystal-cyan hover:text-crystal-cyan"
-          >
+          <Link href="#trailer" className="btn btn-outline">
             Watch Trailer
           </Link>
         </div>

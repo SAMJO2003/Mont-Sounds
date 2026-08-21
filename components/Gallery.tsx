@@ -10,19 +10,19 @@ const swatches: Record<
   crystal: [
     {
       label: "Struck Glass",
-      image: "/images/crystal-sounds-struck-glass.png",
+      image: "/images/crystal-glasses.png",
       gradient:
         "radial-gradient(circle at 30% 20%, rgba(147,216,208,0.35), transparent 60%), linear-gradient(160deg, #0e2b2c, #0a0d0a)",
     },
     {
       label: "Cracking Ice",
-      image: "/images/crystal-sounds-cracking-ice.png",
+      image: "/images/crystal-ice-cracking.png",
       gradient:
         "radial-gradient(circle at 70% 70%, rgba(169,198,204,0.3), transparent 60%), linear-gradient(200deg, #12242a, #0a0d0a)",
     },
     {
       label: "Glass Resonance",
-      image: "/images/crystal-sounds-glass-resonance.png",
+      image: "/images/crystal-glass-resonance.png",
       gradient:
         "radial-gradient(circle at 50% 40%, rgba(242,239,228,0.18), transparent 65%), linear-gradient(180deg, #0d1f20, #0a0d0a)",
     },
