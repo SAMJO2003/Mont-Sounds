@@ -1,7 +1,7 @@
 // Toggle this to false while promoting the site pre-launch (visitors can browse
 // and listen to demos, but the buy button is disabled). Flip back to true once
 // checkout/delivery is fully wired up and ready for real sales.
-export const SALES_ENABLED = true;
+export const SALES_ENABLED = false;
 
 // Launch discount — auto-applied at checkout, no code needed. Mirrors the
 // expiration already set on the discount itself in Paddle (Catalog →
