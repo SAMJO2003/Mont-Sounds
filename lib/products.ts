@@ -1,3 +1,21 @@
+// Toggle this to false while promoting the site pre-launch (visitors can browse
+// and listen to demos, but the buy button is disabled). Flip back to true once
+// checkout/delivery is fully wired up and ready for real sales.
+export const SALES_ENABLED = true;
+
+// Launch discount — auto-applied at checkout, no code needed. Mirrors the
+// expiration already set on the discount itself in Paddle (Catalog →
+// Discounts → "Launch price - first month"), so if this ever isn't updated
+// in time, Paddle simply stops honoring the discount id and the checkout
+// falls back to full price.
+export const LAUNCH_DISCOUNT_ID = "dsc_01m2m7mkx9mmjfzf08bnrz6gmp";
+export const LAUNCH_DISCOUNT_ENDS = new Date("2026-10-15T23:59:00Z");
+export const LAUNCH_PRICE = 29;
+
+export function isLaunchDiscountActive(): boolean {
+  return new Date() < LAUNCH_DISCOUNT_ENDS;
+}
+
 export type DemoTrack = {
   id: string;
   title: string;
@@ -16,6 +34,13 @@ export type Product = {
   name: string;
   tagline: string;
   price: number;
+  paddlePriceId: string;
+  // Temporary manual delivery while sales are too low for Pulse Downloader's
+  // automated hosting. Must be a *direct-download* Google Drive link:
+  // https://drive.google.com/uc?export=download&id=FILE_ID
+  // (right-click the file in Drive → "Share" → "Anyone with the link", then
+  // copy the file id out of the normal share link and build the URL above).
+  driveFileUrl: string;
   image: string;
   heroImage?: string;
   screenshot?: string;
@@ -68,6 +93,8 @@ export const products: Product[] = [
     name: "Crystal Sounds",
     tagline: "The music hidden inside light and ice",
     price: 49,
+    paddlePriceId: "pri_01m2kts186rjfbf1r51fecmpag",
+    driveFileUrl: "https://drive.google.com/uc?export=download&id=1ksZAe_Vris1aeFp_v9zbjL4SuLrtTKXV",
     image: "/images/crystal-sounds-background.png",
     heroImage: "/images/crystal-sounds-background.png",
     screenshot: "/images/crystal-sounds-daw.png",
@@ -112,6 +139,10 @@ export const products: Product[] = [
 
 export function getProduct(slug: string): Product | undefined {
   return products.find((p) => p.slug === slug);
+}
+
+export function getProductByPriceId(priceId: string): Product | undefined {
+  return products.find((p) => p.paddlePriceId === priceId);
 }
 
 export const comingSoon: ComingSoonLibrary[] = [

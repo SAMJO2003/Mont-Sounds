@@ -2,12 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getProduct, products, comingSoon, type Product, type ComingSoonLibrary } from "@/lib/products";
+import { getProduct, products, comingSoon, isLaunchDiscountActive, LAUNCH_PRICE, type Product, type ComingSoonLibrary } from "@/lib/products";
 import Reveal from "@/components/Reveal";
 import ParticleField from "@/components/ParticleField";
 import AudioPlayer from "@/components/AudioPlayer";
 import Faq from "@/components/Faq";
 import Gallery from "@/components/Gallery";
+import BuyButton from "@/components/BuyButton";
 
 export function generateStaticParams() {
   return [
@@ -91,12 +92,19 @@ function ProductDetail({ product }: { product: Product }) {
           </p>
 
           <div id="buy" className="mt-9 flex flex-wrap items-center gap-5">
-            <span className="font-display text-3xl text-crystal-white">
-              ${product.price} USD
-            </span>
-            <button type="button" className="btn btn-primary">
-              Comprar ahora
-            </button>
+            {isLaunchDiscountActive() ? (
+              <span className="font-display text-3xl text-crystal-white">
+                <span className="mr-2 text-crystal-white/50 line-through">
+                  ${product.price}
+                </span>
+                ${LAUNCH_PRICE} USD
+              </span>
+            ) : (
+              <span className="font-display text-3xl text-crystal-white">
+                ${product.price} USD
+              </span>
+            )}
+            <BuyButton priceId={product.paddlePriceId} className="btn btn-primary" />
             <a
               href="#trailer"
               className="text-sm uppercase tracking-[0.2em] text-crystal-white/70 hover:text-crystal-cyan"

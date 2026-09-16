@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "mont-sounds-dev",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "dev"],
       "port": 3000
     }
