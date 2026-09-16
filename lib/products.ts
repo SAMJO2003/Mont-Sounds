@@ -93,7 +93,7 @@ export const products: Product[] = [
     name: "Crystal Sounds",
     tagline: "The music hidden inside light and ice",
     price: 49,
-    paddlePriceId: "pri_01m2kts186rjfbf1r51fecmpag",
+    paddlePriceId: "pri_01m0kp5gt63pyfegf89nacjfqh",
     driveFileUrl: "https://drive.google.com/uc?export=download&id=1ksZAe_Vris1aeFp_v9zbjL4SuLrtTKXV",
     image: "/images/crystal-sounds-background.png",
     heroImage: "/images/crystal-sounds-background.png",
