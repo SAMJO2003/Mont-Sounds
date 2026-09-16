@@ -14,10 +14,9 @@ export default function PoliticaDeReembolsoPage() {
         <h2>1. Producto digital de entrega inmediata</h2>
         <p>
           Todas las librerías y texturas de audio vendidas por Mont Sounds son
-          productos digitales. Al completarse la compra, los archivos
-          descargables y las claves de licencia correspondientes se entregan
-          de forma inmediata a través de nuestro sistema de distribución
-          digital, Pulse Downloader.
+          productos digitales. Al completarse la compra, recibís de forma
+          inmediata un correo electrónico con el enlace de descarga y la
+          licencia correspondiente.
         </p>
       </div>
 
