@@ -108,11 +108,6 @@ export default function Footer() {
                   Instagram
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:text-crystal-cyan">
-                  YouTube
-                </a>
-              </li>
             </ul>
             <NewsletterForm />
           </div>

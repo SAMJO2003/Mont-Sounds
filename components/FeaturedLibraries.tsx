@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { products } from "@/lib/products";
+import { products, isLaunchDiscountActive, LAUNCH_PRICE } from "@/lib/products";
 import Reveal from "./Reveal";
 
 export default function FeaturedLibraries() {
@@ -44,9 +44,18 @@ export default function FeaturedLibraries() {
               </p>
 
               <div className="mt-8 flex flex-wrap items-center gap-5">
-                <span className="font-display text-2xl text-crystal-white">
-                  ${product.price} USD
-                </span>
+                {isLaunchDiscountActive() ? (
+                  <span className="font-display text-2xl text-crystal-white">
+                    <span className="mr-2 text-crystal-white/50 line-through">
+                      ${product.price}
+                    </span>
+                    ${LAUNCH_PRICE} USD
+                  </span>
+                ) : (
+                  <span className="font-display text-2xl text-crystal-white">
+                    ${product.price} USD
+                  </span>
+                )}
                 <Link href={`/libraries/${product.slug}#buy`} className="btn btn-primary">
                   Comprar ahora
                 </Link>
