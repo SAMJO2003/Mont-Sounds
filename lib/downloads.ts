@@ -15,9 +15,17 @@ function getRedis() {
 
 const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 14; // download link expires after 14 days
 
+// Google Drive shows a "can't scan for viruses" interstitial for files this
+// size, requiring an extra click — if a customer doesn't get through it
+// (closes the tab, flaky connection) the link would otherwise be burned
+// with nothing actually downloaded. Give a grace window to retry before
+// truly locking it.
+const REUSE_GRACE_MS = 60 * 60 * 1000; // 1 hour
+
 type DownloadRecord = {
   productSlug: string;
   used: boolean;
+  usedAt?: number;
 };
 
 /**
@@ -57,14 +65,20 @@ export async function consumeDownloadToken(
   const redis = getRedis();
   const record = await redis.get<DownloadRecord>(`download:${token}`);
   if (!record) return { status: "not_found" };
-  if (record.used) return { status: "already_used" };
+
+  if (record.used) {
+    const withinGrace =
+      record.usedAt !== undefined && Date.now() - record.usedAt < REUSE_GRACE_MS;
+    if (!withinGrace) return { status: "already_used" };
+    return { status: "ok", productSlug: record.productSlug };
+  }
 
   // Best-effort race guard: two simultaneous requests could both read
   // used:false before either writes. Fine for this low-volume, low-stakes
   // use case — worst case someone downloads twice via a double-click.
   await redis.set(
     `download:${token}`,
-    { ...record, used: true },
+    { ...record, used: true, usedAt: Date.now() },
     { keepTtl: true }
   );
 
