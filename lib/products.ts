@@ -44,6 +44,7 @@ export type Product = {
   image: string;
   heroImage?: string;
   screenshot?: string;
+  trailerUrl?: string;
   accent: "crystal" | "bronze" | "woodwinds";
   origin: string;
   description: string;
@@ -98,6 +99,7 @@ export const products: Product[] = [
     image: "/images/crystal-sounds-background.png",
     heroImage: "/images/crystal-sounds-background.png",
     screenshot: "/images/crystal-sounds-daw.png",
+    trailerUrl: "/videos/crystal-sounds-trailer.mp4",
     accent: "crystal",
     origin: "Recorded from crystal goblets struck, rubbed and shattered by hand, layered with natural elemental textures",
     description:

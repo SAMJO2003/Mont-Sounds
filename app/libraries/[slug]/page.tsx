@@ -9,6 +9,7 @@ import AudioPlayer from "@/components/AudioPlayer";
 import Faq from "@/components/Faq";
 import Gallery from "@/components/Gallery";
 import BuyButton from "@/components/BuyButton";
+import TrailerPlayer from "@/components/TrailerPlayer";
 
 export function generateStaticParams() {
   return [
@@ -138,28 +139,32 @@ function ProductDetail({ product }: { product: Product }) {
       <section id="trailer" className="bg-forest-black py-24 md:py-32">
         <div className="mx-auto max-w-4xl px-6 md:px-10">
           <Reveal>
-            <div className="group relative aspect-video overflow-hidden rounded-sm border border-crystal-white/10 bg-stone-black">
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at 50% 50%, rgba(28,74,53,0.35) 0%, rgba(10,13,10,0.95) 70%)",
-                }}
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                <button
-                  aria-label="Play trailer"
-                  className="flex h-16 w-16 items-center justify-center rounded-full border border-crystal-white/30 text-crystal-white transition-all group-hover:scale-105 group-hover:border-crystal-cyan group-hover:text-crystal-cyan"
-                >
-                  <svg viewBox="0 0 24 24" className="ml-1 h-6 w-6" fill="currentColor">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </button>
-                <p className="font-display text-lg italic text-crystal-white/70">
-                  {product.name} — Trailer
-                </p>
+            {product.trailerUrl ? (
+              <TrailerPlayer src={product.trailerUrl} label={`${product.name} — Trailer`} />
+            ) : (
+              <div className="group relative aspect-video overflow-hidden rounded-sm border border-crystal-white/10 bg-stone-black">
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(ellipse at 50% 50%, rgba(28,74,53,0.35) 0%, rgba(10,13,10,0.95) 70%)",
+                  }}
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                  <button
+                    aria-label="Play trailer"
+                    className="flex h-16 w-16 items-center justify-center rounded-full border border-crystal-white/30 text-crystal-white transition-all group-hover:scale-105 group-hover:border-crystal-cyan group-hover:text-crystal-cyan"
+                  >
+                    <svg viewBox="0 0 24 24" className="ml-1 h-6 w-6" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </button>
+                  <p className="font-display text-lg italic text-crystal-white/70">
+                    {product.name} — Trailer
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
           </Reveal>
         </div>
       </section>
