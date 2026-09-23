@@ -140,7 +140,7 @@ function ProductDetail({ product }: { product: Product }) {
         <div className="mx-auto max-w-4xl px-6 md:px-10">
           <Reveal>
             {product.trailerUrl ? (
-              <TrailerPlayer src={product.trailerUrl} label={`${product.name} — Trailer`} />
+              <TrailerPlayer src={product.trailerUrl} label={`${product.name} — Trailer`} vertical />
             ) : (
               <div className="group relative aspect-video overflow-hidden rounded-sm border border-crystal-white/10 bg-stone-black">
                 <div

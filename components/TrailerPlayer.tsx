@@ -5,15 +5,21 @@ import { useRef, useState } from "react";
 export default function TrailerPlayer({
   src,
   label,
+  vertical = false,
 }: {
   src: string;
   label: string;
+  vertical?: boolean;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
   return (
-    <div className="group relative aspect-video overflow-hidden rounded-sm border border-crystal-white/10 bg-stone-black">
+    <div
+      className={`group relative mx-auto overflow-hidden rounded-sm border border-crystal-white/10 bg-stone-black ${
+        vertical ? "aspect-[9/16] max-h-[75vh] w-auto" : "aspect-video w-full"
+      }`}
+    >
       <video
         ref={videoRef}
         src={src}
