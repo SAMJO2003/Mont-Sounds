@@ -95,7 +95,7 @@ export const products: Product[] = [
     tagline: "The music hidden inside light and ice",
     price: 49,
     paddlePriceId: "pri_01m0kp5gt63pyfegf89nacjfqh",
-    driveFileUrl: "https://drive.google.com/uc?export=download&id=1pphsFekglBzrrpYcwpty2e6wGfd43Wol",
+    driveFileUrl: "https://drive.google.com/uc?export=download&id=1U5AAO01N_O8UVGZApRjNkqBxtiCDcUxD",
     image: "/images/crystal-sounds-background.png",
     heroImage: "/images/crystal-sounds-background.png",
     screenshot: "/images/crystal-sounds-daw.png",
