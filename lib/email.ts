@@ -39,3 +39,40 @@ export async function sendDownloadEmail({
     `,
   });
 }
+
+// Internal heads-up to the business inbox on every completed transaction, so
+// Santiago hears about a sale without logging into Paddle.
+const SALE_ALERT_TO = "info@montsounds.com";
+
+export async function sendSaleAlertEmail({
+  productName,
+  customerEmail,
+  amount,
+  currency,
+  transactionId,
+}: {
+  productName: string;
+  customerEmail: string;
+  amount: number;
+  currency: string;
+  transactionId: string;
+}) {
+  const isTest = amount === 0;
+  const formatted = `${currency} ${amount.toFixed(2)}`;
+  await getResend().emails.send({
+    from: process.env.RESEND_FROM_EMAIL || "Mont Sounds <onboarding@resend.dev>",
+    to: SALE_ALERT_TO,
+    subject: isTest
+      ? `Compra de $0 (prueba/descuento): ${productName}`
+      : `Nueva venta: ${productName} — ${formatted}`,
+    html: `
+      <div style="font-family: Georgia, serif; padding:24px; max-width:520px;">
+        <h2 style="margin:0 0 16px;">${isTest ? "Compra de $0" : "Nueva venta"} — ${productName}</h2>
+        <p><strong>Total cobrado:</strong> ${formatted}</p>
+        <p><strong>Comprador:</strong> ${customerEmail}</p>
+        <p><strong>Transacción:</strong> ${transactionId}</p>
+        <p style="color:#666; font-size:13px;">El correo con el enlace de descarga ya se envió al comprador. Detalles y monto neto en Paddle → Transactions.</p>
+      </div>
+    `,
+  });
+}

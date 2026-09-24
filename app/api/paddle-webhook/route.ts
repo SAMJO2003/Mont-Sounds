@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyPaddleSignature, fetchPaddleCustomerEmail } from "@/lib/paddle-server";
 import { getProductByPriceId } from "@/lib/products";
 import { getOrCreateDownloadToken } from "@/lib/downloads";
-import { sendDownloadEmail } from "@/lib/email";
+import { sendDownloadEmail, sendSaleAlertEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -68,6 +68,21 @@ export async function POST(request: NextRequest) {
   const downloadUrl = `${siteUrl}/api/download/${token}`;
 
   await sendDownloadEmail({ to: email, productName: product.name, downloadUrl });
+
+  // Best-effort: a failed alert must not make Paddle retry (and re-send the
+  // buyer's email), so log and move on.
+  try {
+    const totals = transaction.details?.totals ?? {};
+    await sendSaleAlertEmail({
+      productName: product.name,
+      customerEmail: email,
+      amount: Number(totals.grand_total ?? 0) / 100,
+      currency: totals.currency_code ?? transaction.currency_code ?? "USD",
+      transactionId,
+    });
+  } catch (err) {
+    console.error(`paddle-webhook: sale alert failed (transaction ${transactionId})`, err);
+  }
 
   return NextResponse.json({ received: true });
 }
