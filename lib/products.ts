@@ -22,6 +22,10 @@ export type DemoTrack = {
   category: string;
   duration: string;
   src?: string;
+  // Main credit shown under the title; composerRealName is a smaller
+  // secondary line (e.g. artist name first, real name below).
+  composer?: string;
+  composerRealName?: string;
 };
 
 export type FaqItem = {
@@ -66,11 +70,21 @@ export type ComingSoonLibrary = {
 
 const crystalSoundsDemos: DemoTrack[] = [
   {
+    id: "crystal-cave-of-mirrors",
+    title: "The Cave of Mirrors",
+    category: "Featured Composer",
+    duration: "0:44",
+    src: "/audio/crystal-cave-of-mirrors.m4a",
+    composer: "ShermanPlays",
+    composerRealName: "Lucas Sherman",
+  },
+  {
     id: "crystal-echo-cave",
     title: "Crystal Echo Cave",
     category: "Atmospheres",
     duration: "1:18",
     src: "/audio/crystal-echo-cave.m4a",
+    composer: "Santiago Agramont",
   },
   {
     id: "crystal-fracture-crystals",
@@ -78,6 +92,7 @@ const crystalSoundsDemos: DemoTrack[] = [
     category: "Textures",
     duration: "1:17",
     src: "/audio/crystal-fracture-crystals.m4a",
+    composer: "Santiago Agramont",
   },
   {
     id: "crystal-glass-tink",
@@ -85,6 +100,7 @@ const crystalSoundsDemos: DemoTrack[] = [
     category: "Playable Instruments",
     duration: "1:44",
     src: "/audio/crystal-glass-tink.m4a",
+    composer: "Santiago Agramont",
   },
 ];
 

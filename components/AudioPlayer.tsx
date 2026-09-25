@@ -94,8 +94,20 @@ export default function AudioPlayer({ demos }: { demos: DemoTrack[] }) {
                       )}
                     </span>
 
-                    <span className="flex-1 truncate text-sm text-crystal-white/85">
-                      {track.title}
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm text-crystal-white/85">
+                        {track.title}
+                      </span>
+                      {track.composer && (
+                        <span className="mt-0.5 block truncate text-xs text-crystal-white/50">
+                          {track.composer}
+                          {track.composerRealName && (
+                            <span className="ml-1.5 text-[10.5px] text-crystal-white/30">
+                              {track.composerRealName}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </span>
 
                     <Waveform playing={isPlaying} />
