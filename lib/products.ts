@@ -72,11 +72,19 @@ const crystalSoundsDemos: DemoTrack[] = [
   {
     id: "crystal-cave-of-mirrors",
     title: "The Cave of Mirrors",
-    category: "Featured Composer",
+    category: "Featured Composers",
     duration: "0:44",
     src: "/audio/crystal-cave-of-mirrors.m4a",
     composer: "ShermanPlays",
     composerRealName: "Lucas Sherman",
+  },
+  {
+    id: "crystal-reflection",
+    title: "Reflection",
+    category: "Featured Composers",
+    duration: "0:36",
+    src: "/audio/crystal-reflection.m4a",
+    composer: "Gianandre Lubin",
   },
   {
     id: "crystal-echo-cave",
