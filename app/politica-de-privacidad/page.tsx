@@ -65,7 +65,8 @@ export default function PoliticaDePrivacidadPage() {
             ni tu correo).
           </li>
           <li>
-            <strong>Vercel</strong> — aloja este sitio web.
+            <strong>Vercel</strong> — aloja este sitio web y mide las
+            visitas de forma anónima.
           </li>
           <li>
             <strong>Google Drive</strong> — aloja los archivos que
@@ -82,10 +83,12 @@ export default function PoliticaDePrivacidadPage() {
       <div>
         <h2>4. Cookies</h2>
         <p>
-          Este sitio no utiliza cookies de publicidad ni herramientas de
-          rastreo o analítica. Durante el pago, Paddle puede usar cookies
-          estrictamente necesarias para procesar la transacción de forma
-          segura y prevenir fraudes.
+          Este sitio no utiliza cookies de publicidad ni de rastreo. Para
+          saber cuántas personas visitan el sitio usamos Vercel Web
+          Analytics, que mide visitas de forma agregada y anónima, sin
+          cookies y sin identificarte personalmente. Durante el pago, Paddle
+          puede usar cookies estrictamente necesarias para procesar la
+          transacción de forma segura y prevenir fraudes.
         </p>
       </div>
 
