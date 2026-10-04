@@ -40,9 +40,17 @@ export async function sendDownloadEmail({
   });
 }
 
-// Internal heads-up to the business inbox on every completed transaction, so
-// Santiago hears about a sale without logging into Paddle.
-const SALE_ALERT_TO = "info@montsounds.com";
+// Internal heads-up on every completed transaction, so Santiago hears about a
+// sale without logging into Paddle. SALE_ALERT_TO (comma-separated, set in
+// Vercel) sends it straight to his inbox: info@ goes through ImprovMX, which
+// bounced an alert because Resend's shared sending IP was on SpamCop.
+function saleAlertRecipients() {
+  const list = (process.env.SALE_ALERT_TO || "info@montsounds.com")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return list.length ? list : ["info@montsounds.com"];
+}
 
 export async function sendSaleAlertEmail({
   productName,
@@ -61,7 +69,7 @@ export async function sendSaleAlertEmail({
   const formatted = `${currency} ${amount.toFixed(2)}`;
   await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL || "Mont Sounds <onboarding@resend.dev>",
-    to: SALE_ALERT_TO,
+    to: saleAlertRecipients(),
     subject: isTest
       ? `Compra de $0 (prueba/descuento): ${productName}`
       : `Nueva venta: ${productName} — ${formatted}`,
