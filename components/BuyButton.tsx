@@ -35,7 +35,7 @@ export default function BuyButton({
   if (!SALES_ENABLED) {
     return (
       <button type="button" className={className} disabled>
-        Próximamente
+        Coming Soon
       </button>
     );
   }

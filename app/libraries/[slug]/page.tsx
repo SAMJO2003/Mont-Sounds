@@ -114,8 +114,9 @@ function ProductDetail({ product }: { product: Product }) {
             </a>
           </div>
           <p className="mt-5 max-w-md text-xs leading-relaxed text-crystal-white/45">
-            Compatible con Native Instruments Kontakt (versión 7 o superior).
-            Se requiere la versión Full de Kontakt para evitar el modo Demo.
+            Compatible with Native Instruments Kontakt 7 or later. Requires
+            the full version of Kontakt (runs in Demo mode in the free
+            Kontakt Player).
           </p>
         </div>
       </section>
@@ -360,7 +361,7 @@ function ComingSoonDetail({ lib }: { lib: ComingSoonLibrary }) {
 
           <div className="mt-9 flex flex-wrap items-center gap-5">
             <span className="btn btn-outline pointer-events-none">
-              Próximamente
+              Coming Soon
             </span>
           </div>
         </div>
