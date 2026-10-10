@@ -52,7 +52,7 @@ export default function BuyButton({
         });
       }}
     >
-      {ready ? "Comprar ahora" : "Cargando…"}
+      {ready ? "Buy Now" : "Loading…"}
     </button>
   );
 }

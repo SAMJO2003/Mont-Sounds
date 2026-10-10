@@ -57,7 +57,7 @@ export default function FeaturedLibraries() {
                   </span>
                 )}
                 <Link href={`/libraries/${product.slug}#buy`} className="btn btn-primary">
-                  Comprar ahora
+                  Buy Now
                 </Link>
                 <Link
                   href={`/libraries/${product.slug}`}

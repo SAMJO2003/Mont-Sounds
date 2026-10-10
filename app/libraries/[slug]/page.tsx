@@ -11,6 +11,10 @@ import Gallery from "@/components/Gallery";
 import BuyButton from "@/components/BuyButton";
 import TrailerPlayer from "@/components/TrailerPlayer";
 
+// The launch-price check is baked in at build time on static pages;
+// re-render hourly so the price flips back by itself when the discount ends.
+export const revalidate = 3600;
+
 export function generateStaticParams() {
   return [
     ...products.map((p) => ({ slug: p.slug })),
@@ -113,6 +117,11 @@ function ProductDetail({ product }: { product: Product }) {
               Watch Trailer
             </a>
           </div>
+          {isLaunchDiscountActive() && (
+            <p className="mt-4 text-xs uppercase tracking-[0.2em] text-ancient-bronze">
+              Launch price ends October 15
+            </p>
+          )}
           <p className="mt-5 max-w-md text-xs leading-relaxed text-crystal-white/45">
             Compatible with Native Instruments Kontakt 7 or later. Requires
             the full version of Kontakt (runs in Demo mode in the free
