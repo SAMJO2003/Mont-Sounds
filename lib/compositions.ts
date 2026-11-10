@@ -72,7 +72,7 @@ export const compositions: Composition[] = [
       {
         id: "pdf",
         label: "Sheet Music (PDF)",
-        price: 4.99,
+        price: 3.99,
         paddlePriceId: "pri_01m71kjxd71nfdx6rkayjnx481",
         driveFileUrl: "https://drive.google.com/uc?export=download&id=1cXjtWQYmkS50MDW7NzX3WryamJkBNsuo",
         includes: ["4-page PDF score (100 bars)"],
@@ -80,7 +80,7 @@ export const compositions: Composition[] = [
       {
         id: "bundle",
         label: "Bundle",
-        price: 7.99,
+        price: 6.99,
         paddlePriceId: "pri_01m71kmgpfswwn0hqb5f26c12q",
         driveFileUrl: "https://drive.google.com/uc?export=download&id=1YGzAq6IDdd5FDFDjK2w-JTplciwTgEJy",
         includes: ["4-page PDF score (100 bars)", "Piano MIDI file", "Reference audio of the full piece"],
