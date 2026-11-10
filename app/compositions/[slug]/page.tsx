@@ -137,7 +137,8 @@ function CompositionDetail({ piece }: { piece: Composition }) {
                         ))}
                       </ul>
                       <BuyButton
-                        priceId={option.paddlePriceId}
+                        // Only sellable once there's a file to deliver.
+                        priceId={option.driveFileUrl ? option.paddlePriceId : ""}
                         label={`Buy ${option.id === "pdf" ? "PDF" : option.label}`}
                         allowLaunchDiscount={false}
                         className={`btn mt-6 w-full ${option.bestValue ? "btn-primary" : "btn-outline"}`}
