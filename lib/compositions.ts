@@ -56,7 +56,7 @@ export const compositions: Composition[] = [
     previewHeight: 2105,
     previewAlt:
       "First page of the sheet music for A Heart Torn Between Two Worlds by Santiago Agramont",
-    youtubeId: "oQmtBzsLgns",
+    youtubeId: "hyZSgP_OX9A",
     specs: [
       { label: "Instrument", value: "Solo piano" },
       { label: "Key", value: "C minor" },

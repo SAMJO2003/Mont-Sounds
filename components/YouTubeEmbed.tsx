@@ -28,9 +28,15 @@ export default function YouTubeEmbed({ id, title }: { id: string; title: string 
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+            // Full-HD thumbnail; older/low-res uploads don't have one, so fall
+            // back to the 480px version if it 404s.
+            src={`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`}
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (!img.src.includes("hqdefault")) img.src = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+            }}
             alt=""
-            className="h-full w-full object-cover opacity-70 transition-opacity group-hover:opacity-90"
+            className="h-full w-full object-cover opacity-90 transition-opacity group-hover:opacity-100"
           />
           <span className="absolute inset-0 flex items-center justify-center">
             <span className="flex h-16 w-16 items-center justify-center rounded-full border border-crystal-white/40 bg-forest-black/60 text-crystal-white transition-all group-hover:scale-105 group-hover:border-crystal-cyan group-hover:text-crystal-cyan">
