@@ -9,9 +9,14 @@ import { SALES_ENABLED, LAUNCH_DISCOUNT_ID, isLaunchDiscountActive } from "@/lib
 export default function BuyButton({
   priceId,
   className,
+  label = "Buy Now",
+  allowLaunchDiscount = true,
 }: {
   priceId: string;
   className?: string;
+  label?: string;
+  // The launch discount only applies to the sample libraries.
+  allowLaunchDiscount?: boolean;
 }) {
   const paddleRef = useRef<Paddle | null>(null);
   const [ready, setReady] = useState(false);
@@ -32,7 +37,7 @@ export default function BuyButton({
     };
   }, []);
 
-  if (!SALES_ENABLED) {
+  if (!SALES_ENABLED || !priceId) {
     return (
       <button type="button" className={className} disabled>
         Coming Soon
@@ -48,11 +53,13 @@ export default function BuyButton({
       onClick={() => {
         paddleRef.current?.Checkout.open({
           items: [{ priceId, quantity: 1 }],
-          ...(isLaunchDiscountActive() ? { discountId: LAUNCH_DISCOUNT_ID } : {}),
+          ...(allowLaunchDiscount && isLaunchDiscountActive()
+            ? { discountId: LAUNCH_DISCOUNT_ID }
+            : {}),
         });
       }}
     >
-      {ready ? "Buy Now" : "Loading…"}
+      {ready ? label : "Loading…"}
     </button>
   );
 }

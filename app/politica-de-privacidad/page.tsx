@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PoliticaDePrivacidadPage() {
   return (
-    <LegalLayout title="Política de Privacidad" updated="1 de octubre de 2026">
+    <LegalLayout title="Política de Privacidad" updated="9 de noviembre de 2026">
       <div>
         <h2>1. Qué datos recopilamos</h2>
         <p>
@@ -89,6 +89,13 @@ export default function PoliticaDePrivacidadPage() {
           cookies y sin identificarte personalmente. Durante el pago, Paddle
           puede usar cookies estrictamente necesarias para procesar la
           transacción de forma segura y prevenir fraudes.
+        </p>
+        <p>
+          Algunas páginas muestran videos de YouTube. El video no se carga
+          hasta que presionás reproducir; en ese momento se carga desde el
+          modo de privacidad mejorada de YouTube (youtube-nocookie.com), y
+          YouTube trata esos datos conforme a su propia política de
+          privacidad.
         </p>
       </div>
 

@@ -288,6 +288,18 @@ function ProductDetail({ product }: { product: Product }) {
         </div>
       </section>
 
+      {/* Link to the composer's own music */}
+      <section className="border-t border-crystal-white/10 bg-forest-black py-12">
+        <div className="mx-auto max-w-3xl px-6 text-center md:px-10">
+          <Link
+            href="/compositions"
+            className="text-sm uppercase tracking-[0.2em] text-crystal-white/60 hover:text-crystal-cyan"
+          >
+            Also by the composer — original compositions &amp; sheet music →
+          </Link>
+        </div>
+      </section>
+
       {/* Related */}
       {related.length > 0 && (
         <section className="bg-stone-black py-24 md:py-32">

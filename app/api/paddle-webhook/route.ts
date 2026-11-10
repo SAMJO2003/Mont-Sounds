@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPaddleSignature, fetchPaddleCustomerEmail } from "@/lib/paddle-server";
-import { getProductByPriceId } from "@/lib/products";
+import { getDeliverableByPriceId } from "@/lib/deliverables";
 import { getOrCreateDownloadToken } from "@/lib/downloads";
 import { sendDownloadEmail, sendSaleAlertEmail } from "@/lib/email";
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     transaction.items ?? [];
   const priceId = items[0]?.price?.id ?? items[0]?.price_id;
 
-  const product = priceId ? getProductByPriceId(priceId) : undefined;
+  const product = priceId ? getDeliverableByPriceId(priceId) : undefined;
   if (!product) {
     console.error(
       `paddle-webhook: no product matches price id "${priceId}" (transaction ${transactionId})`
@@ -63,11 +63,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "could not resolve customer email" }, { status: 500 });
   }
 
-  const token = await getOrCreateDownloadToken(transactionId, product.slug);
+  const token = await getOrCreateDownloadToken(transactionId, product.key);
   const siteUrl = process.env.SITE_URL || "https://montsounds.com";
   const downloadUrl = `${siteUrl}/api/download/${token}`;
 
-  await sendDownloadEmail({ to: email, productName: product.name, downloadUrl });
+  await sendDownloadEmail({
+    to: email,
+    productName: product.name,
+    downloadUrl,
+    kind: product.kind,
+    license: product.license,
+  });
 
   // Best-effort: a failed alert must not make Paddle retry (and re-send the
   // buyer's email), so log and move on.

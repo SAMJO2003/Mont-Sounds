@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { consumeDownloadToken } from "@/lib/downloads";
-import { getProduct } from "@/lib/products";
+import { getDeliverable } from "@/lib/deliverables";
 
 export const runtime = "nodejs";
 
@@ -30,7 +30,7 @@ export async function GET(
   if (result.status === "not_found") {
     return messagePage(
       "Link not found",
-      "This download link doesn't exist or has expired. If you just purchased a library, contact us and we'll sort it out.",
+      "This download link doesn't exist or has expired. If you just made a purchase, contact us and we'll sort it out.",
       404
     );
   }
@@ -43,8 +43,8 @@ export async function GET(
     );
   }
 
-  const product = getProduct(result.productSlug);
-  if (!product) {
+  const product = getDeliverable(result.productSlug);
+  if (!product || !product.driveFileUrl) {
     return messagePage(
       "Something went wrong",
       "We couldn't find the file for this download. Please contact us and we'll send it manually.",

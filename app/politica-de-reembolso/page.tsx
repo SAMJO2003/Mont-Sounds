@@ -9,12 +9,12 @@ export const metadata: Metadata = {
 
 export default function PoliticaDeReembolsoPage() {
   return (
-    <LegalLayout title="Política de Reembolso" updated="20 de agosto de 2026">
+    <LegalLayout title="Política de Reembolso" updated="9 de noviembre de 2026">
       <div>
         <h2>1. Producto digital de entrega inmediata</h2>
         <p>
-          Todas las librerías y texturas de audio vendidas por Mont Sounds son
-          productos digitales. Al completarse la compra, recibís de forma
+          Todas las librerías, texturas de audio y partituras vendidas por
+          Mont Sounds son productos digitales. Al completarse la compra, recibís de forma
           inmediata un correo electrónico con el enlace de descarga y la
           licencia correspondiente.
         </p>

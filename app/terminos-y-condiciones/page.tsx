@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function TerminosYCondicionesPage() {
   return (
-    <LegalLayout title="Términos y Condiciones" updated="20 de agosto de 2026">
+    <LegalLayout title="Términos y Condiciones" updated="9 de noviembre de 2026">
       <div>
         <h2>1. Aceptación de los términos</h2>
         <p>
@@ -30,6 +30,14 @@ export default function TerminosYCondicionesPage() {
           diseñados para funcionar dentro de Native Instruments Kontakt. Los
           productos son entregados de forma digital e inmediata; no se envía
           ningún soporte físico.
+        </p>
+        <p>
+          Mont Sounds también vende partituras digitales (PDF, y en algunos
+          casos MIDI y audio de referencia) de composiciones originales de
+          Santiago Agramont. Las partituras tienen su propia licencia de uso
+          personal, indicada en la página de cada obra y en el correo de
+          compra; lo dispuesto en la sección 3 sobre librerías no se aplica a
+          ellas.
         </p>
       </div>
 

@@ -4,10 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { products } from "@/lib/products";
+import { compositions } from "@/lib/compositions";
 
 const links = [
   { href: "/#philosophy", label: "Philosophy" },
   { href: "/#libraries", label: "Libraries" },
+  { href: "/compositions", label: "Compositions" },
   { href: "/#about", label: "About" },
   { href: "/#coming-soon", label: "Coming Soon" },
 ];
@@ -48,7 +50,7 @@ export default function Nav() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-9 md:flex">
+        <nav className="hidden items-center gap-9 lg:flex">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -60,7 +62,7 @@ export default function Nav() {
           ))}
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           <Link href="/#libraries" className="btn btn-outline !py-2">
             Explore Libraries
           </Link>
@@ -69,7 +71,7 @@ export default function Nav() {
         <button
           aria-label="Toggle menu"
           onClick={() => setOpen((v) => !v)}
-          className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 md:hidden"
+          className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 lg:hidden"
         >
           <span
             className={`h-px w-6 bg-crystal-white transition-transform ${
@@ -90,7 +92,7 @@ export default function Nav() {
       </div>
 
       {open && (
-        <nav className="flex flex-col gap-1 border-t border-crystal-white/10 bg-forest-black/95 px-6 py-6 md:hidden">
+        <nav className="flex flex-col gap-1 border-t border-crystal-white/10 bg-forest-black/95 px-6 py-6 lg:hidden">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -110,6 +112,16 @@ export default function Nav() {
                 className="block py-2 text-sm text-crystal-white/60"
               >
                 {p.name}
+              </Link>
+            ))}
+            {compositions.map((c) => (
+              <Link
+                key={c.slug}
+                href={`/compositions/${c.slug}`}
+                onClick={() => setOpen(false)}
+                className="block py-2 text-sm italic text-crystal-white/60"
+              >
+                {c.title}
               </Link>
             ))}
           </div>
