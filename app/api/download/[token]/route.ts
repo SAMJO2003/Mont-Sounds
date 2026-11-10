@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { consumeDownloadToken } from "@/lib/downloads";
+import { verifyDownloadToken } from "@/lib/downloads";
 import { getDeliverable } from "@/lib/deliverables";
 
 export const runtime = "nodejs";
@@ -25,20 +25,20 @@ export async function GET(
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
-  const result = await consumeDownloadToken(token);
+  const result = verifyDownloadToken(token);
 
-  if (result.status === "not_found") {
+  if (result.status === "invalid") {
     return messagePage(
       "Link not found",
-      "This download link doesn't exist or has expired. If you just made a purchase, contact us and we'll sort it out.",
+      "This download link isn't valid. Please use the link from your purchase email, or reply to that email and we'll sort it out.",
       404
     );
   }
 
-  if (result.status === "already_used") {
+  if (result.status === "expired") {
     return messagePage(
-      "Link already used",
-      "This download link has already been used. Download links only work once — reply to your receipt email if you need it resent.",
+      "Link expired",
+      "This download link has expired. Just reply to your purchase email and we'll send you a new one.",
       410
     );
   }

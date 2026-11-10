@@ -45,7 +45,7 @@ export async function sendDownloadEmail({
         <p style="margin:28px 0;">
           <a href="${downloadUrl}" style="display:inline-block; background:#f2efe9; color:#0b0b0c; padding:12px 24px; text-decoration:none; font-size:14px; letter-spacing:0.04em; text-transform:uppercase;">Download now</a>
         </p>
-        <p style="font-size:13px; line-height:1.6; color:#b8b3a9;">This link works once and expires in 14 days, so please save the files somewhere safe after downloading. If you ever need it again down the road — even long after those 14 days — just reply to this same email and we'll get it to you.</p>
+        <p style="font-size:13px; line-height:1.6; color:#b8b3a9;">This personal link expires in 14 days, so please save the files somewhere safe after downloading. If you ever need it again down the road — even long after those 14 days — just reply to this same email and we'll get it to you.</p>
         ${sizeNote}
         <hr style="border:none; border-top:1px solid #2a2622; margin:28px 0;" />
         ${licenseNote}

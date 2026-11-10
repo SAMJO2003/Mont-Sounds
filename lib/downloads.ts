@@ -1,86 +1,82 @@
-import { Redis } from "@upstash/redis";
-import { randomUUID } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 
-// Upstash Redis — free tier is plenty for low volume.
-// Create a database at https://console.upstash.com, then copy the REST
-// URL and token into .env.local (see .env.example).
-// Lazily constructed so missing env vars only matter once a request actually
-// needs them, not at build/import time.
-function getRedis() {
-  return new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL!,
-    token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  });
+// Signed download links — no database. The token itself carries what to
+// deliver and when it expires, plus an HMAC signature so it can't be forged
+// or edited. This replaced an Upstash Redis store of one-time tokens: the
+// free Upstash database was deleted automatically after 14 days without
+// sales, which silently broke delivery.
+//
+// Trade-off: a link can be used any number of times until it expires (it is
+// not one-time), and it can't be revoked early — Drive files couldn't be
+// revoked per buyer before either.
+
+const LINK_TTL_MS = 14 * 24 * 60 * 60 * 1000; // download link expires after 14 days
+
+// DOWNLOAD_LINK_SECRET can be set in Vercel to rotate links independently;
+// otherwise a key is derived from the Paddle webhook secret, which the site
+// already needs, so no extra configuration is required.
+function getSigningKey(): Buffer {
+  const explicit = process.env.DOWNLOAD_LINK_SECRET;
+  if (explicit) return Buffer.from(explicit);
+  const base = process.env.PADDLE_WEBHOOK_SECRET;
+  if (!base) throw new Error("No secret available to sign download links");
+  return createHmac("sha256", base).update("mont-sounds/download-links/v1").digest();
 }
 
-const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 14; // download link expires after 14 days
-
-// Google Drive shows a "can't scan for viruses" interstitial for files this
-// size, requiring an extra click — if a customer doesn't get through it
-// (closes the tab, flaky connection) the link would otherwise be burned
-// with nothing actually downloaded. Give a grace window to retry before
-// truly locking it.
-const REUSE_GRACE_MS = 60 * 60 * 1000; // 1 hour
-
-type DownloadRecord = {
-  productSlug: string;
-  used: boolean;
-  usedAt?: number;
+type LinkPayload = {
+  k: string; // deliverable key (library slug or "sheet:<slug>:<option>")
+  t: string; // Paddle transaction id
+  e: number; // expiry, ms since epoch
 };
 
-/**
- * Creates a one-time download token for a completed transaction.
- * Safe to call more than once for the same transaction (e.g. Paddle
- * webhook retries) — returns the existing token instead of a new one.
- */
-export async function getOrCreateDownloadToken(
-  transactionId: string,
-  productSlug: string
-): Promise<string> {
-  const redis = getRedis();
-  const existing = await redis.get<string>(`txn:${transactionId}`);
-  if (existing) return existing;
-
-  const token = randomUUID();
-  const record: DownloadRecord = { productSlug, used: false };
-
-  await redis.set(`download:${token}`, record, { ex: TOKEN_TTL_SECONDS });
-  await redis.set(`txn:${transactionId}`, token, { ex: TOKEN_TTL_SECONDS });
-
-  return token;
+function sign(data: string): string {
+  return createHmac("sha256", getSigningKey()).update(data).digest("base64url");
 }
 
-export type ConsumeResult =
-  | { status: "ok"; productSlug: string }
-  | { status: "not_found" }
-  | { status: "already_used" };
-
 /**
- * Marks a download token as used, atomically. Returns "already_used" if
- * this token was ever consumed before (including concurrent requests).
+ * Builds the download token for a completed transaction. Deterministic for
+ * the same transaction and purchase time, so Paddle webhook retries produce
+ * the same link.
  */
-export async function consumeDownloadToken(
-  token: string
-): Promise<ConsumeResult> {
-  const redis = getRedis();
-  const record = await redis.get<DownloadRecord>(`download:${token}`);
-  if (!record) return { status: "not_found" };
+export function createDownloadToken(
+  transactionId: string,
+  deliverableKey: string,
+  purchasedAt: Date
+): string {
+  const payload: LinkPayload = {
+    k: deliverableKey,
+    t: transactionId,
+    e: purchasedAt.getTime() + LINK_TTL_MS,
+  };
+  const data = Buffer.from(JSON.stringify(payload)).toString("base64url");
+  return `${data}.${sign(data)}`;
+}
 
-  if (record.used) {
-    const withinGrace =
-      record.usedAt !== undefined && Date.now() - record.usedAt < REUSE_GRACE_MS;
-    if (!withinGrace) return { status: "already_used" };
-    return { status: "ok", productSlug: record.productSlug };
+export type VerifyResult =
+  | { status: "ok"; productSlug: string }
+  | { status: "invalid" }
+  | { status: "expired" };
+
+export function verifyDownloadToken(token: string): VerifyResult {
+  const [data, signature, extra] = token.split(".");
+  if (!data || !signature || extra !== undefined) return { status: "invalid" };
+
+  const expected = Buffer.from(sign(data));
+  const given = Buffer.from(signature);
+  if (expected.length !== given.length || !timingSafeEqual(expected, given)) {
+    return { status: "invalid" };
   }
 
-  // Best-effort race guard: two simultaneous requests could both read
-  // used:false before either writes. Fine for this low-volume, low-stakes
-  // use case — worst case someone downloads twice via a double-click.
-  await redis.set(
-    `download:${token}`,
-    { ...record, used: true, usedAt: Date.now() },
-    { keepTtl: true }
-  );
+  let payload: LinkPayload;
+  try {
+    payload = JSON.parse(Buffer.from(data, "base64url").toString("utf8"));
+  } catch {
+    return { status: "invalid" };
+  }
+  if (typeof payload.k !== "string" || typeof payload.e !== "number") {
+    return { status: "invalid" };
+  }
+  if (Date.now() > payload.e) return { status: "expired" };
 
-  return { status: "ok", productSlug: record.productSlug };
+  return { status: "ok", productSlug: payload.k };
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPaddleSignature, fetchPaddleCustomerEmail } from "@/lib/paddle-server";
 import { getDeliverableByPriceId } from "@/lib/deliverables";
-import { getOrCreateDownloadToken } from "@/lib/downloads";
+import { createDownloadToken } from "@/lib/downloads";
 import { sendDownloadEmail, sendSaleAlertEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
@@ -63,7 +63,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "could not resolve customer email" }, { status: 500 });
   }
 
-  const token = await getOrCreateDownloadToken(transactionId, product.key);
+  // Same purchase time on every webhook retry → same link.
+  const purchasedAt = new Date(transaction.billed_at ?? transaction.created_at ?? Date.now());
+  const token = createDownloadToken(transactionId, product.key, purchasedAt);
   const siteUrl = process.env.SITE_URL || "https://montsounds.com";
   const downloadUrl = `${siteUrl}/api/download/${token}`;
 

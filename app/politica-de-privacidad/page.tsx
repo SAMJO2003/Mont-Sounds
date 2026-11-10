@@ -60,11 +60,6 @@ export default function PoliticaDePrivacidadPage() {
             enlace de descarga.
           </li>
           <li>
-            <strong>Upstash</strong> — guarda temporalmente tu enlace de
-            descarga asociado al número de tu compra (no almacena tu nombre
-            ni tu correo).
-          </li>
-          <li>
             <strong>Vercel</strong> — aloja este sitio web y mide las
             visitas de forma anónima.
           </li>
@@ -102,7 +97,7 @@ export default function PoliticaDePrivacidadPage() {
       <div>
         <h2>5. Cuánto tiempo conservamos tus datos</h2>
         <p>
-          Tu enlace de descarga se elimina automáticamente a los 14 días. Los
+          Tu enlace de descarga vence automáticamente a los 14 días. Los
           datos de la compra (comprobante y correo) se conservan mientras sea
           necesario para darte soporte y cumplir obligaciones legales y
           contables.
