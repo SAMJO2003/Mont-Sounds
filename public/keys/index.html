@@ -14,6 +14,8 @@
 }
 *{box-sizing:border-box}
 html,body{background:var(--ink);color:var(--fg);font-family:var(--body)}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+.stagewrap,#stage{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px}
 .page{max-width:1080px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:48px;align-items:start}
 .notes{padding-top:24px;min-width:0}
@@ -413,7 +415,7 @@ const BP_W="AAAAAAEAAAABAAAArAAAAFgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADc////AAAA
 <script>
 (()=>{
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-let DUR=12.35, LO=48, HI=84; const LOOK=2.4;
+let DUR=12.35, LO=48, HI=84, LOOK=2.4;
 const NAMES=['Do','Do#','Re','Re#','Mi','Fa','Fa#','Sol','Sol#','La','La#','Si'];
 const isBlack=p=>[1,3,6,8,10].includes(p%12);
 let notes=NOTES.map((n,i)=>({id:i,s:n[0],e:n[1],p:n[2],v:n[3],h:n[4],doubt:n[3]<64}));
@@ -475,6 +477,8 @@ function render(g,W,H,o){
   const col=h=>h==='R'?cfg.R:cfg.L, active={};
   // beams
   if(o.gridLines)drawGridLines(g,W,hit,pps,t);
+  if(o.lane!=null&&L.map[o.lane]){const k=L.map[o.lane],d=devicePixelRatio||1;g.fillStyle='rgba(255,255,255,.07)';g.fillRect(k.x,0,k.w,hit);g.fillStyle='rgba(95,208,164,.35)';g.fillRect(k.x,0,1*d,hit);g.fillRect(k.x+k.w-1*d,0,1*d,hit);
+    const nm2=NAMES[o.lane%12]+(Math.floor(o.lane/12)-1);g.font=`600 ${11*d}px Inter,sans-serif`;const tw=g.measureText(nm2).width+10*d;let tx=Math.min(W-tw-2*d,Math.max(2*d,k.x+k.w/2-tw/2));g.fillStyle='rgba(10,12,17,.85)';g.fillRect(tx,hit-20*d,tw,16*d);g.fillStyle='#5fd0a4';g.textAlign='left';g.fillText(nm2,tx+5*d,hit-8*d)}
   for(const n of notes){if(t>=n.s&&t<n.e){active[n.p]=n;}}
   if(cfg.fx.has('haz')){for(const p in active){const k=L.map[p];if(!k)continue;const gr=g.createLinearGradient(0,hit,0,hit-H*.7);gr.addColorStop(0,hexA(col(active[p].h),.32));gr.addColorStop(1,hexA(col(active[p].h),0));g.fillStyle=gr;g.fillRect(k.x+k.w*.1,0,k.w*.8,hit)}}
   // notes
@@ -531,7 +535,7 @@ function frame(now){
   for(const r of ripples)r.age+=dt;
   sparks=sparks.filter(s=>s.age<s.life);ripples=ripples.filter(r=>r.age<.7);
   lastT=t;
-  if(!$('#v-studio').hidden){geo=render(sg,stage.width,stage.height,{t,cfg:cfgNow(),time,fxLive:true,edit:st.tab==='edit',sel,gridLines:true,selSet:typeof selSet!=='undefined'?selSet:null,rect:typeof rect!=='undefined'?rect:null});}
+  if(!$('#v-studio').hidden){geo=render(sg,stage.width,stage.height,{t,cfg:cfgNow(),time,fxLive:true,edit:st.tab==='edit',sel,gridLines:true,selSet:typeof selSet!=='undefined'?selSet:null,rect:typeof rect!=='undefined'?rect:null,lane:(typeof drag2!=='undefined'&&drag2&&drag2.moved&&drag2.mode==='move')?drag2.n.p:(typeof addHover!=='undefined'?addHover:null)});}
   $('#scrub').value=Math.round(t/DUR*1000);
   $('#time').textContent=`${fmt(t)} / ${fmt(DUR)}`;
   requestAnimationFrame(frame);
@@ -695,7 +699,7 @@ stage.addEventListener('pointerdown',e=>{
   let n=hitNote(x,y);
   if(!n&&addMode){pushUndo();const p=keyAt(x,geo.L),s=st.t+(geo.hit-y)/geo.pps;n={id:Date.now(),s:Math.max(0,s-.3),e:Math.max(.3,s),p,v:72,h:p>=60?'R':'L',doubt:false};notes.push(n)}
   sel=n?n.id:null;stats();
-  if(n){pushUndo();drag={n,x0:x,y0:y,s0:n.s,e0:n.e,p0:n.p,moved:false};stage.setPointerCapture(e.pointerId)}
+  if(n){pushUndo();drag={n,x0:x,y0:y,s0:n.s,e0:n.e,p0:n.p,moved:false};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})()}
 });
 stage.addEventListener('pointermove',e=>{if(!drag)return;const {x,y}=toCanvas(e);const n=drag.n;const dt=(y-drag.y0)/geo.pps;n.s=Math.max(0,drag.s0-dt);n.e=n.s+(drag.e0-drag.s0);n.p=keyAt(x,geo.L);if(Math.abs(x-drag.x0)+Math.abs(y-drag.y0)>4){drag.moved=true;n.doubt=false}stats()});
 stage.addEventListener('pointerup',()=>{if(drag&&!drag.moved)undo.pop();if(!undo.length)$('#tUndo').disabled=true;drag=null});
@@ -1538,7 +1542,7 @@ wrap.addEventListener('pointerdown',e=>{
   if(n){const yt=geo.hit-(n.e-st.t)*geo.pps;if(Math.abs(y-yt)<12*(devicePixelRatio||1))mode='resize'}
   if(!n&&addMode){pushUndo();const p=keyAt(x,geo.L);let s=st.t+(geo.hit-y)/geo.pps;if(st.snap)s=snapT(s,st.div);n={id:Date.now(),s:Math.max(0,s),e:0,p,v:72,h:p>=60?'R':'L',doubt:false};setDur(n,st.div==='bar'?1:st.div);notes.push(n)}
   sel=n?n.id:null;stats();
-  if(n){pushUndo();drag2={n,mode,x0:x,y0:y,s0:n.s,e0:n.e,moved:false};stage.setPointerCapture(e.pointerId)}
+  if(n){pushUndo();drag2={n,mode,x0:x,y0:y,s0:n.s,e0:n.e,moved:false};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})()}
 },true);
 wrap.addEventListener('pointermove',e=>{if(!drag2)return;e.stopPropagation();const {x,y}=toCanvas(e),n=drag2.n;if(Math.abs(x-drag2.x0)+Math.abs(y-drag2.y0)>4)drag2.moved=true;if(!drag2.moved)return;
   const dt=(y-drag2.y0)/geo.pps;
@@ -1637,7 +1641,7 @@ VS.addEventListener('pointerdown',e=>{
   let n=hitNote(x,y),mode='move';
   if(n){const yt=geo.hit-(n.e-st.t)*geo.pps,yb=geo.hit-(n.s-st.t)*geo.pps;if(yb-yt>tol*2.5){if(Math.abs(y-yt)<tol)mode='resizeEnd';else if(Math.abs(y-yb)<tol)mode='resizeStart'}}
   if(st.multi){
-    if(!n){rect={x0:x,y0:y,x1:x,y1:y};stage.setPointerCapture(e.pointerId);return}
+    if(!n){rect={x0:x,y0:y,x1:x,y1:y};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})();return}
     if(!selSet.has(n.id)){selSet.add(n.id);n._justAdded=true}
   }else{
     if(!n&&addMode){pushUndo();const p=keyAt(x,geo.L);let s=st.t+(geo.hit-y)/geo.pps;if(st.snap)s=snapT(s,st.div);n={id:Date.now(),s:Math.max(0,s),e:0,p,v:72,h:p>=60?'R':'L',doubt:false};setDur(n,st.div==='bar'?1:st.div);notes.push(n)}
@@ -1645,7 +1649,7 @@ VS.addEventListener('pointerdown',e=>{
   }
   sel=n?n.id:null;stats();groupPanel();
   if(n){pushUndo();const group=(st.multi&&mode==='move')?notes.filter(q=>selSet.has(q.id)):[n];
-    drag2={n,mode,x0:x,y0:y,s0:n.s,e0:n.e,p0:n.p,moved:false,group:group.map(q=>({q,s:q.s,e:q.e,p:q.p}))};stage.setPointerCapture(e.pointerId)}
+    drag2={n,mode,x0:x,y0:y,s0:n.s,e0:n.e,p0:n.p,moved:false,group:group.map(q=>({q,s:q.s,e:q.e,p:q.p}))};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})()}
 },true);
 VS.addEventListener('pointermove',e=>{
   if(st.tab!=='edit'||(!rect&&!drag2))return;
@@ -1787,6 +1791,53 @@ recPiece=function(mode){
   $('#sepLf').onchange=fh('L');$('#sepRf').onchange=fh('R');
 };
 
+/* ================= EDITOR v5: arrastrar para moverse, pinza para zoom, desplazamiento automático ================= */
+const PT=new Map();let pinch=null,pan=null,lastPtr=null;
+const timeAtY=y=>st.t+(geo.hit-y)/geo.pps;
+document.addEventListener('pointerdown',e=>{
+  if(e.target!==stage)return;
+  const c=toCanvas(e);PT.set(e.pointerId,c);lastPtr=c;
+  if(PT.size===2){e.stopImmediatePropagation();if(lp){clearTimeout(lp.t);lp=null}if(drag2){undo.pop();drag2=null}rect=null;pan=null;
+    const [a,b]=[...PT.values()];pinch={d0:Math.max(20,Math.abs(a.y-b.y)+Math.abs(a.x-b.x)*.35),look0:LOOK};return}
+  if(!geo||c.y>geo.hit)return;
+  const edit=st.tab==='edit',hit=hitNote(c.x,c.y);
+  if(!edit||(!st.multi&&!addMode&&!hit)){
+    e.stopImmediatePropagation();const was=st.playing;if(was)stopAll();
+    pan={y0:c.y,t0:st.t,moved:false,was};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})();
+  }
+},true);
+document.addEventListener('pointermove',e=>{
+  if(!PT.has(e.pointerId))return;const c=toCanvas(e);PT.set(e.pointerId,c);lastPtr=c;
+  if(pinch&&PT.size===2){e.stopImmediatePropagation();const [a,b]=[...PT.values()],d=Math.max(20,Math.abs(a.y-b.y)+Math.abs(a.x-b.x)*.35);LOOK=Math.max(.8,Math.min(10,pinch.look0*pinch.d0/d));return}
+  if(pan){if(rect){pan=null;return}e.stopImmediatePropagation();const dy=c.y-pan.y0;if(Math.abs(dy)>6*(devicePixelRatio||1))pan.moved=true;if(pan.moved){st.t=Math.max(0,Math.min(DUR,pan.t0+dy/geo.pps));lastT=st.t}}
+},true);
+function ptrEnd(e){
+  if(!PT.has(e.pointerId))return;PT.delete(e.pointerId);
+  if(pinch){if(PT.size<2){pinch=null;e.stopImmediatePropagation()}return}
+  if(pan){e.stopImmediatePropagation();const p=pan;pan=null;
+    if(!p.moved){if(st.tab==='edit'){if(!rect){selSet.clear();sel=null;stats();groupPanel()}}else{if(p.was)return;$('#playBtn').click()}}
+    else if(p.was)play();
+  }
+  if(PT.size===0)lastPtr=null;
+}
+document.addEventListener('pointerup',ptrEnd,true);document.addEventListener('pointercancel',ptrEnd,true);
+/* desplazamiento automático cerca de los bordes al seleccionar o arrastrar notas */
+let asLast=performance.now();
+(function autoScroll(now){requestAnimationFrame(autoScroll);const dt=Math.min(.05,(now-asLast)/1000);asLast=now;
+  if(!geo||!lastPtr||!(rect||(drag2&&drag2.moved))||st.tab!=='edit')return;
+  if(rect&&rect.ta===undefined)rect.ta=timeAtY(rect.y0);
+  const f=lastPtr.y/geo.hit;let v=0;
+  if(f<.15)v=(.15-Math.max(0,f))/.15*LOOK*1.2;else if(f>.88&&f<1.02)v=-(f-.88)/.14*LOOK*1.2;
+  if(v){const before=st.t;st.t=Math.max(0,Math.min(DUR,st.t+v*dt));lastT=st.t;const d=st.t-before;
+    if(drag2&&d){drag2.y0+=d*geo.pps;stage.dispatchEvent(new PointerEvent('pointermove',{bubbles:true,clientX:stage.getBoundingClientRect().left+lastPtr.x/((stage.width/stage.getBoundingClientRect().width)||1),clientY:stage.getBoundingClientRect().top+lastPtr.y/((stage.width/stage.getBoundingClientRect().width)||1),pointerId:-1}))}}
+  if(rect){rect.y0=geo.hit-(rect.ta-st.t)*geo.pps;rect.x1=lastPtr.x;rect.y1=lastPtr.y}
+})(asLast);
+
+let addHover=null;
+$('#tAdd').onclick=()=>{addMode=!addMode;$('#tAdd').setAttribute('aria-pressed',addMode);if(addMode&&st.multi){st.multi=false;$('#tMulti').setAttribute('aria-pressed','false');selSet.clear();groupPanel()}
+  toast(addMode?'Modo añadir: toca un espacio vacío donde quieras la nota. Tendrá la duración de la cuadrícula elegida (ahora: '+({bar:'compás',1:'negra',0.5:'corchea',0.25:'semicorchea'}[st.div]||'tresillo')+'). Vuelve a tocar Añadir para salir.':'Modo añadir desactivado.')};
+document.addEventListener('pointermove',e=>{if(!addMode||st.tab!=='edit'||e.target!==stage||!geo){if(addHover!=null&&!addMode)addHover=null;return}const c=toCanvas(e);addHover=c.y<geo.hit?keyAt(c.x,geo.L):null},true);
+stage.addEventListener('pointerleave',()=>{addHover=null});
 qSync();
 syncVisual();
 })();
