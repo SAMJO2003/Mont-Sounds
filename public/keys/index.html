@@ -1838,6 +1838,48 @@ $('#tAdd').onclick=()=>{addMode=!addMode;$('#tAdd').setAttribute('aria-pressed',
   toast(addMode?'Modo añadir: toca un espacio vacío donde quieras la nota. Tendrá la duración de la cuadrícula elegida (ahora: '+({bar:'compás',1:'negra',0.5:'corchea',0.25:'semicorchea'}[st.div]||'tresillo')+'). Vuelve a tocar Añadir para salir.':'Modo añadir desactivado.')};
 document.addEventListener('pointermove',e=>{if(!addMode||st.tab!=='edit'||e.target!==stage||!geo){if(addHover!=null&&!addMode)addHover=null;return}const c=toCanvas(e);addHover=c.y<geo.hit?keyAt(c.x,geo.L):null},true);
 stage.addEventListener('pointerleave',()=>{addHover=null});
+/* ================= EDITOR v6: copiar, cortar, pegar y duplicar ================= */
+let CLIP=null;
+function divBeats(){return st.div==='bar'?(GRID?GRID.meter:4):st.div}
+function copySel(cut){
+  const ns=selNotes();if(!ns.length){toast('Selecciona primero las notas que quieres copiar.');return}
+  const p0=Math.min(...ns.map(n=>beatPos(n.s)));
+  CLIP=ns.map(n=>({off:beatPos(n.s)-p0,dur:beatPos(n.e)-beatPos(n.s),p:n.p,v:n.v,h:n.h,marks:n.marks?JSON.parse(JSON.stringify(n.marks)):null,color:n.color||null}));
+  CLIP.span=Math.max(...CLIP.map(c=>c.off+c.dur));
+  if(cut){pushUndo();notes=notes.filter(n=>!selSet.has(n.id));selSet.clear();sel=null;stats();restartIfPlaying()}
+  clipBar();groupPanel();toast(`${CLIP.length} nota${CLIP.length>1?'s':''} ${cut?'cortada':'copiada'}${CLIP.length>1?'s':''}. Ve adonde quieras y toca "Pegar aquí".`);
+}
+function pasteAt(P){
+  if(!CLIP){toast('No hay nada copiado.');return}
+  pushUndo();const base=Date.now();selSet.clear();
+  CLIP.forEach((c,i)=>{const s=beatTime(P+c.off),e=beatTime(P+c.off+c.dur)-.02,id=base+i;notes.push({id,s:Math.max(0,s),e:Math.max(s+.05,e),p:c.p,v:c.v,h:c.h,doubt:false,marks:c.marks?JSON.parse(JSON.stringify(c.marks)):null,color:c.color});selSet.add(id)});
+  sel=null;st.multi=true;$('#tMulti').setAttribute('aria-pressed','true');
+  DUR=Math.max(DUR,Math.max(...notes.map(n=>n.e))+1);
+  if(st.piano==='orig'){st.piano='cola';buildPianos();syncPedal()}
+  stats();groupPanel();if(st.tab==='score')drawScore();restartIfPlaying();
+  toast(`Pegadas ${CLIP.length} nota${CLIP.length>1?'s':''}. Quedan seleccionadas por si quieres moverlas.`);
+}
+function pasteHere(){if(!GRID)return;const d=divBeats();pasteAt(Math.max(0,Math.round(beatPos(st.t)/d)*d))}
+function duplicateSel(){
+  const ns=selNotes();if(!ns.length){toast('Selecciona primero las notas que quieres duplicar.');return}
+  copySel(false);const d=divBeats(),endB=Math.max(...ns.map(n=>beatPos(n.e)));pasteAt(Math.ceil((endB-.05)/d)*d);
+}
+function clipBar(){const b=$('#clipBox');if(!b)return;b.hidden=!CLIP;if(CLIP)$('#clipTxt').textContent=`Copiado: ${CLIP.length} nota${CLIP.length>1?'s':''} (${(Math.round(CLIP.span*4)/4)} tiempos)`}
+(function(){
+  const gp=$('#groupBox'),row=document.createElement('div');row.className='tools';row.style.gridTemplateColumns='repeat(4,1fr)';
+  row.innerHTML=`<button class="tool" type="button" id="gCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg>Copiar</button>
+   <button class="tool" type="button" id="gCut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8 16L19 4M16 16L5 4"/></svg>Cortar</button>
+   <button class="tool" type="button" id="gDup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="7" width="8" height="10" rx="1"/><rect x="13" y="7" width="8" height="10" rx="1"/><path d="M11 12h2"/></svg>Duplicar</button>
+   <button class="tool" type="button" id="gPaste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9z"/></svg>Pegar</button>`;
+  gp.insertBefore(row,gp.children[1]);
+  $('#gCopy').onclick=()=>copySel(false);$('#gCut').onclick=()=>copySel(true);$('#gDup').onclick=duplicateSel;$('#gPaste').onclick=pasteHere;
+  const cb=document.createElement('div');cb.className='box';cb.id='clipBox';cb.hidden=true;
+  cb.innerHTML=`<p class="hint" id="clipTxt" style="color:var(--fg)">Copiado</p><p class="hint">Mueve el Synthesia hasta donde quieras pegar (la línea del teclado marca el sitio) y toca <b>Pegar aquí</b>. Se pega en la línea de la cuadrícula más cercana.</p>
+   <div class="row-btns"><button class="cta" type="button" id="cPaste">Pegar aquí</button><button class="ghost" type="button" id="cClear" style="text-align:center">Vaciar</button></div>`;
+  const tools=$('#p-edit .tools');tools.parentNode.insertBefore(cb,tools.nextSibling);
+  $('#cPaste').onclick=pasteHere;$('#cClear').onclick=()=>{CLIP=null;clipBar()};
+})();
+
 qSync();
 syncVisual();
 })();
