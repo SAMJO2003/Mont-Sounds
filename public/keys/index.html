@@ -208,6 +208,7 @@ div.li{cursor:default}
 .sel{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--fg);padding:11px 12px;font:14px var(--body)}
 .thumbs{display:flex;gap:6px;flex-wrap:wrap}
 .thumbs img{width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+.savebar{display:flex;gap:8px;align-items:center}
 /* piece rows */
 .prow{display:flex;gap:8px;align-items:stretch}
 .prow .piece{flex:1;min-width:0}
@@ -1879,6 +1880,96 @@ function clipBar(){const b=$('#clipBox');if(!b)return;b.hidden=!CLIP;if(CLIP)$('
   const tools=$('#p-edit .tools');tools.parentNode.insertBefore(cb,tools.nextSibling);
   $('#cPaste').onclick=pasteHere;$('#cClear').onclick=()=>{CLIP=null;clipBar()};
 })();
+
+/* ================= PROYECTOS: guardar, autoguardado, copia, copia de seguridad, importar ================= */
+let dirty=false,saving=false,saveTimer=null,lastSig='',autosave=true;
+function noteSig(){let h=notes.length;for(const n of notes)h=(h*31+Math.round(n.s*100)*7+Math.round(n.e*100)*3+n.p+(n.color?n.color.length:0)+(n.marks?17:0))%1e9;return h+'|'+(st.gridFixed?st.gridFixed.bpm+':'+st.gridFixed.t0.toFixed(3):'')+'|'+st.meter}
+function getSettings(){return {tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
+function applySettings(a){if(!a)return;
+  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);if(a.look)LOOK=a.look;
+  [['pedal',st.pedal],['reverb',st.reverb],['bright',st.bright],['vol',st.vol]].forEach(([id,v])=>{const el=$('#'+id);if(el){el.value=Math.round(v*100);$('#o-'+id).textContent=el.value}});
+  $$('#rooms .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.room));if(ac&&conv)conv.buffer=impulse(ROOMS[st.room][1]);
+  const gt=$('#gridT');if(gt)gt.checked=st.gridLines!==false;buildPianos();syncPedal();applyMix();syncVisual();stats();
+}
+function setSaveState(t,ok){const el=$('#saveState');if(!el)return;el.textContent=t;el.style.color=ok?'var(--accent)':'var(--muted)'}
+function projDoc(extra){const base=CURRENT?(({id,_buf,...r})=>r)(CURRENT):{};return {...base,notas:notes.map(n=>[+n.s.toFixed(3),+n.e.toFixed(3),n.p,n.v,n.h,n.doubt?1:0,n.marks||null,n.color||null]),grid:st.gridFixed||null,bpm:curBpm(),compas:st.meter,duracion:+DUR.toFixed(1),estado:'lista',ajustes:getSettings(),editado:new Date().toISOString(),...(extra||{})}}
+async function saveProject(silent){
+  if(!dbP){setSaveState('No se puede guardar aquí');if(!silent)toast('No se puede guardar en esta vista.');return}
+  if(!CURRENT||!CURRENT.id){if(!silent)saveAsSheet(false);else setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto');return}
+  if(saving)return;saving=true;setSaveState('Guardando…');
+  try{const doc=projDoc();await dbP.doc('piezas/'+CURRENT.id).set(doc);CURRENT={id:CURRENT.id,...doc,_buf:CURRENT._buf};dirty=false;lastSig=noteSig();
+    setSaveState('Guardado ✓ '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),true);if(!silent)toast('Proyecto guardado.')}
+  catch(e){setSaveState('No se pudo guardar');if(!silent)toast('No se pudo guardar ('+((e&&e.code)||'error')+').')}finally{saving=false}
+}
+async function audioAssetFromCurrent(){
+  if(CURRENT&&CURRENT.audio)return CURRENT.audio;
+  if(!origBuf||!W.assets)return null;
+  const SR=22050,oc=new OfflineAudioContext(1,Math.ceil(origBuf.duration*SR),SR),s=oc.createBufferSource();s.buffer=origBuf;s.connect(oc.destination);s.start();const r=await oc.startRendering(),x=r.getChannelData(0);
+  const a=await W.assets.upload(new Blob([JSON.stringify({formato:'wav-base64',sampleRate:SR,canales:1,wav:wav64(x,SR)})],{type:'text/plain'}),{type:'text/plain'});return a.id;
+}
+async function createProject(titulo){
+  if(!dbP){toast('No se puede guardar en esta vista.');return}
+  setSaveState('Guardando…');
+  try{const audio=await audioAssetFromCurrent();const id='k'+Date.now().toString(36);
+    const doc=projDoc({titulo,audio,piano:ACTIVE?ACTIVE.id:(CURRENT&&CURRENT.piano)||null,pianoNombre:ACTIVE?ACTIVE.nombre:(CURRENT&&CURRENT.pianoNombre)||null,modo:(CURRENT&&CURRENT.modo)||'proyecto',fotogramas:[],partitura:(CURRENT&&CURRENT.partitura)||[],creado:new Date().toISOString()});
+    await dbP.doc('piezas/'+id).set(doc);const buf=CURRENT&&CURRENT._buf;CURRENT={id,...doc,_buf:buf};$('#title').value=titulo;dirty=false;lastSig=noteSig();
+    setSaveState('Guardado ✓ '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),true);toast(`Proyecto "${titulo}" guardado en Mis piezas.`)}
+  catch(e){setSaveState('No se pudo guardar');toast('No se pudo guardar ('+((e&&e.code)||e&&e.message||'error')+').')}
+}
+function saveAsSheet(copy){
+  const def=copy?((CURRENT&&CURRENT.titulo)||'Proyecto')+' (copia)':((CURRENT&&CURRENT.titulo)||$('#title').value||'Mi proyecto');
+  sheet(`<h3>${copy?'Guardar como copia':'Guardar proyecto'}</h3><p>${copy?'Se crea un proyecto nuevo con el estado actual. El original no cambia.':'Ponle un nombre. Se guardará en Mis piezas con tus notas, tu tempo y todos los ajustes visuales y de sonido.'}</p>
+   <input class="inp" id="saName" value="${esc(def)}" aria-label="Nombre del proyecto"><button class="cta" type="button" id="saGo">Guardar</button>`);
+  setTimeout(()=>{const i=$('#saName');if(i){i.focus();i.select()}},50);
+  $('#saGo').onclick=async()=>{const t=$('#saName').value.trim()||def;closeSheet();await createProject(t)};
+}
+function renameSheet(){
+  if(!CURRENT||!CURRENT.id){saveAsSheet(false);return}
+  sheet(`<h3>Renombrar</h3><input class="inp" id="rnName" value="${esc(CURRENT.titulo||'')}" aria-label="Nuevo nombre"><button class="cta" type="button" id="rnGo">Cambiar nombre</button>`);
+  $('#rnGo').onclick=async()=>{const t=$('#rnName').value.trim();if(!t)return;CURRENT.titulo=t;$('#title').value=t;closeSheet();await saveProject(true);toast('Nombre cambiado.')};
+}
+async function backupDownload(){
+  try{let wav=null;if(CURRENT&&CURRENT.audio){try{const j=JSON.parse(await (await fetch('/_blob/'+CURRENT.audio)).text());wav=j.wav}catch(e){}}
+    const doc=projDoc({titulo:(CURRENT&&CURRENT.titulo)||$('#title').value||'Proyecto'});delete doc.audio;delete doc.fotogramas;delete doc.partitura;
+    const blob=new Blob([JSON.stringify({app:'Mont Keys',version:1,pieza:doc,audioWav:wav})],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(doc.titulo||'proyecto').replace(/[^\w\- áéíóúñÁÉÍÓÚÑ]/g,'')+'.montkeys.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);
+    toast('Copia de seguridad descargada. Guárdala en Archivos o iCloud.')}catch(e){toast('No se pudo crear la copia ('+((e&&e.message)||'error')+').')}
+}
+async function importProject(file){
+  try{const j=JSON.parse(await file.text());if(!j||j.app!=='Mont Keys'||!j.pieza)throw new Error('no es un proyecto de Mont Keys');
+    if(!dbP){toast('No se puede importar en esta vista.');return}
+    let audio=null;if(j.audioWav&&W.assets){audio=(await W.assets.upload(new Blob([JSON.stringify({formato:'wav-base64',sampleRate:22050,canales:1,wav:j.audioWav})],{type:'text/plain'}),{type:'text/plain'})).id}
+    const id='k'+Date.now().toString(36);await dbP.doc('piezas/'+id).set({...j.pieza,audio,fotogramas:[],partitura:[],importado:new Date().toISOString(),creado:j.pieza.creado||new Date().toISOString()});
+    toast(`Proyecto "${j.pieza.titulo||'importado'}" añadido a Mis piezas.`)}catch(e){toast('No se pudo importar ('+((e&&e.message)||'error')+').')}
+}
+/* interfaz */
+(function(){
+  const bar=document.createElement('div');bar.className='savebar';
+  bar.innerHTML=`<span id="saveState" class="hint" style="flex:1;min-width:0">—</span><button class="cta" type="button" id="saveNow" style="padding:9px 16px;font-size:13px">Guardar</button><button class="ghost" type="button" id="saveMore" aria-label="Más opciones" style="padding:9px 12px">⋯</button>`;
+  const tr=$('.transport');tr.parentNode.insertBefore(bar,tr.nextSibling);
+  $('#saveNow').onclick=()=>saveProject(false);
+  $('#saveMore').onclick=()=>{sheet(`<h3>Proyecto</h3><div class="list">
+    <button class="li" type="button" id="pmRename"><span>Renombrar</span><span class="chev">›</span></button>
+    <button class="li" type="button" id="pmCopy"><span>Guardar como copia<small>Un proyecto nuevo con el estado actual</small></span><span class="chev">›</span></button>
+    <button class="li" type="button" id="pmBackup"><span>Descargar copia de seguridad<small>Un archivo para guardar en Archivos o iCloud</small></span><span class="chev">›</span></button>
+    <div class="li"><span>Guardado automático<small>Guarda cada cambio a los 2 segundos</small></span><input type="checkbox" class="sw2" id="pmAuto" ${autosave?'checked':''} aria-label="Guardado automático"></div></div>`);
+    $('#pmRename').onclick=()=>{closeSheet();renameSheet()};$('#pmCopy').onclick=()=>{closeSheet();saveAsSheet(true)};$('#pmBackup').onclick=()=>{closeSheet();backupDownload()};$('#pmAuto').onchange=e=>{autosave=e.target.checked;try{localStorage.setItem('mk_autosave',autosave?'1':'0')}catch(_){}}};
+  try{autosave=localStorage.getItem('mk_autosave')!=='0'}catch(_){}
+  const old=$('#saveEdits');if(old){old.textContent='Guardar proyecto';old.onclick=()=>saveProject(false)}
+  const lbl=[...document.querySelectorAll('#v-home .label')].find(x=>x.textContent==='Mis piezas');
+  if(lbl){const imp=document.createElement('div');imp.style.cssText='display:flex;justify-content:space-between;align-items:center';lbl.parentNode.insertBefore(imp,lbl);imp.appendChild(lbl);
+    imp.insertAdjacentHTML('beforeend','<label class="chip" for="impProj" style="cursor:pointer">Importar proyecto</label><input type="file" id="impProj" accept=".json,application/json" hidden>');
+    $('#impProj').onchange=e=>{const f=e.target.files[0];e.target.value='';if(f)importProject(f)}}
+})();
+/* marca cambios y autoguarda */
+const _stats7=stats;stats=function(){_stats7();const sg=noteSig();if(lastSig&&sg!==lastSig&&CURRENT){dirty=true;setSaveState(CURRENT.id?'Cambios sin guardar':'Pieza de ejemplo: toca Guardar para crear tu proyecto');if(autosave&&CURRENT.id){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}}if(!lastSig)lastSig=sg};
+['#pianos','#tpls','#fx','#bgs','#rooms','#swR','#swL'].forEach(sel=>{const el=$(sel);if(el)el.addEventListener('click',()=>setTimeout(()=>{if(CURRENT&&CURRENT.id&&autosave){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}},0))});
+const _openPiece=openPiece;openPiece=async function(p){await _openPiece(p);applySettings(p.ajustes);lastSig=noteSig();dirty=false;setSaveState(p.id?'Guardado ✓':'Sin guardar',!!p.id)};
+const _openExample=openExample;openExample=async function(){await _openExample();lastSig=noteSig();setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto')};
+$('#exPiece').onclick=openExample;
+window.addEventListener('beforeunload',e=>{if(dirty&&CURRENT&&CURRENT.id){saveProject(true)}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty&&CURRENT&&CURRENT.id)saveProject(true)});
+setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto');
 
 qSync();
 syncVisual();
