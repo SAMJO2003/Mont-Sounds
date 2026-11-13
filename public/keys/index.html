@@ -564,7 +564,8 @@ const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 requestAnimationFrame(frame);
 
 /* ---------- audio ---------- */
-let busG=null,limiter=null;
+let busG=null,limiter=null,meterA=null,audioErrs=[];
+const IS_IOS=!/Android/i.test(navigator.userAgent)&&(/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1));
 let ac=null, master, toneF, dry, wet, conv, origBuf=null, live=[];
 const PIANOS={
   orig:{name:'Original',desc:'Tu grabación, tal cual'},
@@ -580,14 +581,14 @@ async function ensureAudio(){
   if(ac)return;
   ac=new (window.AudioContext||window.webkitAudioContext)();
   master=ac.createGain();toneF=ac.createBiquadFilter();toneF.type='lowpass';dry=ac.createGain();wet=ac.createGain();conv=ac.createConvolver();
-  toneF.connect(dry);toneF.connect(conv);conv.connect(wet);dry.connect(master);wet.connect(master);busG=ac.createGain();limiter=ac.createDynamicsCompressor();limiter.threshold.value=-9;limiter.knee.value=6;limiter.ratio.value=14;limiter.attack.value=.003;limiter.release.value=.22;master.connect(busG);busG.connect(limiter);limiter.connect(ac.destination);
+  toneF.connect(dry);toneF.connect(conv);conv.connect(wet);dry.connect(master);wet.connect(master);busG=ac.createGain();limiter=ac.createDynamicsCompressor();limiter.threshold.value=-9;limiter.knee.value=6;limiter.ratio.value=14;limiter.attack.value=.003;limiter.release.value=.22;master.connect(busG);busG.connect(limiter);limiter.connect(ac.destination);meterA=ac.createAnalyser();meterA.fftSize=1024;limiter.connect(meterA);
   conv.buffer=impulse(ROOMS[st.room][1]);applyMix();
   try{const r=await fetch(ORIG_AUDIO);origBuf=await ac.decodeAudioData(await r.arrayBuffer())}catch(e){origBuf=null}
 }
 
 /* salida de audio que cambia (Bluetooth desconectado, llamada, etc.) */
 let needRebuild=false,micBusy=false;
-function watchCtx(){if(!ac)return;ac.onstatechange=()=>{if(ac&&ac.state!=='running'&&ac.state!=='closed'&&!micBusy)needRebuild=true}}
+function watchCtx(){if(!ac)return;ac.onstatechange=()=>{if(IS_IOS&&ac&&ac.state!=='running'&&ac.state!=='closed'&&!micBusy)needRebuild=true}}
 async function rebuildAudio(){
   try{stopNodes()}catch(e){}
   const old=ac;ac=null;needRebuild=false;
@@ -601,11 +602,12 @@ async function rebuildAudio(){
 }
 async function wakeAudio(){
   if(!ac){await ensureAudio();watchCtx()}
+  if(!IS_IOS){if(ac.state!=='running'){try{await ac.resume()}catch(e){}}needRebuild=false;return}
   if(needRebuild&&!micBusy){await rebuildAudio();return}
   if(ac.state!=='running'){try{await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,500))])}catch(e){}
     if(ac.state!=='running'&&!micBusy)await rebuildAudio()}
 }
-if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(ac&&!micBusy)needRebuild=true});
+if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(IS_IOS&&ac&&!micBusy)needRebuild=true});
 function activeTracks(){const set=new Set();for(const n of notes){const k=n.inst||'piano';if(!(st.im&&st.im[k]))set.add(k)}return Math.max(1,set.size)}
 function applyMix(){if(!ac)return;master.gain.value=1.1;if(busG)busG.gain.value=1/Math.sqrt(activeTracks());if(!(typeof fxBusy==='function'&&fxBusy('piano','rev'))){wet.gain.value=st.reverb*1.4*st.vol;dry.gain.value=(1-st.reverb*.35)*st.vol}if(!(typeof fxBusy==='function'&&fxBusy('piano','bri')))toneF.frequency.value=900*Math.pow(18,st.bright)}
 function voice(n,when){
@@ -626,7 +628,7 @@ async function play(){
   stopNodes(); applyMix();
   const now=ac.currentTime+.06;
   if(st.piano==='orig'){if(origBuf&&!(st.im&&st.im.piano)){const s=ac.createBufferSource();s.buffer=origBuf;s.connect(toneF);s.start(now,Math.min(st.t,origBuf.duration-.01));live.push(s)}}
-  ;for(const n of (typeof playList==='function'?playList():notes)){if(n.e<=st.t)continue;const w=now+Math.max(0,n.s-st.t);if(n.inst&&n.inst!=='piano'){if(typeof instVoice==='function')instVoice(n,w)}else if(st.piano!=='orig'&&!(st.im&&st.im.piano))voice(n,w)}
+  ;for(const n of (typeof playList==='function'?playList():notes)){if(n.e<=st.t)continue;const w=now+Math.max(0,n.s-st.t);try{if(n.inst&&n.inst!=='piano'){if(typeof instVoice==='function')instVoice(n,w)}else if(st.piano!=='orig'&&!(st.im&&st.im.piano))voice(n,w)}catch(err){if(audioErrs.length<20)audioErrs.push((n.inst||st.piano)+': '+(err&&err.message||err))}}
   t0=st.t;wall0=performance.now()+60;st.playing=true;setPlayIcon();if(typeof PLAY_AT!=='undefined')PLAY_AT=now;
 }
 function stopNodes(){for(const n of live){try{n.stop?n.stop():n.disconnect()}catch(e){}}live=[]}
@@ -2407,11 +2409,11 @@ let iosUnlocked=false,silentEl=null;
 function silentWavURL(){const sr=8000,n=sr/2,b=new ArrayBuffer(44+n),d=new DataView(b),w=(o,t)=>{for(let i=0;i<t.length;i++)d.setUint8(o+i,t.charCodeAt(i))};w(0,'RIFF');d.setUint32(4,36+n,true);w(8,'WAVEfmt ');d.setUint32(16,16,true);d.setUint16(20,1,true);d.setUint16(22,1,true);d.setUint32(24,sr,true);d.setUint32(28,sr,true);d.setUint16(32,1,true);d.setUint16(34,8,true);w(36,'data');d.setUint32(40,n,true);for(let i=0;i<n;i++)d.setUint8(44+i,128);return URL.createObjectURL(new Blob([b],{type:'audio/wav'}))}
 function setAudioSession(type){try{if(navigator.audioSession)navigator.audioSession.type=type}catch(e){}}
 function unlockIOS(){if(iosUnlocked)return;iosUnlocked=true;setAudioSession('playback');
-  if(!navigator.audioSession){try{silentEl=document.createElement('audio');silentEl.src=silentWavURL();silentEl.loop=true;silentEl.setAttribute('playsinline','');silentEl.volume=.01;const p=silentEl.play();if(p&&p.catch)p.catch(()=>{iosUnlocked=false})}catch(e){iosUnlocked=false}}
+  if(IS_IOS&&!navigator.audioSession){try{silentEl=document.createElement('audio');silentEl.src=silentWavURL();silentEl.loop=true;silentEl.setAttribute('playsinline','');silentEl.volume=.01;const p=silentEl.play();if(p&&p.catch)p.catch(()=>{iosUnlocked=false})}catch(e){iosUnlocked=false}}
   if(ac)try{ac.resume()}catch(e){}}
-function healAudio(){if(!ac||micBusy)return;if(needRebuild||ac.state!=='running'){if(st.playing&&needRebuild)stopAll();wakeAudio()}}
+function healAudio(){if(!ac||micBusy)return;if(!IS_IOS){if(ac.state==='suspended')try{ac.resume()}catch(e){}return}if(needRebuild||ac.state!=='running'){if(st.playing&&needRebuild)stopAll();wakeAudio()}}
 ['pointerup','touchend'].forEach(ev=>document.addEventListener(ev,healAudio,{capture:true,passive:true}));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ac&&ac.state!=='running'&&!micBusy)needRebuild=true});
+document.addEventListener('visibilitychange',()=>{if(IS_IOS&&!document.hidden&&ac&&ac.state!=='running'&&!micBusy)needRebuild=true});
 ['pointerup','touchend','click'].forEach(ev=>document.addEventListener(ev,unlockIOS,{capture:true,passive:true}));
 
 
@@ -2435,6 +2437,39 @@ function resetFX(){if(!ac)return;const T=ac.currentTime;
 const _playFX=play;play=async function(){await _playFX();if(!ac)return;if(st.autoArm&&autoRec)autoRec.p=st.autoParam;scheduleFX(PLAY_AT||ac.currentTime)};
 const _stopFX=stopAll;stopAll=function(){_stopFX();resetFX()};
 const _rbFX=rebuildAudio;rebuildAudio=async function(){for(const k in CHV){try{CHV[k].l.stop()}catch(e){}delete CHV[k]}await _rbFX()};
+
+
+/* ================= MEDIDOR DE SONIDO + COMPROBAR SONIDO ================= */
+(function(){
+  const tp=$('.transport'),m=document.createElement('button');m.type='button';m.id='lvlBtn';m.setAttribute('aria-label','Comprobar sonido');
+  m.style.cssText='flex:none;width:14px;height:34px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);position:relative;overflow:hidden;cursor:pointer;padding:0';
+  m.innerHTML='<i id="lvlFill" style="position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(to top,#5fd0a4 0%,#5fd0a4 60%,#ffd56e 85%,#ef6b6b 100%);background-size:100% 34px;background-position:bottom"></i>';
+  tp.appendChild(m);
+  const buf=new Float32Array(1024);let peakHold=0;
+  window.__lvl=()=>{if(!meterA||!ac)return 0;meterA.getFloatTimeDomainData(buf);let p=0;for(let i=0;i<buf.length;i++){const a=Math.abs(buf[i]);if(a>p)p=a}return p};
+  (function loop(){requestAnimationFrame(loop);const p=window.__lvl();peakHold=Math.max(p,peakHold*.92);const db=peakHold>0?20*Math.log10(peakHold):-90,f=Math.max(0,Math.min(1,(db+48)/48));$('#lvlFill').style.height=(f*100)+'%';const box=$('#sndChkLvl');if(box){box.style.width=(f*100)+'%';$('#sndChkDb').textContent=peakHold>0.0005?Math.round(db)+' dB':'silencio'}})();
+  m.onclick=openSoundCheck;
+  const b=document.createElement('button');b.className='ghost';b.type='button';b.textContent='Comprobar sonido';b.style.textAlign='center';b.onclick=openSoundCheck;$('#p-sound').appendChild(b);
+})();
+async function testTone(kind){await ensureAudio();await wakeAudio();const t=ac.currentTime+.05;
+  try{if(kind==='direct'){const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=440;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.2,t+.02);g.gain.setValueAtTime(.2,t+.9);g.gain.linearRampToValueAtTime(0,t+1);o.connect(g);g.connect(busG||ac.destination);o.start(t);o.stop(t+1.05)}
+    else{const keep=st.piano;if(keep==='orig')st.piano='cola';[60,64,67,72].forEach((p,i)=>voice({p,v:90,s:0,e:.5},t+i*.18));st.piano=keep}}catch(err){audioErrs.push(kind+': '+(err&&err.message||err))}
+  setTimeout(fillSoundCheck,1300)}
+function fillSoundCheck(){const el=$('#sndChkInfo');if(!el)return;const rows=[
+  ['Estado del audio',ac?({running:'✅ funcionando',suspended:'⏸ en pausa (toca un botón)',interrupted:'⏸ interrumpido',closed:'❌ cerrado'}[ac.state]||ac.state):'aún no iniciado'],
+  ['Frecuencia de muestreo',ac?ac.sampleRate+' Hz':'—'],
+  ['Retraso de salida',ac&&ac.outputLatency?Math.round(ac.outputLatency*1000)+' ms':(ac&&ac.baseLatency?Math.round(ac.baseLatency*1000)+' ms':'—')],
+  ['Sistema',IS_IOS?'iPhone / iPad':(/Android/.test(navigator.userAgent)?'Android':'Computador')],
+  ['Piano elegido',PIANOS[st.piano]?PIANOS[st.piano].name:st.piano]];
+  el.innerHTML=rows.map(r=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)"><span>${r[0]}</span><b style="text-align:right">${r[1]}</b></div>`).join('')+
+   (audioErrs.length?`<p style="color:var(--danger);margin-top:10px"><b>Errores:</b><br>${audioErrs.slice(-6).map(e=>e.replace(/</g,'&lt;')).join('<br>')}</p>`:'<p class="hint" style="margin-top:10px">Sin errores de sonido.</p>')}
+function openSoundCheck(){
+  sheet(`<h3>Comprobar sonido</h3><p>Toca una prueba y mira la barra: si se mueve, la app está produciendo sonido. Si se mueve pero no oyes nada, el problema está en el volumen o la salida del teléfono.</p>
+   <div style="display:flex;align-items:center;gap:10px;margin:6px 0 4px"><div style="flex:1;height:14px;border-radius:7px;background:rgba(255,255,255,.1);overflow:hidden"><div id="sndChkLvl" style="height:100%;width:0;background:linear-gradient(90deg,#5fd0a4,#ffd56e 80%,#ef6b6b)"></div></div><span id="sndChkDb" style="font:600 12px var(--mono);min-width:64px;text-align:right">silencio</span></div>
+   <div class="row-btns"><button class="ghost" type="button" id="sndT1" style="text-align:center">Tono de prueba</button><button class="ghost" type="button" id="sndT2" style="text-align:center">Acorde de piano</button></div>
+   <div id="sndChkInfo" style="font-size:14px;margin-top:8px"></div>
+   <p class="hint">Si algo falla, haz una captura de esta pantalla y envíamela.</p>`);
+  $('#sndT1').onclick=()=>testTone('direct');$('#sndT2').onclick=()=>testTone('piano');fillSoundCheck()}
 
 qSync();
 syncVisual();
