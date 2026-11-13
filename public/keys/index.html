@@ -897,18 +897,18 @@ play=async function(){await basePlay();if(!$('#metPlay').checked)return;const bt
 (function beatLoop(){requestAnimationFrame(beatLoop);if(!$('#metPlay').checked||!st.playing){stBeats.innerHTML='';return}if(!stBeats.children.length)stBeats.innerHTML='<i></i>'.repeat(st.meter);const bt=beatTimes();let cur=null;for(const x of bt){if(x.t<=st.t)cur=x}[...stBeats.children].forEach((d,i)=>{d.className=(cur&&cur.b%st.meter===i&&st.t-cur.t<.18?'on':'')+(i===0?' acc':'')})})();
 $('#metPlay').onchange=()=>restartIfPlaying();
 // metronome in the record sheet
-let metIv=null,during='clic',countIn=1;
+let metIv=null,during='clic',countIn=2;
 let metToken=0;const metIvs=new Set();
 function metStop(){metToken++;metIvs.forEach(i=>clearInterval(i));metIvs.clear();clearInterval(metIv);metIv=null;const b=$('#rTry');if(b)b.textContent='Probar metrónomo';document.querySelectorAll('#rBeats i').forEach(d=>d.classList.remove('on'))}
-async function metStart(){metStop();const my=metToken;await ensureAudio();if(ac.state==='suspended')await ac.resume();if(my!==metToken)return;let next=ac.currentTime+.1,beat=0;
-  metIv=setInterval(()=>{if(my!==metToken)return;while(next<ac.currentTime+.12){const acc=beat%st.meter===0,inCount=beat<countIn*st.meter,b=beat%st.meter;
-    if(during==='clic'||inCount)click(next,acc);
+async function metStart(T,ci,silent){metStop();const my=metToken;await ensureAudio();if(ac.state==='suspended')await ac.resume();if(my!==metToken)return;let next=T||ac.currentTime+.1,beat=0;const cin=ci??countIn;
+  metIv=setInterval(()=>{if(my!==metToken)return;while(next<ac.currentTime+.12){const acc=beat%st.meter===0,inCount=beat<cin*st.meter,b=beat%st.meter;
+    if((during==='clic'&&!silent)||inCount)click(next,acc);
     setTimeout(()=>{$$('#rBeats i').forEach((d,i)=>d.classList.toggle('on',i===b));if(st.vib&&navigator.vibrate)try{navigator.vibrate(acc?30:12)}catch(e){}},Math.max(0,(next-ac.currentTime)*1000));
     next+=60/st.recBpm;beat++}},25);metIvs.add(metIv);const rt=$('#rTry');if(rt)rt.textContent='Parar metrónomo'}
 function recMetroUI(){
   const upd=()=>{$('#rBpm').innerHTML=`${st.recBpm}<small>BPM</small>`;$('#rBeats').innerHTML=Array.from({length:st.meter},(_,i)=>`<i class="${i===0?'acc':''}"></i>`).join('');$$('#rMeters .chip').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.k===st.meter));$$('#rCount .chip').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.k===countIn));$$('#rDuring .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===during))};
   chips($('#rMeters'),[[2,'2/4'],[3,'3/4'],[4,'4/4']],null,k=>{st.meter=+k;upd()});
-  chips($('#rCount'),[[0,'Sin cuenta'],[1,'1 compás'],[2,'2 compases']],null,k=>{countIn=+k;upd()});
+  chips($('#rCount'),[[2,'2 compases'],[3,'3 compases'],[4,'4 compases']],null,k=>{countIn=+k;upd()});if(countIn<2)countIn=2;
   chips($('#rDuring'),[['clic','Clic (auriculares)'],['visual','Solo visual'],['off','Apagado']],null,k=>{during=k;upd()});
   $('#rDn').onclick=()=>{st.recBpm=Math.max(30,st.recBpm-2);upd()};$('#rUp').onclick=()=>{st.recBpm=Math.min(240,st.recBpm+2);upd()};
   let taps=[];$('#rTap').onclick=()=>{const t=performance.now();taps=taps.filter(x=>t-x<3000);taps.push(t);if(taps.length>=3){const d=(taps[taps.length-1]-taps[0])/(taps.length-1);st.recBpm=Math.round(60000/d);upd()}};
@@ -954,15 +954,15 @@ function micStart(box,q,onDone,opt){
   q('go').disabled=true;q('go').lastChild.textContent='Pidiendo permiso del micrófono…';
   navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}}).then(async stream=>{
     await p0;try{await ac.resume()}catch(e){}
-    const metro=opt.metro&&$('#rMet')&&$('#rMet').checked;let waitS=0;
-    if(metro){metStart();waitS=countIn*st.meter*60/st.recBpm}
+    const metro=opt.metro&&$('#rMet')&&$('#rMet').checked;const ci=opt.metro?Math.max(countIn||0,2):0;const T=ac.currentTime+.25;const waitS=.25+ci*st.meter*60/st.recBpm;
+    if(ci>0)metStart(T,ci,!metro);
     q('go').hidden=true;q('live').hidden=false;
     const src=ac.createMediaStreamSource(stream),sp=ac.createScriptProcessor(4096,1,1),g=ac.createGain();g.gain.value=0;src.connect(sp);sp.connect(g);g.connect(ac.destination);
-    const chunks=[],lv=[],t0=ac.currentTime+waitS;let stopped=false;let alongSrc=null;const alongX=typeof opt.along==='function'?opt.along():opt.along;if(alongX){const ab=ac.createBuffer(1,alongX.length,22050);ab.getChannelData(0).set(alongX);alongSrc=ac.createBufferSource();alongSrc.buffer=ab;alongSrc.connect(ac.destination);alongSrc.start(t0)}if(opt.onT0)opt.onT0(t0);
+    const chunks=[],lv=[],t0=T+ci*st.meter*60/st.recBpm;let stopped=false;let alongSrc=null;const alongX=typeof opt.along==='function'?opt.along():opt.along;if(alongX){const ab=ac.createBuffer(1,alongX.length,22050);ab.getChannelData(0).set(alongX);alongSrc=ac.createBufferSource();alongSrc.buffer=ab;alongSrc.connect(ac.destination);alongSrc.start(t0)}if(opt.onT0)opt.onT0(t0);
     const cv=q('lvl');
     sp.onaudioprocess=e=>{const a=e.inputBuffer.getChannelData(0);let s=0;for(let i=0;i<a.length;i+=4)s+=a[i]*a[i];const db=20*Math.log10(Math.sqrt(s/(a.length/4))+1e-7);lv.push(db);if(lv.length>240)lv.shift();
       if(ac.currentTime>=t0&&!stopped)chunks.push(new Float32Array(a))};
-    const iv=setInterval(()=>{const el=ac.currentTime-t0;q('time').textContent=el<0?`Cuenta previa… ${Math.ceil(-el)}`:`● Grabando ${fmt(el)}`;drawWave(cv,lv);if(el>(opt.max||300))finish()},100);
+    const iv=setInterval(()=>{const el=ac.currentTime-t0;q('time').textContent=el<0?`Prepárate… entra en ${Math.max(1,Math.ceil(-el/(60/st.recBpm)-.001))}`:`● Grabando ${fmt(el)}`;drawWave(cv,lv);if(el>(opt.max||300))finish()},100);
     async function finish(){if(stopped)return;stopped=true;clearInterval(iv);metStop();try{alongSrc&&alongSrc.stop()}catch(e){}if(opt.onStop)try{opt.onStop()}catch(e){}try{sp.disconnect();src.disconnect();g.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());
       let n=0;chunks.forEach(c=>n+=c.length);if(n<ac.sampleRate*.5){q('live').hidden=true;q('go').hidden=false;q('go').disabled=false;q('go').lastChild.textContent='Grabar';msg.textContent='La grabación fue demasiado corta. Inténtalo otra vez.';return}
       q('time').textContent='Procesando…';
@@ -1786,7 +1786,7 @@ recPiece=function(mode){
   const take={L:null,R:null};
   async function got(hand,A){
     const s=$('#sep'+hand+'s');s.textContent='Convirtiendo a notas…';
-    try{const ns=await convertAudio(A.x,p=>s.textContent='Convirtiendo a notas… '+Math.round(p*100)+'%');ns.forEach(n=>{n[4]=hand});take[hand]={A,ns};s.className='saved ok';s.textContent=`✓ ${ns.length} notas de la mano ${hand==='L'?'izquierda':'derecha'}.`}
+    try{const ns=await convertAudio(A.x,p=>s.textContent='Convirtiendo a notas… '+Math.round(p*100)+'%');ns.forEach(n=>{n[4]=hand});if(hand==='R'&&take.L&&$('#sepAlong').checked){const lat=(ac.outputLatency||0)+(ac.baseLatency||0)+.03;ns.forEach(n=>{n[0]=Math.max(0,n[0]-lat);n[1]=Math.max(n[0]+.05,n[1]-lat)});A={...A,x:A.x.subarray(Math.min(A.x.length-1,Math.round(lat*A.sr)))}}take[hand]={A,ns};s.className='saved ok';s.textContent=`✓ ${ns.length} notas de la mano ${hand==='L'?'izquierda':'derecha'}.`}
     catch(e){s.textContent='No se pudo convertir ('+((e&&e.message)||'error')+').';return}
     if(hand==='L'){$('#sepRbox').style.opacity=1;$('#sepRs').className='saved';$('#sepRs').textContent='Ahora graba la mano derecha.';micUI($('#sepR'),A2=>got('R',A2),{metro:true,max:600,label:'Grabar mano derecha',along:()=>$('#sepAlong').checked&&take.L?take.L.A.x:null})}
     if(take.L&&take.R){const a=take.L.A.x,b=take.R.A.x,n=Math.max(a.length,b.length),x=new Float32Array(n);let pk=0;for(let i=0;i<n;i++){const v=(a[i]||0)+(b[i]||0);x[i]=v;if(Math.abs(v)>pk)pk=Math.abs(v)}if(pk>.99)for(let i=0;i<n;i++)x[i]*=.98/pk;
@@ -2079,14 +2079,14 @@ function newTrackSheet(){
    <p class="label" style="margin:0">Instrumento</p><div class="chips" id="ntInst"></div>
    <div class="toggle"><span>Escuchar la pieza mientras grabo<small>Usa <b>auriculares con cable</b>: si suena por el altavoz, el micrófono también la graba</small></span><input type="checkbox" class="sw2" id="ntListen" checked></div>
    <div class="toggle"><span>Ajustar al tempo al terminar<small>Coloca cada nota en la línea más cercana</small></span><input type="checkbox" class="sw2" id="ntSnap" checked></div>
-   <p class="hint">Empieza en <b>${fmt(tStart)}</b>, donde está la línea del teclado. Hay un compás de cuenta previa a ${curBpm()} BPM: mira los círculos.</p>
+   <p class="hint">Empieza en <b>${fmt(tStart)}</b>, donde está la línea del teclado. Hay <b>dos compases de cuenta previa</b> a ${curBpm()} BPM antes de que empiece a grabar: mira los círculos.</p>
    <div class="beats" id="rBeats">${'<i></i>'.repeat(st.meter)}</div><input type="checkbox" id="rMet" checked hidden>
    <div id="ntMic"></div><label class="recbtn alt" for="ntFile">O elegir una grabación ya hecha</label><input type="file" id="ntFile" accept="audio/*,video/*" hidden><p class="saved" id="ntMsg"></p>`);
   $('#ntFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;listen=false;tStart=st.t;$('#ntMsg').textContent='Leyendo la grabación…';let A;try{A=await wDecode(f)}catch(err){A=await wLiveAsk(f,$('#ntMsg'));if(!A)return}finishTrack(A)};
   chips($('#ntInst'),Object.entries(INST).map(([k,v])=>[k,v.name]),null,k=>{inst=k;$$('#ntInst .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));previewInst(k)});
   $$('#ntInst .chip').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.k===inst);b.style.boxShadow=`inset 3px 0 0 ${INST[b.dataset.k].color}`});
   $('#ntListen').onchange=e=>listen=e.target.checked;$('#ntSnap').onchange=e=>snapOn=e.target.checked;
-  st.recBpm=curBpm();countIn=1;during='visual';
+  st.recBpm=curBpm();countIn=2;during='visual';
   micUI($('#ntMic'),A=>finishTrack(A),{metro:true,max:600,label:'Grabar pista',
     onT0:t0=>{capT0=t0;tStart=st.t;if(listen){const ms=Math.max(0,(t0-ac.currentTime)*1000);setTimeout(()=>{play()},ms)}},
     onStop:()=>{if(st.playing)stopAll()}});
