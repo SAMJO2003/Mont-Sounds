@@ -607,7 +607,7 @@ async function wakeAudio(){
 }
 if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(ac&&!micBusy)needRebuild=true});
 function activeTracks(){const set=new Set();for(const n of notes){const k=n.inst||'piano';if(!(st.im&&st.im[k]))set.add(k)}return Math.max(1,set.size)}
-function applyMix(){if(!ac)return;master.gain.value=1.1;if(busG)busG.gain.value=1/Math.sqrt(activeTracks());wet.gain.value=st.reverb*1.4*st.vol;dry.gain.value=(1-st.reverb*.35)*st.vol;toneF.frequency.value=900*Math.pow(18,st.bright)}
+function applyMix(){if(!ac)return;master.gain.value=1.1;if(busG)busG.gain.value=1/Math.sqrt(activeTracks());if(!(typeof fxBusy==='function'&&fxBusy('piano','rev'))){wet.gain.value=st.reverb*1.4*st.vol;dry.gain.value=(1-st.reverb*.35)*st.vol}if(!(typeof fxBusy==='function'&&fxBusy('piano','bri')))toneF.frequency.value=900*Math.pow(18,st.bright)}
 function voice(n,when){
   const P=PIANOS[st.piano],f0=440*Math.pow(2,(n.p+(P.oct||0)-69)/12),amp=Math.pow(n.v/127,1.6)*.16;
   const dec=P.dec*Math.pow(2,-(n.p-60)/24), rel=.12+st.pedal*3.2, end=when+(n.e-n.s), stop=end+rel+.05;
@@ -1986,10 +1986,10 @@ function clipBar(){const b=$('#clipBox');if(!b)return;b.hidden=!CLIP;if(CLIP)$('
 /* ================= PROYECTOS: guardar, autoguardado, copia, copia de seguridad, importar ================= */
 let dirty=false,saving=false,saveTimer=null,lastSig='',autosave=true;
 function noteSig(){let h=notes.length;for(const n of notes)h=(h*31+Math.round(n.s*100)*7+Math.round(n.e*100)*3+n.p+(n.color?n.color.length:0)+(n.marks?17:0))%1e9;return h+'|'+(st.gridFixed?st.gridFixed.bpm+':'+st.gridFixed.t0.toFixed(3):'')+'|'+st.meter}
-function getSettings(){return {extraTracks:st.extraTracks||[],ts:st.ts,iv:st.iv,hide:st.hide,im:st.im,tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
+function getSettings(){return {automFX:st.automFX||{},extraTracks:st.extraTracks||[],ts:st.ts,iv:st.iv,hide:st.hide,im:st.im,tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
 function defaultSettings(){return {tpl:'mont',R:TPL.mont.R,L:TPL.mont.L,bg:'negro',fx:['brillo'],names:false,gridLines:true,piano:origBuf?'orig':'cola',pedal:.45,reverb:.3,bright:.55,vol:.8,room:'sala',hide:{},im:{},look:3.4}}
 function applySettings(a){if(!a)return;
-  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);st.extraTracks=a.extraTracks||[];st.hide=a.hide||{};st.im=a.im||{};st.ts=a.ts||{};st.iv=a.iv||{};if(typeof INST!=='undefined'&&ac)Object.keys(INST).forEach(k=>{if(instGains[k])instBus(k)});if(typeof trackBar==='function')trackBar();if(a.look)LOOK=a.look;if(typeof syncSpd==='function')syncSpd();
+  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);st.automFX=a.automFX||{};st.extraTracks=a.extraTracks||[];st.hide=a.hide||{};st.im=a.im||{};st.ts=a.ts||{};st.iv=a.iv||{};if(typeof INST!=='undefined'&&ac)Object.keys(INST).forEach(k=>{if(instGains[k])instBus(k)});if(typeof trackBar==='function')trackBar();if(a.look)LOOK=a.look;if(typeof syncSpd==='function')syncSpd();
   [['pedal',st.pedal],['reverb',st.reverb],['bright',st.bright],['vol',st.vol]].forEach(([id,v])=>{const el=$('#'+id);if(el){el.value=Math.round(v*100);$('#o-'+id).textContent=el.value}});
   $$('#rooms .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.room));if(ac&&conv)conv.buffer=impulse(ROOMS[st.room][1]);
   const gt=$('#gridT');if(gt)gt.checked=st.gridLines!==false;buildPianos();syncPedal();applyMix();syncVisual();stats();
@@ -2068,7 +2068,7 @@ async function importProject(file){
 const _stats7=stats;stats=function(){_stats7();const sg=noteSig();if(lastSig&&sg!==lastSig&&CURRENT){dirty=true;setSaveState(CURRENT.id?'Cambios sin guardar':'Pieza de ejemplo: toca Guardar para crear tu proyecto');if(autosave&&CURRENT.id){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}}if(!lastSig)lastSig=sg};
 ['#pianos','#tpls','#fx','#bgs','#rooms','#swR','#swL'].forEach(sel=>{const el=$(sel);if(el)el.addEventListener('click',()=>setTimeout(()=>{if(CURRENT&&CURRENT.id&&autosave){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}},0))});
 const _openPiece=openPiece;openPiece=async function(p){st.userKeys=false;await _openPiece(p);st.autom=Array.isArray(p.autom)?p.autom:[];st.automT=p.automT||{};if(typeof autoSync==='function')autoSync();st.focus=null;clearTimeout(saveTimer);applySettings({...defaultSettings(),...(p.ajustes||{})});clearTimeout(saveTimer);lastSig=noteSig();dirty=false;setSaveState(p.id?'Guardado ✓':'Sin guardar',!!p.id)};
-const _openExample=openExample;openExample=async function(){st.userKeys=false;await _openExample();st.autom=[];st.automT={};if(typeof autoSync==='function')autoSync();clearTimeout(saveTimer);st.focus=null;applySettings(defaultSettings());clearTimeout(saveTimer);lastSig=noteSig();setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto')};
+const _openExample=openExample;openExample=async function(){st.userKeys=false;await _openExample();st.autom=[];st.automT={};st.automFX={};st.autoParam='vol';if(typeof autoSync==='function')autoSync();clearTimeout(saveTimer);st.focus=null;applySettings(defaultSettings());clearTimeout(saveTimer);lastSig=noteSig();setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto')};
 $('#exPiece').onclick=openExample;
 window.addEventListener('beforeunload',e=>{if(dirty&&CURRENT&&CURRENT.id){saveProject(true)}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty&&CURRENT&&CURRENT.id)saveProject(true)});
@@ -2094,7 +2094,11 @@ function ksBuffer(k,p){const key=k+p;if(ksCache[key])return ksCache[key];const P
   let prev=0;for(let i=0;i<N;i++){const r=Math.random()*2-1;prev=prev+(r-prev)*P.bright;ring[i]=prev}
   const dec=Math.pow(P.decay,440/Math.max(60,f)*.6);let idx=0;for(let i=0;i<len;i++){const a=ring[idx],b2=ring[(idx+1)%N];d[i]=a;ring[idx]=(a+b2)*.5*dec;idx=(idx+1)%N}
   let mx=0;for(let i=0;i<Math.min(len,4000);i++)mx=Math.max(mx,Math.abs(d[i]));if(mx>0)for(let i=0;i<len;i++)d[i]/=mx;ksCache[key]=b;return b}
-function vibrato(P,f,when,targets){if(!P.vib)return null;const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=P.vib[0];const depth=f*(Math.pow(2,P.vib[1]*(P._vm??1)/1200)-1);lg.gain.setValueAtTime(0,when);lg.gain.linearRampToValueAtTime(0,when+P.vib[2]);lg.gain.linearRampToValueAtTime(depth,when+P.vib[2]+.35);l.connect(lg);targets.forEach(t=>lg.connect(t));l.start(when);return l}
+const CHV={};
+function vibBus(k){const P=INST[k];if(!CHV[k]){const l=ac.createOscillator(),g=ac.createGain();l.frequency.value=P.vib[0];g.gain.value=trackSet(k).vib??1;l.connect(g);l.start();CHV[k]={l,g}}
+  if(!(st.playing&&fxHas(k,'vib'))&&!(st.autoArm&&st.autoParam==='vib'&&autoKey()===k))CHV[k].g.gain.value=trackSet(k).vib??1;return CHV[k]}
+function vibrato(P,f,when,targets){if(!P.vib)return null;if(!P._k)P._k=Object.keys(INST).find(x=>INST[x]===P);const vb=vibBus(P._k),lg=ac.createGain();const depth=f*(Math.pow(2,P.vib[1]/1200)-1);lg.gain.setValueAtTime(0,when);lg.gain.linearRampToValueAtTime(0,when+P.vib[2]);lg.gain.linearRampToValueAtTime(depth,when+P.vib[2]+.35);vb.g.connect(lg);targets.forEach(t=>lg.connect(t));
+  return {stop(t){const ms=t==null?0:Math.max(0,(t-ac.currentTime)*1000+150);setTimeout(()=>{try{vb.g.disconnect(lg)}catch(e){}},ms)}}}
 function instVoice(n,when){
   const k=n.inst,P=INST[k];if(!P||!ac)return;P._vm=trackSet(k).vib;const f=440*Math.pow(2,(n.p-69)/12),amp=Math.pow((n.v||80)/127,1.3)*P.gain,end=when+Math.max(.06,(n.e-n.s)*artMul(k)),out=instBus(k),nodes=[];
   if(P.kind==='ks'){const s=ac.createBufferSource();s.buffer=ksBuffer(k,n.p);const g=ac.createGain();g.gain.value=amp;s.connect(g);g.connect(out);s.start(when);s.stop(when+P.len);live.push(s);return}
@@ -2208,11 +2212,22 @@ function newTrackSheet(pre){
 /* ================= DINÁMICA EN VIVO (automatización de volumen, por pista) ================= */
 st.autom=[];st.automT={};st.autoArm=false;st.autoShow=true;let autoRec=null;
 function autoKey(){return st.focus||'_all'}
-function autoArr(k){if(k==='_all')return st.autom;st.automT=st.automT||{};return st.automT[k]||[]}
-function setAutoArr(k,a){if(k==='_all')st.autom=a;else{st.automT=st.automT||{};if(a.length)st.automT[k]=a;else delete st.automT[k]}}
+st.autoParam='vol';st.automFX={};
+function autoArr(k,p){p=p||st.autoParam;if(p!=='vol'){const M=(st.automFX=st.automFX||{})[p]||{};return M[k]||[]}if(k==='_all')return st.autom;st.automT=st.automT||{};return st.automT[k]||[]}
+function setAutoArr(k,a,p){p=p||st.autoParam;if(p!=='vol'){st.automFX=st.automFX||{};const M=st.automFX[p]=st.automFX[p]||{};if(a.length)M[k]=a;else delete M[k];return}if(k==='_all')st.autom=a;else{st.automT=st.automT||{};if(a.length)st.automT[k]=a;else delete st.automT[k]}}
 function autoName(k){return k==='_all'?'Todas las pistas':(typeof trackName==='function'?trackName(k):k)}
-function autoAt(t,k){const A=autoArr(k??autoKey());if(!A.length)return 1;if(t<=A[0].t)return A[0].v;if(t>=A[A.length-1].t)return A[A.length-1].v;let lo=0,hi=A.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(A[m].t<=t)lo=m;else hi=m}const a=A[lo],b=A[hi];return a.v+(b.v-a.v)*(t-a.t)/((b.t-a.t)||1)}
+function autoAt(t,k,p){k=k??autoKey();p=p||st.autoParam;const A=autoArr(k,p);if(!A.length)return pDef(k,p);if(t<=A[0].t)return A[0].v;if(t>=A[A.length-1].t)return A[A.length-1].v;let lo=0,hi=A.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(A[m].t<=t)lo=m;else hi=m}const a=A[lo],b=A[hi];return a.v+(b.v-a.v)*(t-a.t)/((b.t-a.t)||1)}
 function baseGain(){return 1.1}
+/* efectos que se pueden automatizar con el deslizador */
+const PARAMS={
+  vol:{name:'Dinámica',short:'Vol',max:1.5,grad:'linear-gradient(to top,#5fd0a4,#ffd56e)',line:'rgba(255,213,110,.6)',desc:'Volumen de la pista'},
+  rev:{name:'Reverb',short:'Rev',max:1,grad:'linear-gradient(to top,#3b6fd8,#9cc4ff)',line:'rgba(156,196,255,.7)',desc:'Cuánta sala o eco tiene'},
+  bri:{name:'Brillo',short:'Brillo',max:1,grad:'linear-gradient(to top,#a8742a,#fff1b8)',line:'rgba(255,241,184,.7)',desc:'Oscuro y suave ↔ brillante'},
+  vib:{name:'Vibrato',short:'Vib',max:2,grad:'linear-gradient(to top,#7b4fd8,#e3b8ff)',line:'rgba(227,184,255,.7)',desc:'Cuánto ondula la afinación (cuerdas, vientos)'}};
+function pFmt(v){return Math.round(v*100)+'%'}
+function pDef(k,p){if(p==='vol')return 1;const isP=k==='piano'||k==='_all'||!(typeof INST!=='undefined'&&INST[k]);
+  if(p==='rev')return isP?st.reverb:trackSet(k).reverb;if(p==='bri')return isP?st.bright:trackSet(k).bright;if(p==='vib')return isP?1:(trackSet(k).vib??1);return 1}
+function paramOK(k,p){if(p==='vol')return true;if(k==='_all')return false;if(p==='vib')return !!(typeof INST!=='undefined'&&INST[k]&&INST[k].vib);return true}
 /* un control de volumen propio para cada pista */
 let PA=null;
 function pianoAuto(){if(!PA){PA=ac.createGain();try{dry.disconnect(master)}catch(e){}try{wet.disconnect(master)}catch(e){}dry.connect(PA);wet.connect(PA);PA.connect(master)}return PA}
@@ -2220,24 +2235,24 @@ function autoNode(k){if(!ac||!master)return null;if(k==='_all')return master;if(
 function autoBase(k){return k==='_all'?baseGain():1}
 function autoKeysAll(){return ['_all','piano',...Object.keys(typeof INST!=='undefined'?INST:{})]}
 function scheduleAutom(now){if(!ac||!master)return;
-  autoKeysAll().forEach(k=>{const A=autoArr(k),live=st.autoArm&&k===autoKey();if(!A.length&&!live&&k!=='_all'&&!(k==='piano'&&PA)&&!(CH[k]))return;const node=autoNode(k);if(!node)return;const g=node.gain,b=autoBase(k);g.cancelScheduledValues(now);
+  autoKeysAll().forEach(k=>{const A=autoArr(k,'vol'),live=st.autoArm&&k===autoKey()&&st.autoParam==='vol';if(!A.length&&!live&&k!=='_all'&&!(k==='piano'&&PA)&&!(CH[k]))return;const node=autoNode(k);if(!node)return;const g=node.gain,b=autoBase(k);g.cancelScheduledValues(now);
     if(live||!A.length){g.setValueAtTime(b*(live?liveV:1),now);return}
-    g.setValueAtTime(b*autoAt(st.t,k),now);A.forEach(p=>{if(p.t>st.t)g.linearRampToValueAtTime(b*p.v,now+(p.t-st.t))})})}
+    g.setValueAtTime(b*autoAt(st.t,k,'vol'),now);A.forEach(p=>{if(p.t>st.t)g.linearRampToValueAtTime(b*p.v,now+(p.t-st.t))})})}
 function resetAutoNodes(){if(!ac)return;autoKeysAll().forEach(k=>{if(k!=='_all'&&!(k==='piano'&&PA)&&!CH[k])return;const n=autoNode(k);if(!n)return;n.gain.cancelScheduledValues(ac.currentTime);n.gain.setValueAtTime(autoBase(k),ac.currentTime)})}
 let liveV=1;
 /* deslizador sobre el escenario */
 (function(){
   const sw=$('.stagewrap'),box=document.createElement('div');box.id='autoBox';box.hidden=true;
   box.style.cssText='position:absolute;right:8px;top:10px;bottom:30%;width:52px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:5;touch-action:none';
-  box.innerHTML='<span id="autoWho" style="font:600 9px var(--body);color:#fff;background:rgba(0,0,0,.6);padding:2px 5px;border-radius:6px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Todas</span><span id="autoVal" style="font:600 10px var(--mono);color:#fff;background:rgba(0,0,0,.55);padding:2px 5px;border-radius:6px">100%</span><div id="autoTrack" style="flex:1;width:14px;border-radius:8px;background:rgba(255,255,255,.14);position:relative;cursor:ns-resize"><div id="autoFill" style="position:absolute;left:0;right:0;bottom:0;border-radius:8px;background:linear-gradient(to top,#5fd0a4,#ffd56e)"></div><div id="autoThumb" style="position:absolute;left:50%;width:30px;height:30px;margin-left:-15px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div></div><span id="autoRecDot" style="font:700 9px var(--body);color:#ef6b6b" hidden>● REC</span><button type="button" id="autoRecMini" aria-label="Grabar dinámica" style="width:34px;height:34px;border-radius:50%;border:2px solid #fff;background:rgba(239,107,107,.9);color:#fff;font:700 9px var(--body);cursor:pointer">REC</button><button type="button" id="autoDel" aria-label="Borrar dinámica" style="width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button><button type="button" id="autoClose" aria-label="Ocultar deslizador" style="width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;cursor:pointer">×</button>';
+  box.innerHTML='<button type="button" id="autoParamB" aria-label="Elegir qué automatizar" style="font:700 9px var(--body);color:#0a0c11;background:#ffd56e;border:0;padding:3px 6px;border-radius:8px;cursor:pointer;white-space:nowrap">Vol ▾</button><span id="autoWho" style="font:600 9px var(--body);color:#fff;background:rgba(0,0,0,.6);padding:2px 5px;border-radius:6px;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Todas</span><span id="autoVal" style="font:600 10px var(--mono);color:#fff;background:rgba(0,0,0,.55);padding:2px 5px;border-radius:6px">100%</span><div id="autoTrack" style="flex:1;width:14px;border-radius:8px;background:rgba(255,255,255,.14);position:relative;cursor:ns-resize"><div id="autoFill" style="position:absolute;left:0;right:0;bottom:0;border-radius:8px;background:linear-gradient(to top,#5fd0a4,#ffd56e)"></div><div id="autoThumb" style="position:absolute;left:50%;width:30px;height:30px;margin-left:-15px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div></div><span id="autoRecDot" style="font:700 9px var(--body);color:#ef6b6b" hidden>● REC</span><button type="button" id="autoRecMini" aria-label="Grabar dinámica" style="width:34px;height:34px;border-radius:50%;border:2px solid #fff;background:rgba(239,107,107,.9);color:#fff;font:700 9px var(--body);cursor:pointer">REC</button><button type="button" id="autoDel" aria-label="Borrar dinámica" style="width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;cursor:pointer;display:grid;place-items:center"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg></button><button type="button" id="autoClose" aria-label="Ocultar deslizador" style="width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;cursor:pointer">×</button>';
   sw.appendChild(box);
   const tr=$('#autoTrack');
-  const setV=v=>{liveV=Math.max(0,Math.min(1.5,v));const f=liveV/1.5;$('#autoFill').style.height=(f*100)+'%';$('#autoThumb').style.bottom=`calc(${f*100}% - 15px)`;$('#autoVal').textContent=Math.round(liveV*100)+'%'};
+  const setV=v=>{const P=PARAMS[st.autoParam];liveV=Math.max(0,Math.min(P.max,v));const f=liveV/P.max;$('#autoFill').style.height=(f*100)+'%';$('#autoFill').style.background=P.grad;$('#autoThumb').style.bottom=`calc(${f*100}% - 15px)`;$('#autoVal').textContent=pFmt(liveV)};
   setV(1);window.__setAutoV=setV;
-  const fromY=e=>{const r=tr.getBoundingClientRect();return (1-(e.clientY-r.top)/r.height)*1.5};
+  const fromY=e=>{const r=tr.getBoundingClientRect();return Math.max(0,Math.min(1,1-(e.clientY-r.top)/r.height))*PARAMS[st.autoParam].max};
   let dragging=false;
-  const apply=v=>{setV(v);const k=autoKey(),n=autoNode(k);if(n&&st.playing)n.gain.setTargetAtTime(autoBase(k)*liveV,ac.currentTime,.03);
-    if(st.autoArm&&st.playing){const t=st.t;if(!autoRec)autoRec={k,t0:t,pts:[]};const L=autoRec.pts[autoRec.pts.length-1];if(!L||t-L.t>.04)autoRec.pts.push({t:+t.toFixed(3),v:+liveV.toFixed(3)})}};
+  const apply=v=>{setV(v);const k=autoKey();if(st.autoParam==='vol'){const n=autoNode(k);if(n&&st.playing)n.gain.setTargetAtTime(autoBase(k)*liveV,ac.currentTime,.03)}else if(paramOK(k,st.autoParam))fxLive(k,st.autoParam,liveV);
+    if(st.autoArm&&st.playing){const t=st.t;if(!autoRec)autoRec={k,p:st.autoParam,t0:t,pts:[]};const L=autoRec.pts[autoRec.pts.length-1];if(!L||t-L.t>.04)autoRec.pts.push({t:+t.toFixed(3),v:+liveV.toFixed(3)})}};
   tr.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();dragging=true;try{tr.setPointerCapture(e.pointerId)}catch(_){}apply(fromY(e))});
   tr.addEventListener('pointermove',e=>{if(!dragging)return;e.stopPropagation();apply(fromY(e))});
   tr.addEventListener('pointerup',e=>{dragging=false;e.stopPropagation()});
@@ -2255,11 +2270,15 @@ let liveV=1;
   fab.onclick=()=>{box.hidden=false;fab.hidden=true;$('#autoShowT').checked=true;autoSync();toast(`Dinámica de ${autoName(autoKey())}: mueve el deslizador. Toca REC para grabar esos cambios mientras suena.`)};
   $('#autoClose').onclick=()=>{if(st.autoArm)$('#autoArmB').click();box.hidden=true;fab.hidden=false;$('#autoShowT').checked=false};
   $('#autoRecMini').onclick=()=>$('#autoArmB').click();
-  $('#autoDel').onclick=()=>{const k=autoKey(),A=autoArr(k);if(st.autoArm){toast('Primero termina de grabar (■).');return}if(!A.length){toast(`${autoName(k)} no tiene dinámica grabada.`);return}
-    sheet(`<h3>Dinámica de ${autoName(k)}</h3><p>¿Qué quieres borrar?</p>${autoPrev[k]?'<button class="ghost" type="button" id="adUndo" style="text-align:center">Deshacer solo la última toma</button>':''}<button class="cta" type="button" id="adAll" style="background:var(--danger);color:#fff">Borrar toda la dinámica de esta pista</button>`);
-    const u=$('#adUndo');if(u)u.onclick=()=>{setAutoArr(k,autoPrev[k]);delete autoPrev[k];closeSheet();autoSync();markDirtyAuto();restartIfPlaying();toast('Última toma deshecha.')};
-    $('#adAll').onclick=()=>{autoPrev[k]=A.slice();setAutoArr(k,[]);closeSheet();autoSync();markDirtyAuto();restartIfPlaying();toast(`Dinámica de ${autoName(k)} borrada.`)}};
-  $('#autoArmB').onclick=()=>{st.autoArm=!st.autoArm;$('#autoShowT').checked=true;box.hidden=false;fab.hidden=true;autoSync();if(st.autoArm){toast(`Dos compases de preparación y empieza a grabar la dinámica de ${autoName(autoKey())}.`);autoCountIn()}else{autoCancelCount();commitAuto();if(st.playing){stopAll()}}};
+  $('#autoParamB').onclick=()=>{if(st.autoArm){toast('Primero termina de grabar (■).');return}const k=autoKey();
+    sheet(`<h3>¿Qué quieres automatizar?</h3><p>Pista: <b>${autoName(k)}</b>. El deslizador controlará esto y podrás grabar sus cambios mientras suena.</p><div class="list" id="apList"></div>${k==='_all'?'<p class="hint">Para reverb, brillo o vibrato elige primero una pista en la barra de pistas.</p>':''}`);
+    $('#apList').innerHTML=Object.entries(PARAMS).map(([p,P])=>{const ok=paramOK(k,p),n=autoArr(k,p).length;return `<button class="ghost" type="button" data-p="${p}" ${ok?'':'disabled'} style="text-align:left;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;${p===st.autoParam?'border-color:#ffd56e;':''}${ok?'':'opacity:.4;'}"><span><b>${P.name}</b><br><small>${ok?P.desc:(p==='vib'?'Esta pista no tiene vibrato':'Elige una pista')}</small></span><small>${n?'● grabado':''}</small></button>`}).join('');
+    $$('#apList [data-p]').forEach(b=>b.onclick=()=>{st.autoParam=b.dataset.p;closeSheet();autoSync();toast(`${PARAMS[st.autoParam].name} de ${autoName(k)}: mueve el deslizador para probar y toca REC para grabarlo.`)})};
+  $('#autoDel').onclick=()=>{const k=autoKey(),A=autoArr(k);if(st.autoArm){toast('Primero termina de grabar (■).');return}if(!A.length){toast(`${autoName(k)} no tiene ${PARAMS[st.autoParam].name.toLowerCase()} grabado.`);return}
+    sheet(`<h3>${PARAMS[st.autoParam].name} de ${autoName(k)}</h3><p>¿Qué quieres borrar?</p>${autoPrev[k+st.autoParam]?'<button class="ghost" type="button" id="adUndo" style="text-align:center">Deshacer solo la última toma</button>':''}<button class="cta" type="button" id="adAll" style="background:var(--danger);color:#fff">Borrar toda esta curva de la pista</button>`);
+    const u=$('#adUndo');if(u)u.onclick=()=>{setAutoArr(k,autoPrev[k+st.autoParam]);delete autoPrev[k+st.autoParam];closeSheet();autoSync();markDirtyAuto();restartIfPlaying();toast('Última toma deshecha.')};
+    $('#adAll').onclick=()=>{autoPrev[k+st.autoParam]=A.slice();setAutoArr(k,[]);closeSheet();autoSync();markDirtyAuto();restartIfPlaying();toast(`${PARAMS[st.autoParam].name} de ${autoName(k)} borrado.`)}};
+  $('#autoArmB').onclick=()=>{if(!st.autoArm&&!paramOK(autoKey(),st.autoParam)){toast(autoKey()==='_all'?'Elige una pista en la barra para automatizar este efecto.':'Esta pista no tiene vibrato. Elige otro efecto.');return}st.autoArm=!st.autoArm;$('#autoShowT').checked=true;box.hidden=false;fab.hidden=true;autoSync();if(st.autoArm){toast(`Dos compases de preparación y empieza a grabar ${PARAMS[st.autoParam].name.toLowerCase()} de ${autoName(autoKey())}.`);autoCountIn()}else{autoCancelCount();commitAuto();if(st.playing){stopAll()}}};
   $('#autoClr').onclick=()=>{const k=autoKey();if(!autoArr(k).length){toast(`${autoName(k)} no tiene dinámica grabada.`);return}setAutoArr(k,[]);autoSync();markDirtyAuto();toast(`Dinámica de ${autoName(k)} borrada.`);restartIfPlaying()};
 })();
 
@@ -2275,20 +2294,20 @@ async function autoCountIn(){
   acTimers.push(setTimeout(()=>{clearInterval(iv);metStop();dot.textContent='● REC';if(st.autoArm)play()},Math.max(0,(startAt-ac.currentTime)*1000-60)));
 }
 
-function autoSync(){const k=autoKey(),A=autoArr(k);$('#autoArmB').textContent=st.autoArm?'■ Terminar de grabar':'● Grabar dinámica';const rm=$('#autoRecMini');if(rm){rm.textContent=st.autoArm?'■':'REC';rm.style.background=st.autoArm?'#ef6b6b':'rgba(239,107,107,.9)'}
-  const fb=$('#autoFab');if(fb)fb.style.borderColor=A.length?'#ffd56e':'rgba(255,255,255,.25)';$('#autoRecDot').hidden=!st.autoArm;const w=$('#autoWho');if(w)w.textContent=k==='_all'?'Todas':autoName(k);
+function autoSync(){if(!paramOK(autoKey(),st.autoParam)&&!st.autoArm)st.autoParam='vol';const k=autoKey(),A=autoArr(k),PP=PARAMS[st.autoParam];$('#autoArmB').textContent=st.autoArm?'■ Terminar de grabar':'● Grabar '+PP.name.toLowerCase();const pb=$('#autoParamB');if(pb){pb.textContent=PP.short+' ▾';pb.style.background=st.autoParam==='vol'?'#ffd56e':PP.line.replace(/,\.\d+\)/,',1)')}const fbl=$('#autoFab');if(fbl&&fbl.lastChild)fbl.lastChild.textContent=PP.name;const rm=$('#autoRecMini');if(rm){rm.textContent=st.autoArm?'■':'REC';rm.style.background=st.autoArm?'#ef6b6b':'rgba(239,107,107,.9)'}
+  const fb=$('#autoFab');if(fb)fb.style.borderColor=(A.length||Object.values(st.automFX||{}).some(M=>Object.keys(M).length))?'#ffd56e':'rgba(255,255,255,.25)';$('#autoRecDot').hidden=!st.autoArm;const w=$('#autoWho');if(w)w.textContent=k==='_all'?'Todas':autoName(k);
   const others=Object.keys(st.automT||{}).filter(x=>x!==k).map(autoName);
-  $('#autoHint').innerHTML=`Pista: <b>${autoName(k)}</b>. `+(A.length?`Tiene dinámica grabada (${A.length} puntos); al reproducir, su volumen la sigue solo.`:'Activa <b>Grabar dinámica</b>, reproduce y sube o baja el deslizador. Solo afectará a esta pista.')+(k==='_all'?' Elige una pista en la barra para darle su propia dinámica.':'')+(others.length?` Otras pistas con dinámica: ${others.join(', ')}.`:'');
-  if(!st.playing||st.autoArm)window.__setAutoV(A.length?autoAt(st.t,k):1)}
-const autoPrev={};function commitAuto(){if(!autoRec||!autoRec.pts.length){autoRec=null;return}autoPrev[autoRec.k]=autoArr(autoRec.k).slice();const k=autoRec.k,a=autoRec.t0,b=autoRec.pts[autoRec.pts.length-1].t;
+  $('#autoHint').innerHTML=`Pista: <b>${autoName(k)}</b>. `+(A.length?`Tiene ${PP.name.toLowerCase()} grabado (${A.length} puntos); al reproducir lo sigue solo.`:`Activa <b>Grabar ${PP.name.toLowerCase()}</b>, reproduce y mueve el deslizador. Solo afectará a esta pista.`)+(k==='_all'?' Elige una pista en la barra para darle su propia dinámica.':'')+(others.length?` Otras pistas con dinámica: ${others.join(', ')}.`:'');
+  if(!st.playing||st.autoArm)window.__setAutoV(A.length?autoAt(st.t,k):pDef(k,st.autoParam))}
+const autoPrev={};function commitAuto(){if(!autoRec||!autoRec.pts.length){autoRec=null;return}autoPrev[autoRec.k+st.autoParam]=autoArr(autoRec.k).slice();const k=autoRec.k,a=autoRec.t0,b=autoRec.pts[autoRec.pts.length-1].t;
   setAutoArr(k,[...autoArr(k).filter(p=>p.t<a-.01||p.t>b+.01),...autoRec.pts].sort((x,y)=>x.t-y.t));autoRec=null;autoSync();markDirtyAuto()}
 function markDirtyAuto(){if(CURRENT&&CURRENT.id&&typeof saveProject==='function'){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),1500)}}
 const _stopAllA=stopAll;stopAll=function(){_stopAllA();if(autoRec)commitAuto();resetAutoNodes()};
 const _playA=play;play=async function(){await _playA();if(!ac)return;if(st.autoArm){autoRec={k:autoKey(),t0:st.t,pts:[{t:+st.t.toFixed(3),v:+liveV.toFixed(3)}]}}scheduleAutom(PLAY_AT||ac.currentTime)};
 (function autoFollow(){requestAnimationFrame(autoFollow);const k=autoKey();if(st.playing&&!st.autoArm&&autoArr(k).length&&!$('#autoBox').hidden)window.__setAutoV(autoAt(st.t,k))})();
 const _dgl=drawGridLines;drawGridLines=function(g,W,hit,pps,t){_dgl(g,W,hit,pps,t);const k=autoKey(),A=autoArr(k);if(!A.length||$('#autoBox').hidden)return;const d=devicePixelRatio||1,x0=W-72*d,w=50*d;
-  g.strokeStyle=k==='_all'||!(typeof INST!=='undefined'&&INST[k])?'rgba(255,213,110,.55)':hexA(INST[k].color,.7);g.lineWidth=2*d;g.beginPath();let started=false;
-  for(let y=hit;y>=0;y-=4*d){const tt=t+(hit-y)/pps,v=autoAt(tt,k),x=x0+w*Math.min(1,v/1.5);if(!started){g.moveTo(x,y);started=true}else g.lineTo(x,y)}g.stroke()};
+  g.strokeStyle=st.autoParam!=='vol'?PARAMS[st.autoParam].line:(k==='_all'||!(typeof INST!=='undefined'&&INST[k])?'rgba(255,213,110,.55)':hexA(INST[k].color,.7));g.lineWidth=2*d;g.beginPath();let started=false;
+  for(let y=hit;y>=0;y-=4*d){const tt=t+(hit-y)/pps,v=autoAt(tt,k),x=x0+w*Math.min(1,v/PARAMS[st.autoParam].max);if(!started){g.moveTo(x,y);started=true}else g.lineTo(x,y)}g.stroke()};
 
 /* ================= SELECCIONAR TODO ================= */
 function selectAll(){const ns=notes.filter(n=>!st.focus||(n.inst||'piano')===st.focus);if(!ns.length){toast('No hay notas para seleccionar.');return}
@@ -2335,7 +2354,7 @@ function relMul(k){const a=trackSet(k).artic;return a<.5?(.5+a):(1+(a-.5)*2)}
 const ROOMBUF={};function roomImpulse(r){if(!ROOMBUF[r])ROOMBUF[r]=impulse(ROOMS[r][1]);return ROOMBUF[r]}
 const CH={};
 instBus=function(k){if(!CH[k]){const c={in:ac.createGain(),lp:ac.createBiquadFilter(),dry:ac.createGain(),conv:ac.createConvolver(),wet:ac.createGain(),room:null};c.lp.type='lowpass';c.in.connect(c.lp);c.lp.connect(c.dry);c.lp.connect(c.conv);c.conv.connect(c.wet);c.auto=ac.createGain();c.dry.connect(c.auto);c.wet.connect(c.auto);c.auto.connect(master);CH[k]=c;instGains[k]=c.in}
-  const c=CH[k],t=trackSet(k),v=st.iv[k]??t.vol;c.in.gain.value=st.im[k]?0:v*1.25;c.lp.frequency.value=900*Math.pow(18,t.bright);c.dry.gain.value=1-t.reverb*.35;c.wet.gain.value=t.reverb*1.4;if(c.room!==t.room){c.conv.buffer=roomImpulse(t.room);c.room=t.room}return c.in};
+  const c=CH[k],t=trackSet(k),v=st.iv[k]??t.vol;c.in.gain.value=st.im[k]?0:v*1.25;if(!fxBusy(k,'bri'))c.lp.frequency.value=900*Math.pow(18,t.bright);if(!fxBusy(k,'rev')){c.dry.gain.value=1-t.reverb*.35;c.wet.gain.value=t.reverb*1.4}if(c.room!==t.room){c.conv.buffer=roomImpulse(t.room);c.room=t.room}return c.in};
 function sndTarget(){return st.focus&&st.focus!=='piano'&&INST[st.focus]?st.focus:null}
 function articLabel(a){return a<.2?'Staccato':a<.42?'Corto':a<.58?'Normal':a<.8?'Ligado':'Legato'}
 function syncSoundPanel(){const k=sndTarget(),isP=!k;
@@ -2394,6 +2413,28 @@ function healAudio(){if(!ac||micBusy)return;if(needRebuild||ac.state!=='running'
 ['pointerup','touchend'].forEach(ev=>document.addEventListener(ev,healAudio,{capture:true,passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ac&&ac.state!=='running'&&!micBusy)needRebuild=true});
 ['pointerup','touchend','click'].forEach(ev=>document.addEventListener(ev,unlockIOS,{capture:true,passive:true}));
+
+
+/* ================= AUTOMATIZACIÓN DE EFECTOS (reverb, brillo, vibrato) ================= */
+function fxHas(k,p){const M=(st.automFX||{})[p];return !!(M&&M[k]&&M[k].length)}
+function fxBusy(k,p){return !!(st.playing&&fxHas(k,p))||!!(st.autoArm&&st.autoParam===p&&autoKey()===k)}
+function fxTargets(k,p){if(!ac)return [];
+  if(p==='rev'){if(k==='piano')return [{a:wet.gain,m:v=>v*1.4*st.vol},{a:dry.gain,m:v=>(1-v*.35)*st.vol}];if(!INST[k])return [];instBus(k);const c=CH[k];return c?[{a:c.wet.gain,m:v=>v*1.4},{a:c.dry.gain,m:v=>1-v*.35}]:[]}
+  if(p==='bri'){const fr=v=>900*Math.pow(18,v);if(k==='piano')return [{a:toneF.frequency,m:fr}];if(!INST[k])return [];instBus(k);return CH[k]?[{a:CH[k].lp.frequency,m:fr}]:[]}
+  if(p==='vib'){if(!INST[k]||!INST[k].vib)return [];return [{a:vibBus(k).g.gain,m:v=>v}]}
+  return []}
+function fxLive(k,p,v){if(!ac)return;const T=ac.currentTime;fxTargets(k,p).forEach(t=>{try{t.a.cancelScheduledValues(T);t.a.setTargetAtTime(t.m(v),T,.03)}catch(e){}})}
+function scheduleFX(now){if(!ac)return;
+  ['rev','bri','vib'].forEach(p=>{const M=(st.automFX||{})[p]||{};const ks=new Set(Object.keys(M));if(st.autoArm&&st.autoParam===p&&autoKey()!=='_all')ks.add(autoKey());
+    ks.forEach(k=>{const A=autoArr(k,p),live=st.autoArm&&st.autoParam===p&&autoKey()===k;fxTargets(k,p).forEach(t=>{const a=t.a;try{a.cancelScheduledValues(now);
+      if(live||!A.length){a.setValueAtTime(t.m(live?liveV:pDef(k,p)),now);return}
+      a.setValueAtTime(t.m(autoAt(st.t,k,p)),now);let last=st.t;A.forEach(pt=>{if(pt.t>st.t&&pt.t-last>.015){a.linearRampToValueAtTime(t.m(pt.v),now+(pt.t-st.t));last=pt.t}})}catch(e){}})})})}
+function resetFX(){if(!ac)return;const T=ac.currentTime;
+  const ks=new Set(['piano',...Object.keys(CH),...Object.keys(CHV)]);
+  ks.forEach(k=>['rev','bri','vib'].forEach(p=>{if(p==='vib'&&!CHV[k])return;if(p!=='vib'&&k!=='piano'&&!CH[k])return;fxTargets(k,p).forEach(t=>{try{t.a.cancelScheduledValues(T);t.a.setValueAtTime(t.m(pDef(k,p)),T)}catch(e){}})}))}
+const _playFX=play;play=async function(){await _playFX();if(!ac)return;if(st.autoArm&&autoRec)autoRec.p=st.autoParam;scheduleFX(PLAY_AT||ac.currentTime)};
+const _stopFX=stopAll;stopAll=function(){_stopFX();resetFX()};
+const _rbFX=rebuildAudio;rebuildAudio=async function(){for(const k in CHV){try{CHV[k].l.stop()}catch(e){}delete CHV[k]}await _rbFX()};
 
 qSync();
 syncVisual();
