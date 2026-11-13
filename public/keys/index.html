@@ -939,6 +939,51 @@ if(!window.claude&&!/claude/i.test(location.hostname)){
 }
 
 /* ================= GRABADORA CON MICRÓFONO DIRECTO ================= */
+/* ================= SINCRONÍA: retraso del móvil (medido una vez) ================= */
+const BUF=4096;
+function latLoad(){try{return JSON.parse(localStorage.getItem('mk_lat')||'null')||{}}catch(e){return {}}}
+function latSave(o){try{localStorage.setItem('mk_lat',JSON.stringify(o))}catch(e){}}
+function latDefault(){return (ac&&ac.outputLatency||0)+(ac&&ac.baseLatency||0)+.02}
+/* retraso total (oír + grabar), en segundos, que se descuenta de cada toma */
+function getLatency(){const c=latLoad();let R=typeof c.R==='number'?c.R+((ac&&ac.outputLatency||0)-(c.out||0)):latDefault();return Math.max(0,Math.min(.6,R+(c.fine||0)/1000))}
+function latLabel(){const c=latLoad();return `${Math.round(getLatency()*1000)} ms${typeof c.R==='number'?' (medido)':' (estimado)'}`}
+/* tiempo de inicio del bloque de entrada según el reloj de audio */
+function chunkTime(e){const sr=ac.sampleRate;return (typeof e.playbackTime==='number'&&e.playbackTime>0?e.playbackTime:ac.currentTime)-2*BUF/sr}
+/* recorta la toma para que la muestra 0 sea el instante t0, ya descontado el retraso */
+function alignChunks(chunks,t0,R){const sr=ac.sampleRate;if(!chunks.length)return new Float32Array(0);let n=0;chunks.forEach(c=>n+=c.d.length);const x=new Float32Array(n);let o=0;chunks.forEach(c=>{x.set(c.d,o);o+=c.d.length});
+  const start=Math.round((t0+R-chunks[0].ts)*sr);return start>0?x.subarray(Math.min(start,x.length)):(start<0?(()=>{const y=new Float32Array(x.length-start);y.set(x,-start);return y})():x)}
+/* medir: 6 clics por el altavoz, se graban y se mide cuánto tardan en llegar */
+async function measureLatency(out){
+  out.textContent='Quita los auriculares y deja el móvil en silencio unos segundos…';
+  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}})}catch(e){out.textContent='No se pudo usar el micrófono.';return}
+  await ensureAudio();try{await ac.resume()}catch(e){}
+  const src=ac.createMediaStreamSource(stream),sp=ac.createScriptProcessor(BUF,1,1),g=ac.createGain();g.gain.value=0;src.connect(sp);sp.connect(g);g.connect(ac.destination);
+  const chunks=[];sp.onaudioprocess=e=>chunks.push({ts:chunkTime(e),d:new Float32Array(e.inputBuffer.getChannelData(0))});
+  const T=ac.currentTime+.6,clicks=[];for(let k=0;k<6;k++){const c=T+k*.5;clicks.push(c);const o=ac.createOscillator(),og=ac.createGain();o.type='square';o.frequency.value=2000;og.gain.setValueAtTime(0,c);og.gain.linearRampToValueAtTime(.6,c+.001);og.gain.exponentialRampToValueAtTime(.0001,c+.03);o.connect(og);og.connect(ac.destination);o.start(c);o.stop(c+.04)}
+  out.textContent='Escuchando los clics…';
+  await new Promise(r=>setTimeout(r,(T+3.6-ac.currentTime)*1000));
+  try{sp.disconnect();src.disconnect();g.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());
+  const sr=ac.sampleRate,x=alignChunks(chunks,chunks[0].ts,0),t00=chunks[0].ts;
+  const hp=new Float32Array(x.length);for(let i=1;i<x.length;i++)hp[i]=x[i]-.97*x[i-1];
+  const win=Math.round(sr*.002),env=[];for(let i=0;i+win<hp.length;i+=win){let s=0;for(let j=i;j<i+win;j++)s+=hp[j]*hp[j];env.push(Math.sqrt(s/win))}
+  const sorted=[...env].sort((a,b)=>a-b),noise=sorted[Math.floor(sorted.length*.5)]||1e-6,ds=[];
+  clicks.forEach(c=>{const a=Math.floor((c-t00)*sr/win),b=Math.min(env.length-1,a+Math.floor(.45*sr/win));let peak=0;for(let i=Math.max(0,a);i<=b;i++)peak=Math.max(peak,env[i]);if(peak<noise*8)return;const th=noise+(peak-noise)*.3;for(let i=Math.max(0,a);i<=b;i++)if(env[i]>=th){ds.push((i*win)/sr+t00-c);break}});
+  if(ds.length<3){out.textContent='No pude oír los clics. Sube el volumen del móvil, quita los auriculares y vuelve a intentarlo.';return}
+  ds.sort((a,b)=>a-b);const R=ds[ds.length>>1],spread=ds[ds.length-1]-ds[0];
+  const c=latLoad();c.R=R;c.out=ac.outputLatency||0;latSave(c);
+  out.textContent=`Retraso medido: ${Math.round(R*1000)} ms${spread>.03?' (algo irregular: si notas desfase, repite la medición)':''}. Ya se compensa en todas tus grabaciones.`;
+  document.querySelectorAll('.latVal').forEach(el=>el.textContent=latLabel());
+}
+function latBoxHTML(){const c=latLoad();return `<div class="box"><p class="label" style="margin:0">Sincronía con el metrónomo</p>
+  <p class="hint">Tu móvil tarda un poco en sonar y en grabar. Mídelo una vez para que todo quede a tiempo. Retraso actual: <b class="latVal">${latLabel()}</b></p>
+  <button class="ghost" type="button" data-latm style="text-align:center">Medir el retraso (sin auriculares)</button>
+  <div class="slider" style="grid-template-columns:86px 1fr 52px"><label>Ajuste fino</label><input type="range" min="-150" max="150" step="5" value="${c.fine||0}" data-latf aria-label="Ajuste fino del retraso"><output class="latFineVal">${(c.fine||0)>0?'+':''}${c.fine||0} ms</output></div>
+  <p class="hint">Si tus notas quedan <b>atrasadas</b> respecto a las líneas, mueve el ajuste a la derecha; si quedan <b>adelantadas</b>, a la izquierda.</p><p class="saved latMsg"></p></div>`}
+function wireLatBox(root){
+  const m=root.querySelector('[data-latm]');if(m)m.onclick=()=>measureLatency(root.querySelector('.latMsg'));
+  const f=root.querySelector('[data-latf]');if(f)f.oninput=()=>{const c=latLoad();c.fine=+f.value;latSave(c);root.querySelector('.latFineVal').textContent=`${c.fine>0?'+':''}${c.fine} ms`;document.querySelectorAll('.latVal').forEach(el=>el.textContent=latLabel())};
+}
+
 function micUI(box,onDone,opt={}){
   box.innerHTML=`<button class="recbtn" type="button" data-m="go"><span class="dot"></span>${opt.label||'Grabar'}</button>
   <div data-m="live" hidden style="display:flex;flex-direction:column;gap:8px"><canvas class="wave" data-m="lvl"></canvas>
@@ -957,17 +1002,16 @@ function micStart(box,q,onDone,opt){
     const metro=opt.metro&&$('#rMet')&&$('#rMet').checked;const ci=opt.metro?Math.max(countIn||0,2):0;const T=ac.currentTime+.25;const waitS=.25+ci*st.meter*60/st.recBpm;
     if(ci>0)metStart(T,ci,!metro);
     q('go').hidden=true;q('live').hidden=false;
-    const src=ac.createMediaStreamSource(stream),sp=ac.createScriptProcessor(4096,1,1),g=ac.createGain();g.gain.value=0;src.connect(sp);sp.connect(g);g.connect(ac.destination);
+    const src=ac.createMediaStreamSource(stream),sp=ac.createScriptProcessor(BUF,1,1),g=ac.createGain();g.gain.value=0;src.connect(sp);sp.connect(g);g.connect(ac.destination);
     const chunks=[],lv=[],t0=T+ci*st.meter*60/st.recBpm;let stopped=false;let alongSrc=null;const alongX=typeof opt.along==='function'?opt.along():opt.along;if(alongX){const ab=ac.createBuffer(1,alongX.length,22050);ab.getChannelData(0).set(alongX);alongSrc=ac.createBufferSource();alongSrc.buffer=ab;alongSrc.connect(ac.destination);alongSrc.start(t0)}if(opt.onT0)opt.onT0(t0);
     const cv=q('lvl');
     sp.onaudioprocess=e=>{const a=e.inputBuffer.getChannelData(0);let s=0;for(let i=0;i<a.length;i+=4)s+=a[i]*a[i];const db=20*Math.log10(Math.sqrt(s/(a.length/4))+1e-7);lv.push(db);if(lv.length>240)lv.shift();
-      if(ac.currentTime>=t0&&!stopped)chunks.push(new Float32Array(a))};
+      if(!stopped)chunks.push({ts:chunkTime(e),d:new Float32Array(a)})};
     const iv=setInterval(()=>{const el=ac.currentTime-t0;q('time').textContent=el<0?`Prepárate… entra en ${Math.max(1,Math.ceil(-el/(60/st.recBpm)-.001))}`:`● Grabando ${fmt(el)}`;drawWave(cv,lv);if(el>(opt.max||300))finish()},100);
     async function finish(){if(stopped)return;stopped=true;clearInterval(iv);metStop();try{alongSrc&&alongSrc.stop()}catch(e){}if(opt.onStop)try{opt.onStop()}catch(e){}try{sp.disconnect();src.disconnect();g.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());
-      let n=0;chunks.forEach(c=>n+=c.length);if(n<ac.sampleRate*.5){q('live').hidden=true;q('go').hidden=false;q('go').disabled=false;q('go').lastChild.textContent='Grabar';msg.textContent='La grabación fue demasiado corta. Inténtalo otra vez.';return}
+      const R=opt.metro||opt.alignAlways?getLatency():0;const xa=alignChunks(chunks,t0,R);const n=xa.length;if(n<ac.sampleRate*.5){q('live').hidden=true;q('go').hidden=false;q('go').disabled=false;q('go').lastChild.textContent='Grabar';msg.textContent='La grabación fue demasiado corta. Inténtalo otra vez.';return}
       q('time').textContent='Procesando…';
-      const x=new Float32Array(n);let o=0;chunks.forEach(c=>{x.set(c,o);o+=c.length});
-      const SR=22050,buf=ac.createBuffer(1,n,ac.sampleRate);buf.getChannelData(0).set(x);const oc=new OfflineAudioContext(1,Math.ceil(n/ac.sampleRate*SR),SR),s2=oc.createBufferSource();s2.buffer=buf;s2.connect(oc.destination);s2.start();
+      const SR=22050,buf=ac.createBuffer(1,n,ac.sampleRate);buf.getChannelData(0).set(xa);const oc=new OfflineAudioContext(1,Math.ceil(n/ac.sampleRate*SR),SR),s2=oc.createBufferSource();s2.buffer=buf;s2.connect(oc.destination);s2.start();
       const r=await oc.startRendering();q('live').hidden=true;q('go').hidden=false;q('go').disabled=false;q('go').lastChild.textContent='Grabar de nuevo';
       onDone({x:r.getChannelData(0),sr:SR,dur:n/ac.sampleRate,origSr:ac.sampleRate,ch:1})}
     q('stop').onclick=finish;
@@ -1396,13 +1440,14 @@ function recPiece(mode){
   <p class="label" style="margin:0">Mientras grabas</p><div class="chips" id="rDuring"></div>
   <div class="beats" id="rBeats"></div><button class="ghost" type="button" id="rTry" style="text-align:center">Probar metrónomo</button>
   ${cam?'<p class="hint">Con la cámara abierta, el metrónomo de la app no puede sonar: úsalo para elegir el tempo y pon uno aparte.</p>':'<p class="hint">El metrónomo suena y se ve mientras grabas. Usa auriculares con cable para que el clic no entre en la grabación, o elige "Solo visual".</p>'}</div>
+  ${cam?'':latBoxHTML()}
   <p class="label" style="margin:0">Partitura (opcional)</p><label class="recbtn alt" for="pScore">Añadir foto o PDF de la partitura</label><input type="file" id="pScore" accept="image/*,application/pdf" multiple hidden><div class="thumbs" id="pThumbs"></div>
   ${cam?`<label class="recbtn" for="pFile"><span class="dot"></span>Grabar vídeo</label><input type="file" id="pFile" accept="video/*" capture="environment" hidden>
   <label class="recbtn alt" for="pFile2">Elegir un vídeo ya grabado</label><input type="file" id="pFile2" accept="video/*" hidden>`
   :`<div id="pMic"></div><label class="recbtn alt" for="pFile2">O elegir una grabación de audio</label><input type="file" id="pFile2" accept="audio/*,.m4a,.wav,.mp3,.aac,.caf" hidden><input type="file" id="pFile" hidden>`}
   <p class="hint">Recomendado: hasta 2 minutos por toma. Deja 2 segundos de silencio al empezar y al terminar.</p>
   <div id="pOut"></div>`);
-  recMetroUI();
+  recMetroUI();wireLatBox($('#sheetbox'));
   const gw=$('#goWiz');if(gw)gw.onclick=()=>{closeSheet();openWizard()};
   $('#pScore').onchange=e=>{const fs=[...e.target.files];e.target.value='';fs.forEach(f=>{scoreFiles.push(f);if(f.type.startsWith('image/')){const im=document.createElement('img');im.src=URL.createObjectURL(f);im.alt='Partitura';$('#pThumbs').appendChild(im)}else{const s=document.createElement('span');s.className='chip';s.textContent=f.name;$('#pThumbs').appendChild(s)}})};
   const h=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;return hRun(f,null)};
@@ -1786,7 +1831,7 @@ recPiece=function(mode){
   const take={L:null,R:null};
   async function got(hand,A){
     const s=$('#sep'+hand+'s');s.textContent='Convirtiendo a notas…';
-    try{const ns=await convertAudio(A.x,p=>s.textContent='Convirtiendo a notas… '+Math.round(p*100)+'%');ns.forEach(n=>{n[4]=hand});if(hand==='R'&&take.L&&$('#sepAlong').checked){const lat=(ac.outputLatency||0)+(ac.baseLatency||0)+.03;ns.forEach(n=>{n[0]=Math.max(0,n[0]-lat);n[1]=Math.max(n[0]+.05,n[1]-lat)});A={...A,x:A.x.subarray(Math.min(A.x.length-1,Math.round(lat*A.sr)))}}take[hand]={A,ns};s.className='saved ok';s.textContent=`✓ ${ns.length} notas de la mano ${hand==='L'?'izquierda':'derecha'}.`}
+    try{const ns=await convertAudio(A.x,p=>s.textContent='Convirtiendo a notas… '+Math.round(p*100)+'%');ns.forEach(n=>{n[4]=hand});take[hand]={A,ns};s.className='saved ok';s.textContent=`✓ ${ns.length} notas de la mano ${hand==='L'?'izquierda':'derecha'}.`}
     catch(e){s.textContent='No se pudo convertir ('+((e&&e.message)||'error')+').';return}
     if(hand==='L'){$('#sepRbox').style.opacity=1;$('#sepRs').className='saved';$('#sepRs').textContent='Ahora graba la mano derecha.';micUI($('#sepR'),A2=>got('R',A2),{metro:true,max:600,label:'Grabar mano derecha',along:()=>$('#sepAlong').checked&&take.L?take.L.A.x:null})}
     if(take.L&&take.R){const a=take.L.A.x,b=take.R.A.x,n=Math.max(a.length,b.length),x=new Float32Array(n);let pk=0;for(let i=0;i<n;i++){const v=(a[i]||0)+(b[i]||0);x[i]=v;if(Math.abs(v)>pk)pk=Math.abs(v)}if(pk>.99)for(let i=0;i<n;i++)x[i]*=.98/pk;
@@ -2081,19 +2126,19 @@ function newTrackSheet(){
    <div class="toggle"><span>Ajustar al tempo al terminar<small>Coloca cada nota en la línea más cercana</small></span><input type="checkbox" class="sw2" id="ntSnap" checked></div>
    <p class="hint">Empieza en <b>${fmt(tStart)}</b>, donde está la línea del teclado. Hay <b>dos compases de cuenta previa</b> a ${curBpm()} BPM antes de que empiece a grabar: mira los círculos.</p>
    <div class="beats" id="rBeats">${'<i></i>'.repeat(st.meter)}</div><input type="checkbox" id="rMet" checked hidden>
-   <div id="ntMic"></div><label class="recbtn alt" for="ntFile">O elegir una grabación ya hecha</label><input type="file" id="ntFile" accept="audio/*,video/*" hidden><p class="saved" id="ntMsg"></p>`);
+   ${latBoxHTML()}<div id="ntMic"></div><label class="recbtn alt" for="ntFile">O elegir una grabación ya hecha</label><input type="file" id="ntFile" accept="audio/*,video/*" hidden><p class="saved" id="ntMsg"></p>`);
   $('#ntFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;listen=false;tStart=st.t;$('#ntMsg').textContent='Leyendo la grabación…';let A;try{A=await wDecode(f)}catch(err){A=await wLiveAsk(f,$('#ntMsg'));if(!A)return}finishTrack(A)};
   chips($('#ntInst'),Object.entries(INST).map(([k,v])=>[k,v.name]),null,k=>{inst=k;$$('#ntInst .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));previewInst(k)});
   $$('#ntInst .chip').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.k===inst);b.style.boxShadow=`inset 3px 0 0 ${INST[b.dataset.k].color}`});
   $('#ntListen').onchange=e=>listen=e.target.checked;$('#ntSnap').onchange=e=>snapOn=e.target.checked;
-  st.recBpm=curBpm();countIn=2;during='visual';
+  st.recBpm=curBpm();countIn=2;during='visual';wireLatBox($('#sheetbox'));
   micUI($('#ntMic'),A=>finishTrack(A),{metro:true,max:600,label:'Grabar pista',
     onT0:t0=>{capT0=t0;tStart=st.t;if(listen){const ms=Math.max(0,(t0-ac.currentTime)*1000);setTimeout(()=>{play()},ms)}},
     onStop:()=>{if(st.playing)stopAll()}});
   async function finishTrack(A){
     const msg=$('#ntMsg');msg.className='saved';msg.textContent='Convirtiendo a notas…';
     let ns;try{ns=await convertAudio(A.x,p=>msg.textContent='Convirtiendo a notas… '+Math.round(p*100)+'%')}catch(e){msg.textContent='No se pudo convertir ('+((e&&e.message)||'error')+').';return}
-    const lat=(ac.outputLatency||0)+(ac.baseLatency||0)+.03,shift=(listen&&PLAY_AT?(tStart+capT0-PLAY_AT):tStart)-lat;
+    const shift=listen&&PLAY_AT?(tStart+capT0-PLAY_AT):tStart;
     pushUndo();const base=Date.now(),added=[];
     ns.forEach((r,i)=>{const s=r[0]+shift,e=r[1]+shift;if(e<=0)return;
       if(listen&&notes.some(q=>q.p===r[2]&&Math.abs(q.s-s)<.1&&(q.inst||'piano')!==inst))return;
