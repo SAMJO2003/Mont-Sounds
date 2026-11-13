@@ -1434,8 +1434,9 @@ async function convertPending(p){
 
 /* grabar una pieza */
 let PIECE_HRUN=null;
+let SHEET_PID=null,SHEET_OLD=null;
 function recPiece(mode){
-  const cam=mode==='cam';let scoreFiles=[];
+  SHEET_PID=null;SHEET_OLD=null;const cam=mode==='cam';let scoreFiles=[];
   sheet(`<h3>${cam?'Grabar con manos + sonido':'Grabar una pieza'}</h3>
   ${ACTIVE?`<p class="saved ok">✓ Piano: ${esc(ACTIVE.nombre)} (calibrado)</p>`:`<div class="verdict warn">Todavía no has calibrado tu piano. La app entenderá mejor tus piezas si antes haces "Conoce tu piano" (unos 6 minutos, una sola vez).</div><button class="ghost" type="button" id="goWiz" style="text-align:center">Calibrar mi piano primero</button>`}
   <label class="label" for="pTitle">Título de la pieza</label><input class="inp" id="pTitle" placeholder="Ej.: Idea en La menor">
@@ -1472,10 +1473,10 @@ function recPiece(mode){
       const a=await W.assets.upload(new Blob([JSON.stringify({formato:'wav-base64',sampleRate:A.sr,canales:1,original:{nombre:f.name,tipo:f.type,bytes:f.size,sampleRate:A.origSr,canales:A.ch},wav:wav64(A.x,A.sr)})],{type:'text/plain'}),{type:'text/plain'});
       const frames=[];if(cam){msg.textContent='Guardando fotogramas…';try{for(const b of await videoFrames(f))frames.push((await W.assets.upload(b,{type:'image/jpeg'})).id)}catch(e2){}}
       const scores=[];for(const sf of scoreFiles){const t=sf.type==='application/pdf'?'application/pdf':(['image/jpeg','image/png','image/webp','image/gif'].includes(sf.type)?sf.type:'image/jpeg');try{scores.push((await W.assets.upload(sf,{type:t})).id)}catch(e3){}}
-      const id='k'+Date.now().toString(36);
+      const replacing=!!SHEET_PID;const id=SHEET_PID||(SHEET_PID='k'+Date.now().toString(36));if(SHEET_OLD&&W.assets&&W.assets.delete){for(const aid of SHEET_OLD){try{await W.assets.delete(aid)}catch(e){}}}SHEET_OLD=[a.id,...frames,...scores];
       const docData={titulo,piano:ACTIVE?ACTIVE.id:null,pianoNombre:ACTIVE?ACTIVE.nombre:null,modo:cam?'manos':'escucha',duracion:+A.dur.toFixed(1),metricas:r.m,audio:a.id,fotogramas:frames,partitura:scores,bpm:$('#rMet').checked?st.recBpm:null,compas:st.meter,estado:notas?'lista':'pendiente',notas:notas||null,motor:notas?'basic-pitch-web':null,segundos_conversion:notas?+secs:null,archivo:{nombre:f.name,tipo:f.type,bytes:f.size},creado:new Date().toISOString()};
       await W.db.doc('piezas/'+id).set(docData);
-      msg.className='saved ok';msg.textContent=notas?(Pre?`✓ Lista: ${notas.length} notas (mano izquierda + mano derecha).`:`✓ Lista: ${notas.length} notas, convertidas en tu móvil en ${secs} s.`):'✓ Guardada en Mis piezas. Podrás convertirla desde allí.';
+      msg.className='saved ok';msg.textContent=(replacing?'Toma anterior sustituida. ':'')+(notas?(Pre?`✓ Lista: ${notas.length} notas (mano izquierda + mano derecha).`:`✓ Lista: ${notas.length} notas, convertidas en tu móvil en ${secs} s.`):'✓ Guardada en Mis piezas. Podrás convertirla desde allí.');
       const btn=document.createElement('button');btn.className='cta';btn.type='button';btn.textContent=notas?'Abrir en el editor':'Ver Mis piezas';btn.onclick=()=>{closeSheet();if(notas)openPiece({id,...docData});else go('home')};out.appendChild(btn);
     }catch(err){const c=err&&err.code;msg.textContent=c==='too_large'?'La grabación es demasiado grande (máx. 20 MB). Graba una toma más corta.':'No se pudo guardar ('+(c||'error')+'). Puedes intentarlo otra vez.'}
   };
@@ -1945,8 +1946,9 @@ function clipBar(){const b=$('#clipBox');if(!b)return;b.hidden=!CLIP;if(CLIP)$('
 let dirty=false,saving=false,saveTimer=null,lastSig='',autosave=true;
 function noteSig(){let h=notes.length;for(const n of notes)h=(h*31+Math.round(n.s*100)*7+Math.round(n.e*100)*3+n.p+(n.color?n.color.length:0)+(n.marks?17:0))%1e9;return h+'|'+(st.gridFixed?st.gridFixed.bpm+':'+st.gridFixed.t0.toFixed(3):'')+'|'+st.meter}
 function getSettings(){return {hide:st.hide,im:st.im,tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
+function defaultSettings(){return {tpl:'mont',R:TPL.mont.R,L:TPL.mont.L,bg:'negro',fx:['brillo'],names:false,gridLines:true,piano:origBuf?'orig':'cola',pedal:.45,reverb:.3,bright:.55,vol:.8,room:'sala',hide:{},im:{},look:2.4}}
 function applySettings(a){if(!a)return;
-  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);if(a.hide)st.hide=a.hide;if(a.im)st.im=a.im;if(typeof trackBar==='function')trackBar();if(a.look)LOOK=a.look;
+  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);st.hide=a.hide||{};st.im=a.im||{};if(typeof INST!=='undefined'&&ac)Object.keys(INST).forEach(k=>{if(instGains[k])instBus(k)});if(typeof trackBar==='function')trackBar();if(a.look)LOOK=a.look;
   [['pedal',st.pedal],['reverb',st.reverb],['bright',st.bright],['vol',st.vol]].forEach(([id,v])=>{const el=$('#'+id);if(el){el.value=Math.round(v*100);$('#o-'+id).textContent=el.value}});
   $$('#rooms .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.room));if(ac&&conv)conv.buffer=impulse(ROOMS[st.room][1]);
   const gt=$('#gridT');if(gt)gt.checked=st.gridLines!==false;buildPianos();syncPedal();applyMix();syncVisual();stats();
@@ -2024,8 +2026,8 @@ async function importProject(file){
 /* marca cambios y autoguarda */
 const _stats7=stats;stats=function(){_stats7();const sg=noteSig();if(lastSig&&sg!==lastSig&&CURRENT){dirty=true;setSaveState(CURRENT.id?'Cambios sin guardar':'Pieza de ejemplo: toca Guardar para crear tu proyecto');if(autosave&&CURRENT.id){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}}if(!lastSig)lastSig=sg};
 ['#pianos','#tpls','#fx','#bgs','#rooms','#swR','#swL'].forEach(sel=>{const el=$(sel);if(el)el.addEventListener('click',()=>setTimeout(()=>{if(CURRENT&&CURRENT.id&&autosave){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}},0))});
-const _openPiece=openPiece;openPiece=async function(p){await _openPiece(p);st.autom=Array.isArray(p.autom)?p.autom:[];if(typeof autoSync==='function')autoSync();applySettings(p.ajustes);lastSig=noteSig();dirty=false;setSaveState(p.id?'Guardado ✓':'Sin guardar',!!p.id)};
-const _openExample=openExample;openExample=async function(){await _openExample();st.autom=[];if(typeof autoSync==='function')autoSync();lastSig=noteSig();setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto')};
+const _openPiece=openPiece;openPiece=async function(p){await _openPiece(p);st.autom=Array.isArray(p.autom)?p.autom:[];if(typeof autoSync==='function')autoSync();st.focus=null;clearTimeout(saveTimer);applySettings({...defaultSettings(),...(p.ajustes||{})});clearTimeout(saveTimer);lastSig=noteSig();dirty=false;setSaveState(p.id?'Guardado ✓':'Sin guardar',!!p.id)};
+const _openExample=openExample;openExample=async function(){await _openExample();st.autom=[];if(typeof autoSync==='function')autoSync();clearTimeout(saveTimer);st.focus=null;applySettings(defaultSettings());clearTimeout(saveTimer);lastSig=noteSig();setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto')};
 $('#exPiece').onclick=openExample;
 window.addEventListener('beforeunload',e=>{if(dirty&&CURRENT&&CURRENT.id){saveProject(true)}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty&&CURRENT&&CURRENT.id)saveProject(true)});
