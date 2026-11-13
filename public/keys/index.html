@@ -209,6 +209,15 @@ div.li{cursor:default}
 .thumbs{display:flex;gap:6px;flex-wrap:wrap}
 .thumbs img{width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
 .savebar{display:flex;gap:8px;align-items:center}
+.transport{gap:8px}
+.transport .play{width:40px;height:40px}
+.transport .time{min-width:0;font-size:11px;white-space:nowrap}
+#scrub{min-width:60px}
+.trk{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--line);border-radius:22px;padding:2px 4px 2px 2px;flex:none;background:var(--panel)}
+.trk .chip{border:0;background:none}
+.trk .chip[aria-pressed="true"]{background:color-mix(in srgb,var(--accent) 18%,var(--panel))}
+.trk-ic{width:30px;height:30px;border-radius:50%;border:0;background:none;color:var(--fg);display:grid;place-items:center;cursor:pointer}
+.trk-ic[aria-pressed="false"]{color:var(--danger)}
 #trackBar{flex:none;min-height:38px;scrollbar-width:none}
 #trackBar::-webkit-scrollbar{display:none}
 #trackBar .chip{flex:none;white-space:nowrap}
@@ -484,11 +493,11 @@ function render(g,W,H,o){
   if(o.gridLines)drawGridLines(g,W,hit,pps,t);
   if(o.lane!=null&&L.map[o.lane]){const k=L.map[o.lane],d=devicePixelRatio||1;g.fillStyle='rgba(255,255,255,.07)';g.fillRect(k.x,0,k.w,hit);g.fillStyle='rgba(95,208,164,.35)';g.fillRect(k.x,0,1*d,hit);g.fillRect(k.x+k.w-1*d,0,1*d,hit);
     const nm2=NAMES[o.lane%12]+(Math.floor(o.lane/12)-1);g.font=`600 ${11*d}px Inter,sans-serif`;const tw=g.measureText(nm2).width+10*d;let tx=Math.min(W-tw-2*d,Math.max(2*d,k.x+k.w/2-tw/2));g.fillStyle='rgba(10,12,17,.85)';g.fillRect(tx,hit-20*d,tw,16*d);g.fillStyle='#5fd0a4';g.textAlign='left';g.fillText(nm2,tx+5*d,hit-8*d)}
-  for(const n of notes){if(t>=n.s&&t<n.e){active[n.p]=n;}}
+  for(const n of notes){if((st.hide&&st.hide[n.inst||'piano']))continue;if(t>=n.s&&t<n.e){active[n.p]=n;}}
   if(cfg.fx.has('haz')){for(const p in active){const k=L.map[p];if(!k)continue;const gr=g.createLinearGradient(0,hit,0,hit-H*.7);gr.addColorStop(0,hexA(col(active[p].h),.32));gr.addColorStop(1,hexA(col(active[p].h),0));g.fillStyle=gr;g.fillRect(k.x+k.w*.1,0,k.w*.8,hit)}}
   // notes
   for(const n of notes){
-    g.globalAlpha=1;const k=L.map[n.p]; if(!k)continue;
+    g.globalAlpha=1;if((st.hide&&st.hide[n.inst||'piano']))continue;const k=L.map[n.p]; if(!k)continue;
     const yb=hit-(n.s-t)*pps, yt=hit-(n.e-t)*pps; if(yb<0||yt>hit)continue;
     const x=k.x+k.w*.12, w=k.w*.76, y0=Math.max(yt,-10), y1=Math.min(yb,hit);
     if(y1-y0<1)continue;
@@ -587,8 +596,8 @@ async function play(){
   await ensureAudio(); if(ac.state==='suspended')await ac.resume();
   stopNodes(); applyMix();
   const now=ac.currentTime+.06;
-  if(st.piano==='orig'){if(origBuf){const s=ac.createBufferSource();s.buffer=origBuf;s.connect(toneF);s.start(now,Math.min(st.t,origBuf.duration-.01));live.push(s)}}
-  ;for(const n of (typeof playList==='function'?playList():notes)){if(n.e<=st.t)continue;const w=now+Math.max(0,n.s-st.t);if(n.inst&&n.inst!=='piano'){if(typeof instVoice==='function')instVoice(n,w)}else if(st.piano!=='orig')voice(n,w)}
+  if(st.piano==='orig'){if(origBuf&&!(st.im&&st.im.piano)){const s=ac.createBufferSource();s.buffer=origBuf;s.connect(toneF);s.start(now,Math.min(st.t,origBuf.duration-.01));live.push(s)}}
+  ;for(const n of (typeof playList==='function'?playList():notes)){if(n.e<=st.t)continue;const w=now+Math.max(0,n.s-st.t);if(n.inst&&n.inst!=='piano'){if(typeof instVoice==='function')instVoice(n,w)}else if(st.piano!=='orig'&&!(st.im&&st.im.piano))voice(n,w)}
   t0=st.t;wall0=performance.now()+60;st.playing=true;setPlayIcon();if(typeof PLAY_AT!=='undefined')PLAY_AT=now;
 }
 function stopNodes(){for(const n of live){try{n.stop?n.stop():n.disconnect()}catch(e){}}live=[]}
@@ -698,7 +707,7 @@ const snap=()=>JSON.stringify(notes);
 function pushUndo(){undo.push(snap());if(undo.length>40)undo.shift();$('#tUndo').disabled=false}
 function stats(){$('#nCount').textContent=notes.length;$('#nDoubt').textContent=notes.filter(n=>n.doubt).length;const n=notes.find(x=>x.id===sel);$('#selInfo').textContent=n?`${NAMES[n.p%12]}${Math.floor(n.p/12)-1} · ${n.s.toFixed(2)} s`:'Ninguna seleccionada';$('#tDel').disabled=!n}
 function toCanvas(e){const r=stage.getBoundingClientRect(),d=stage.width/r.width;return {x:(e.clientX-r.left)*d,y:(e.clientY-r.top)*d}}
-function hitNote(x,y){if(!geo)return null;for(let i=notes.length-1;i>=0;i--){const n=notes[i],k=geo.L.map[n.p];if(!k)continue;if(st.focus&&(n.inst||'piano')!==st.focus)continue;const yb=geo.hit-(n.s-st.t)*geo.pps,yt=geo.hit-(n.e-st.t)*geo.pps;if(x>=k.x-4&&x<=k.x+k.w+4&&y>=yt-6&&y<=yb+6)return n}return null}
+function hitNote(x,y){if(!geo)return null;for(let i=notes.length-1;i>=0;i--){const n=notes[i],k=geo.L.map[n.p];if(!k)continue;if(st.focus&&(n.inst||'piano')!==st.focus)continue;if((st.hide&&st.hide[n.inst||'piano']))continue;const yb=geo.hit-(n.s-st.t)*geo.pps,yt=geo.hit-(n.e-st.t)*geo.pps;if(x>=k.x-4&&x<=k.x+k.w+4&&y>=yt-6&&y<=yb+6)return n}return null}
 stage.addEventListener('pointerdown',e=>{
   if(st.tab!=='edit'){$('#playBtn').click();return}
   const {x,y}=toCanvas(e);if(!geo||y>geo.hit)return;
@@ -1715,7 +1724,7 @@ VS.addEventListener('pointermove',e=>{
 VS.addEventListener('pointerup',e=>{
   if(st.tab!=='edit'||(!rect&&!drag2))return;
   if(rect){e.stopImmediatePropagation();const x0=Math.min(rect.x0,rect.x1),x1=Math.max(rect.x0,rect.x1),y0=Math.min(rect.y0,rect.y1),y1=Math.max(rect.y0,rect.y1);
-    notes.forEach(n=>{const k=geo.L.map[n.p];if(!k)return;if(st.focus&&(n.inst||'piano')!==st.focus)return;const yb=geo.hit-(n.s-st.t)*geo.pps,yt=geo.hit-(n.e-st.t)*geo.pps;if(k.x+k.w>x0&&k.x<x1&&yb>y0&&yt<y1)selSet.add(n.id)});rect=null;stats();groupPanel();return}
+    notes.forEach(n=>{const k=geo.L.map[n.p];if(!k)return;if(st.focus&&(n.inst||'piano')!==st.focus)return;if((st.hide&&st.hide[n.inst||'piano']))return;const yb=geo.hit-(n.s-st.t)*geo.pps,yt=geo.hit-(n.e-st.t)*geo.pps;if(k.x+k.w>x0&&k.x<x1&&yb>y0&&yt<y1)selSet.add(n.id)});rect=null;stats();groupPanel();return}
   if(!drag2)return;e.stopImmediatePropagation();const n=drag2.n;
   if(!drag2.moved){undo.pop();if(st.multi&&!n._justAdded){selSet.delete(n.id);sel=null}}
   delete n._justAdded;$('#tUndo').disabled=!undo.length;drag2=null;stats();groupPanel();restartIfPlaying()},true);
@@ -1935,9 +1944,9 @@ function clipBar(){const b=$('#clipBox');if(!b)return;b.hidden=!CLIP;if(CLIP)$('
 /* ================= PROYECTOS: guardar, autoguardado, copia, copia de seguridad, importar ================= */
 let dirty=false,saving=false,saveTimer=null,lastSig='',autosave=true;
 function noteSig(){let h=notes.length;for(const n of notes)h=(h*31+Math.round(n.s*100)*7+Math.round(n.e*100)*3+n.p+(n.color?n.color.length:0)+(n.marks?17:0))%1e9;return h+'|'+(st.gridFixed?st.gridFixed.bpm+':'+st.gridFixed.t0.toFixed(3):'')+'|'+st.meter}
-function getSettings(){return {tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
+function getSettings(){return {hide:st.hide,im:st.im,tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
 function applySettings(a){if(!a)return;
-  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);if(a.look)LOOK=a.look;
+  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);if(a.hide)st.hide=a.hide;if(a.im)st.im=a.im;if(typeof trackBar==='function')trackBar();if(a.look)LOOK=a.look;
   [['pedal',st.pedal],['reverb',st.reverb],['bright',st.bright],['vol',st.vol]].forEach(([id,v])=>{const el=$('#'+id);if(el){el.value=Math.round(v*100);$('#o-'+id).textContent=el.value}});
   $$('#rooms .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.room));if(ac&&conv)conv.buffer=impulse(ROOMS[st.room][1]);
   const gt=$('#gridT');if(gt)gt.checked=st.gridLines!==false;buildPianos();syncPedal();applyMix();syncVisual();stats();
@@ -2105,7 +2114,7 @@ function mixUI(){const el=$('#mixList');if(!el)return;const ks=[...new Set(notes
 /* ================= PISTAS: enfoque por instrumento y grabación de pistas nuevas ================= */
 st.focus=null;
 function trackName(k){return k==='piano'?'Piano':(INST[k]?INST[k].name:k)}
-function trackBar(){const el=$('#trackBar');if(!el)return;const ks=[...new Set(notes.map(n=>n.inst||'piano'))];
+function trackBar_old(){const el=$('#trackBar');if(!el)return;const ks=[...new Set(notes.map(n=>n.inst||'piano'))];
   const cur=st.focus&&!ks.includes(st.focus)?null:st.focus;st.focus=cur;
   el.innerHTML=`<button class="chip" type="button" data-tr="" aria-pressed="${!cur}">Todas</button>`+ks.map(k=>`<button class="chip" type="button" data-tr="${k}" aria-pressed="${cur===k}" style="box-shadow:inset 3px 0 0 ${k==='piano'?'var(--silver)':INST[k].color}">${trackName(k)}</button>`).join('')+`<button class="chip" type="button" id="trNew" style="border-style:dashed">+ Nueva pista</button>`;
   el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{st.focus=b.dataset.tr||null;selSet.clear();sel=null;trackBar();stats();groupPanel();if(st.focus)toast(`Editando solo: ${trackName(st.focus)}. Las demás pistas se ven tenues.`)});
@@ -2117,9 +2126,9 @@ const _statsT=stats;let lastTrackKey='';stats=function(){_statsT();const key=[..
 const _mixUI=mixUI;mixUI=function(){_mixUI();const el=$('#mixList');if(!el)return;el.querySelectorAll('[data-im]').forEach(b=>{const k=b.dataset.im,d=document.createElement('button');d.className='chip';d.type='button';d.textContent='Borrar';d.style.padding='4px 8px';d.onclick=()=>{sheet(`<h3>¿Borrar la pista de ${trackName(k)}?</h3><p>Se quitan todas sus notas. Puedes deshacerlo con Deshacer.</p><button class="cta" type="button" id="trDel" style="background:var(--danger);color:#fff">Borrar pista</button>`);$('#trDel').onclick=()=>{pushUndo();notes=notes.filter(n=>n.inst!==k);closeSheet();stats();mixUI();restartIfPlaying();toast('Pista borrada.')}};b.parentNode.appendChild(d);b.parentNode.style.gridTemplateColumns='92px 1fr 44px 58px'})};
 /* grabar una pista nueva escuchando la pieza */
 let PLAY_AT=0;
-function newTrackSheet(){
+function newTrackSheet(pre){
   if(st.playing)stopAll();
-  let inst='cello',listen=true,snapOn=true,capT0=0,tStart=st.t;
+  let inst=(typeof pre==='string'&&pre)?pre:'cello',listen=true,snapOn=true,capT0=0,tStart=st.t;
   sheet(`<h3>Grabar otra pista</h3><p>Toca en tu piano la parte del nuevo instrumento mientras escuchas lo que ya tienes. La app la convierte y la suena con el instrumento elegido.</p>
    <p class="label" style="margin:0">Instrumento</p><div class="chips" id="ntInst"></div>
    <div class="toggle"><span>Escuchar la pieza mientras grabo<small>Usa <b>auriculares con cable</b>: si suena por el altavoz, el micrófono también la graba</small></span><input type="checkbox" class="sw2" id="ntListen" checked></div>
@@ -2128,8 +2137,8 @@ function newTrackSheet(){
    <div class="beats" id="rBeats">${'<i></i>'.repeat(st.meter)}</div><input type="checkbox" id="rMet" checked hidden>
    ${latBoxHTML()}<div id="ntMic"></div><label class="recbtn alt" for="ntFile">O elegir una grabación ya hecha</label><input type="file" id="ntFile" accept="audio/*,video/*" hidden><p class="saved" id="ntMsg"></p>`);
   $('#ntFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;listen=false;tStart=st.t;$('#ntMsg').textContent='Leyendo la grabación…';let A;try{A=await wDecode(f)}catch(err){A=await wLiveAsk(f,$('#ntMsg'));if(!A)return}finishTrack(A)};
-  chips($('#ntInst'),Object.entries(INST).map(([k,v])=>[k,v.name]),null,k=>{inst=k;$$('#ntInst .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));previewInst(k)});
-  $$('#ntInst .chip').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.k===inst);b.style.boxShadow=`inset 3px 0 0 ${INST[b.dataset.k].color}`});
+  chips($('#ntInst'),[['piano','Piano'],...Object.entries(INST).map(([k,v])=>[k,v.name])],null,k=>{inst=k;$$('#ntInst .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));previewInst(k)});
+  $$('#ntInst .chip').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.k===inst);b.style.boxShadow=`inset 3px 0 0 ${INST[b.dataset.k]?INST[b.dataset.k].color:'#dfe8f5'}`});
   $('#ntListen').onchange=e=>listen=e.target.checked;$('#ntSnap').onchange=e=>snapOn=e.target.checked;
   st.recBpm=curBpm();countIn=2;during='visual';wireLatBox($('#sheetbox'));
   micUI($('#ntMic'),A=>finishTrack(A),{metro:true,max:600,label:'Grabar pista',
@@ -2142,13 +2151,13 @@ function newTrackSheet(){
     pushUndo();const base=Date.now(),added=[];
     ns.forEach((r,i)=>{const s=r[0]+shift,e=r[1]+shift;if(e<=0)return;
       if(listen&&notes.some(q=>q.p===r[2]&&Math.abs(q.s-s)<.1&&(q.inst||'piano')!==inst))return;
-      const n={id:base+i,s:Math.max(0,s),e:Math.max(s+.06,e),p:r[2],v:r[3],h:r[4],doubt:!!r[5],marks:null,color:INST[inst].color,inst};notes.push(n);added.push(n)});
+      const n={id:base+i,s:Math.max(0,s),e:Math.max(s+.06,e),p:r[2],v:r[3],h:r[4],doubt:!!r[5],marks:null,color:inst==='piano'?null:INST[inst].color,inst:inst==='piano'?null:inst};notes.push(n);added.push(n)});
     selSet.clear();added.forEach(n=>selSet.add(n.id));
     DUR=Math.max(DUR,...added.map(n=>n.e+1));
     if(snapOn&&added.length&&GRID){const f=st.qdiv||.5;added.forEach(n=>{const dur=beatPos(n.e)-beatPos(n.s),s=snapT(n.s,f),db=Math.max(f,Math.round(dur/f)*f);n.s=Math.max(0,s);n.e=beatTime(beatPos(s)+db)-.02;n.doubt=false})}
     st.focus=inst;st.multi=true;$('#tMulti').setAttribute('aria-pressed','true');st.t=Math.max(0,tStart-.5);lastT=st.t;
     stats();groupPanel();mixUI();closeSheet();
-    toast(added.length?`Pista de ${INST[inst].name}: ${added.length} notas. Quedan seleccionadas por si quieres ajustarlas.`:'No se detectaron notas nuevas. Prueba a tocar más fuerte o más cerca del móvil.');
+    toast(added.length?`Pista de ${trackName(inst)}: ${added.length} notas. Quedan seleccionadas por si quieres ajustarlas.`:'No se detectaron notas nuevas. Prueba a tocar más fuerte o más cerca del móvil.');
   }
 }
 /* ================= DINÁMICA EN VIVO (automatización de volumen) ================= */
@@ -2210,6 +2219,27 @@ function selectAll(){const ns=notes.filter(n=>!st.focus||(n.inst||'piano')===st.
   $('#selAll').onclick=selectAll;$('#selNone').onclick=()=>{selSet.clear();sel=null;stats();groupPanel()};
   const gp=$('#groupBox'),b=document.createElement('button');b.className='chip';b.type='button';b.textContent='Seleccionar todo';b.onclick=selectAll;b.style.alignSelf='flex-start';gp.insertBefore(b,gp.children[1]);
 })();
+
+
+/* ================= PISTAS v2: ver/ocultar, silenciar y grabar desde el Synthesia ================= */
+st.hide=st.hide||{};
+var IC_EYE='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+var IC_EYEOFF='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 6c6 0 10 6 10 6a17 17 0 0 1-3.2 3.8M6.3 7.6A17 17 0 0 0 2 12s4 7 10 7a9.7 9.7 0 0 0 4.4-1"/></svg>';
+var IC_SPK='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" stroke-linecap="round"/></svg>';
+var IC_MUTE='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6" stroke-linecap="round"/></svg>';
+function trackBar(){const el=$('#trackBar');if(!el||!IC_EYE)return;st.hide=st.hide||{};const ks=[...new Set(notes.map(n=>n.inst||'piano'))];
+  const cur=st.focus&&!ks.includes(st.focus)?null:st.focus;st.focus=cur;
+  const col=k=>k==='piano'?'var(--silver)':INST[k].color;
+  el.innerHTML=`<button class="chip" type="button" data-tr="" aria-pressed="${!cur}">Todas</button>`+ks.map(k=>`<span class="trk" style="box-shadow:inset 3px 0 0 ${col(k)}"><button class="chip" type="button" data-tr="${k}" aria-pressed="${cur===k}">${trackName(k)}</button><button class="trk-ic" type="button" data-vis="${k}" aria-label="${st.hide[k]?'Mostrar':'Ocultar'} ${trackName(k)}" aria-pressed="${!st.hide[k]}">${st.hide[k]?IC_EYEOFF:IC_EYE}</button><button class="trk-ic" type="button" data-mute="${k}" aria-label="${st.im[k]?'Activar sonido de':'Silenciar'} ${trackName(k)}" aria-pressed="${!st.im[k]}">${st.im[k]?IC_MUTE:IC_SPK}</button></span>`).join('')+`<button class="chip" type="button" id="trNew" style="border-style:dashed">+ Nueva pista</button>`;
+  el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{st.focus=b.dataset.tr||null;selSet.clear();sel=null;trackBar();stats();groupPanel();if(st.focus)toast(`Editando solo: ${trackName(st.focus)}. Las demás pistas se ven tenues.`)});
+  el.querySelectorAll('[data-vis]').forEach(b=>b.onclick=()=>{const k=b.dataset.vis;st.hide[k]=!st.hide[k];if(st.hide[k]){notes.forEach(n=>{if((n.inst||'piano')===k)selSet.delete(n.id)})}trackBar();stats();groupPanel();toast(st.hide[k]?`${trackName(k)} oculto. Sigue sonando salvo que lo silencies.`:`${trackName(k)} visible.`)});
+  el.querySelectorAll('[data-mute]').forEach(b=>b.onclick=()=>{const k=b.dataset.mute;st.im[k]=!st.im[k];if(ac&&INST[k])instBus(k);trackBar();if(typeof mixUI==='function')mixUI();restartIfPlaying();toast(st.im[k]?`${trackName(k)} silenciado.`:`${trackName(k)} suena.`)});
+  $('#trNew').onclick=()=>newTrackSheet(st.focus||'cello');
+}
+trackBar();
+/* botón Grabar junto al Play */
+(function(){const b=document.createElement('button');b.className='play';b.type='button';b.id='recBtn';b.setAttribute('aria-label','Grabar una toma');b.style.cssText='background:var(--danger);color:#fff';b.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg>';
+  const pb=$('#playBtn');pb.parentNode.insertBefore(b,pb.nextSibling);b.onclick=()=>newTrackSheet(st.focus||'piano')})();
 
 qSync();
 syncVisual();
