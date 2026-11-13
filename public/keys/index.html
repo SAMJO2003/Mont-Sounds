@@ -501,7 +501,7 @@ function render(g,W,H,o){
     const yb=hit-(n.s-t)*pps, yt=hit-(n.e-t)*pps; if(yb<0||yt>hit)continue;
     const x=k.x+k.w*.12, w=k.w*.76, y0=Math.max(yt,-10), y1=Math.min(yb,hit);
     if(y1-y0<1)continue;
-    const c=n.color||col(n.h);if(o.focus&&((n.inst||'piano')!==o.focus))g.globalAlpha=.18;
+    const c=n.color||col(n.h);if(o.focus&&((n.inst||'piano')!==o.focus))g.globalAlpha=.12;
     if(cfg.fx.has('brillo')){g.shadowColor=hexA(c,.8);g.shadowBlur=W/40}
     const gr=g.createLinearGradient(x,0,x+w,0);gr.addColorStop(0,mix(c,'#ffffff',.35));gr.addColorStop(1,c);
     g.fillStyle=gr;rr(g,x,y0,w,y1-y0,w*.35);g.fill();g.shadowBlur=0;
@@ -721,7 +721,7 @@ stage.addEventListener('pointerup',()=>{if(drag&&!drag.moved)undo.pop();if(!undo
 $('#tAdd').onclick=()=>{addMode=!addMode;$('#tAdd').setAttribute('aria-pressed',addMode)};
 $('#tDel').onclick=()=>{if(sel==null)return;pushUndo();notes=notes.filter(n=>n.id!==sel);sel=null;stats()};
 $('#tUndo').onclick=()=>{const s=undo.pop();if(s){notes=JSON.parse(s);sel=null;stats()}$('#tUndo').disabled=!undo.length};
-$('#tNext').onclick=()=>{const d=notes.filter(n=>n.doubt).sort((a,b)=>a.s-b.s);if(!d.length){toast('No quedan notas dudosas.');return}const n=d.find(x=>x.s>st.t+.05)||d[0];st.t=Math.max(0,n.s-.4);lastT=st.t;sel=n.id;stats()};
+$('#tNext').onclick=()=>{const d=notes.filter(n=>n.doubt&&(!st.focus||(n.inst||'piano')===st.focus)&&!(st.hide&&st.hide[n.inst||'piano'])).sort((a,b)=>a.s-b.s);if(!d.length){toast('No quedan notas dudosas.');return}const n=d.find(x=>x.s>st.t+.05)||d[0];st.t=Math.max(0,n.s-.4);lastT=st.t;sel=n.id;stats()};
 stats();
 
 /* ---------- export ---------- */
@@ -778,7 +778,7 @@ function buildItems(){
   const per=st.meter*st.sub, res={R:[],L:[]};let maxSlot=0;
   for(const hand of ['R','L']){
     const evs=[];
-    for(const o of ana.on){const ids=o.ids.filter(id=>{const n=notes.find(x=>x.id===id);return n&&n.h===hand&&(!n.inst||st.scoreInst)});if(!ids.length)continue;
+    for(const o of ana.on){const ids=o.ids.filter(id=>{const n=notes.find(x=>x.id===id);return n&&n.h===hand&&(st.focus?((n.inst||'piano')===st.focus):(!n.inst||st.scoreInst))});if(!ids.length)continue;
       const ns=ids.map(id=>notes.find(x=>x.id===id));const len=Math.max(1,Math.round(Math.max(...ns.map(n=>n.e-n.s))/(o.g||ana.g)));
       evs.push({slot:o.slot,ps:[...new Set(ns.map(n=>n.p))].sort((a,b)=>a-b),ids,len,hand})}
     const items=res[hand];let cur=0;
@@ -1602,7 +1602,7 @@ wrap.addEventListener('pointerdown',e=>{
   const {x,y}=toCanvas(e);if(!geo||y>geo.hit)return;
   let n=hitNote(x,y),mode='move';
   if(n){const yt=geo.hit-(n.e-st.t)*geo.pps;if(Math.abs(y-yt)<12*(devicePixelRatio||1))mode='resize'}
-  if(!n&&addMode){pushUndo();const p=keyAt(x,geo.L);let s=st.t+(geo.hit-y)/geo.pps;if(st.snap)s=snapT(s,st.div);n={id:Date.now(),s:Math.max(0,s),e:0,p,v:72,h:p>=60?'R':'L',doubt:false};setDur(n,st.div==='bar'?1:st.div);notes.push(n)}
+  if(!n&&addMode){pushUndo();const p=keyAt(x,geo.L);let s=st.t+(geo.hit-y)/geo.pps;if(st.snap)s=snapT(s,st.div);n={id:Date.now(),s:Math.max(0,s),e:0,p,v:72,h:p>=60?'R':'L',doubt:false,inst:(st.focus&&st.focus!=='piano'?st.focus:null),color:(st.focus&&typeof INST!=='undefined'&&INST[st.focus]?INST[st.focus].color:null)};setDur(n,st.div==='bar'?1:st.div);notes.push(n)}
   sel=n?n.id:null;stats();
   if(n){pushUndo();drag2={n,mode,x0:x,y0:y,s0:n.s,e0:n.e,moved:false};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})()}
 },true);
@@ -1706,7 +1706,7 @@ VS.addEventListener('pointerdown',e=>{
     if(!n){rect={x0:x,y0:y,x1:x,y1:y};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})();return}
     if(!selSet.has(n.id)){selSet.add(n.id);n._justAdded=true}
   }else{
-    if(!n&&addMode){pushUndo();const p=keyAt(x,geo.L);let s=st.t+(geo.hit-y)/geo.pps;if(st.snap)s=snapT(s,st.div);n={id:Date.now(),s:Math.max(0,s),e:0,p,v:72,h:p>=60?'R':'L',doubt:false};setDur(n,st.div==='bar'?1:st.div);notes.push(n)}
+    if(!n&&addMode){pushUndo();const p=keyAt(x,geo.L);let s=st.t+(geo.hit-y)/geo.pps;if(st.snap)s=snapT(s,st.div);n={id:Date.now(),s:Math.max(0,s),e:0,p,v:72,h:p>=60?'R':'L',doubt:false,inst:(st.focus&&st.focus!=='piano'?st.focus:null),color:(st.focus&&typeof INST!=='undefined'&&INST[st.focus]?INST[st.focus].color:null)};setDur(n,st.div==='bar'?1:st.div);notes.push(n)}
     selSet.clear();if(n)selSet.add(n.id);
   }
   sel=n?n.id:null;stats();groupPanel();
@@ -1914,7 +1914,7 @@ function copySel(cut){
 function pasteAt(P){
   if(!CLIP){toast('No hay nada copiado.');return}
   pushUndo();const base=Date.now();selSet.clear();
-  CLIP.forEach((c,i)=>{const s=beatTime(P+c.off),e=beatTime(P+c.off+c.dur)-.02,id=base+i;notes.push({id,s:Math.max(0,s),e:Math.max(s+.05,e),p:c.p,v:c.v,h:c.h,doubt:false,marks:c.marks?JSON.parse(JSON.stringify(c.marks)):null,color:c.color,inst:c.inst||null});selSet.add(id)});
+  CLIP.forEach((c,i)=>{const s=beatTime(P+c.off),e=beatTime(P+c.off+c.dur)-.02,id=base+i;notes.push({id,s:Math.max(0,s),e:Math.max(s+.05,e),p:c.p,v:c.v,h:c.h,doubt:false,marks:c.marks?JSON.parse(JSON.stringify(c.marks)):null,color:st.focus?(st.focus&&typeof INST!=='undefined'&&INST[st.focus]?INST[st.focus].color:null):c.color,inst:st.focus?(st.focus&&st.focus!=='piano'?st.focus:null):(c.inst||null)});selSet.add(id)});
   sel=null;st.multi=true;$('#tMulti').setAttribute('aria-pressed','true');
   DUR=Math.max(DUR,Math.max(...notes.map(n=>n.e))+1);
   if(st.piano==='orig'){st.piano='cola';buildPianos();syncPedal()}
@@ -2119,7 +2119,7 @@ function trackName(k){return k==='piano'?'Piano':(INST[k]?INST[k].name:k)}
 function trackBar_old(){const el=$('#trackBar');if(!el)return;const ks=[...new Set(notes.map(n=>n.inst||'piano'))];
   const cur=st.focus&&!ks.includes(st.focus)?null:st.focus;st.focus=cur;
   el.innerHTML=`<button class="chip" type="button" data-tr="" aria-pressed="${!cur}">Todas</button>`+ks.map(k=>`<button class="chip" type="button" data-tr="${k}" aria-pressed="${cur===k}" style="box-shadow:inset 3px 0 0 ${k==='piano'?'var(--silver)':INST[k].color}">${trackName(k)}</button>`).join('')+`<button class="chip" type="button" id="trNew" style="border-style:dashed">+ Nueva pista</button>`;
-  el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{st.focus=b.dataset.tr||null;selSet.clear();sel=null;trackBar();stats();groupPanel();if(st.focus)toast(`Editando solo: ${trackName(st.focus)}. Las demás pistas se ven tenues.`)});
+  el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{st.focus=b.dataset.tr||null;selSet.clear();sel=null;trackBar();stats();groupPanel();if(st.focus){toast(`Editando solo ${trackName(st.focus)}: añadir, borrar, mover, pegar y la partitura afectan solo a esta pista.`);if(st.tab==='score')drawScore()}else if(st.tab==='score')drawScore()});
   $('#trNew').onclick=newTrackSheet;
 }
 (function(){const bar=document.createElement('div');bar.id='trackBar';bar.className='chips';bar.style.cssText='flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px';const sb=$('.savebar');sb.parentNode.insertBefore(bar,sb.nextSibling);trackBar()})();
@@ -2240,7 +2240,7 @@ function trackBar(){const el=$('#trackBar');if(!el||!IC_EYE)return;st.hide=st.hi
   const cur=st.focus&&!ks.includes(st.focus)?null:st.focus;st.focus=cur;
   const col=k=>k==='piano'?'var(--silver)':INST[k].color;
   el.innerHTML=`<button class="chip" type="button" data-tr="" aria-pressed="${!cur}">Todas</button>`+ks.map(k=>`<span class="trk" style="box-shadow:inset 3px 0 0 ${col(k)}"><button class="chip" type="button" data-tr="${k}" aria-pressed="${cur===k}">${trackName(k)}</button><button class="trk-ic" type="button" data-vis="${k}" aria-label="${st.hide[k]?'Mostrar':'Ocultar'} ${trackName(k)}" aria-pressed="${!st.hide[k]}">${st.hide[k]?IC_EYEOFF:IC_EYE}</button><button class="trk-ic" type="button" data-mute="${k}" aria-label="${st.im[k]?'Activar sonido de':'Silenciar'} ${trackName(k)}" aria-pressed="${!st.im[k]}">${st.im[k]?IC_MUTE:IC_SPK}</button><button class="trk-ic" type="button" data-deltr="${k}" aria-label="Borrar pista ${trackName(k)}" style="color:var(--muted)"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>`).join('')+`<button class="chip" type="button" id="trNew" style="border-style:dashed">+ Nueva pista</button>`;
-  el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{st.focus=b.dataset.tr||null;selSet.clear();sel=null;trackBar();stats();groupPanel();if(st.focus)toast(`Editando solo: ${trackName(st.focus)}. Las demás pistas se ven tenues.`)});
+  el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{st.focus=b.dataset.tr||null;selSet.clear();sel=null;trackBar();stats();groupPanel();if(st.focus){toast(`Editando solo ${trackName(st.focus)}: añadir, borrar, mover, pegar y la partitura afectan solo a esta pista.`);if(st.tab==='score')drawScore()}else if(st.tab==='score')drawScore()});
   el.querySelectorAll('[data-vis]').forEach(b=>b.onclick=()=>{const k=b.dataset.vis;st.hide[k]=!st.hide[k];if(st.hide[k]){notes.forEach(n=>{if((n.inst||'piano')===k)selSet.delete(n.id)})}trackBar();stats();groupPanel();toast(st.hide[k]?`${trackName(k)} oculto. Sigue sonando salvo que lo silencies.`:`${trackName(k)} visible.`)});
   el.querySelectorAll('[data-mute]').forEach(b=>b.onclick=()=>{const k=b.dataset.mute;st.im[k]=!st.im[k];if(ac&&INST[k])instBus(k);trackBar();if(typeof mixUI==='function')mixUI();restartIfPlaying();toast(st.im[k]?`${trackName(k)} silenciado.`:`${trackName(k)} suena.`)});
   el.querySelectorAll('[data-deltr]').forEach(b=>b.onclick=()=>{const k=b.dataset.deltr,cnt=notes.filter(n=>(n.inst||'piano')===k).length;
