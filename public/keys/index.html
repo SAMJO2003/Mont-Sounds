@@ -318,12 +318,15 @@ div.li{cursor:default}
           </div>
 
           <div class="panel" id="p-sound" hidden>
-            <p class="label">Piano</p>
+            <div class="info" id="sndCtx">Ajustes de sonido: Piano</div>
+            <p class="label" id="pianoLbl">Piano</p>
             <div class="pianos" id="pianos"></div>
             <p class="label">Ajustes</p>
             <div class="slider" id="s-pedal"><label for="pedal">Pedal</label><input id="pedal" type="range" min="0" max="100" value="45"><output id="o-pedal">45</output></div>
             <div class="slider"><label for="reverb">Reverb</label><input id="reverb" type="range" min="0" max="100" value="30"><output id="o-reverb">30</output></div>
             <div class="slider"><label for="bright">Brillo</label><input id="bright" type="range" min="0" max="100" value="55"><output id="o-bright">55</output></div>
+            <div class="slider" id="s-artic" hidden><label for="artic">Articulación</label><input id="artic" type="range" min="0" max="100" value="50"><output id="o-artic">Normal</output></div>
+            <div class="slider" id="s-vibr" hidden><label for="vibr">Vibrato</label><input id="vibr" type="range" min="0" max="200" value="100"><output id="o-vibr">100</output></div>
             <div class="slider"><label for="vol">Volumen</label><input id="vol" type="range" min="0" max="100" value="80"><output id="o-vol">80</output></div>
             <p class="label">Sala</p>
             <div class="chips" id="rooms"></div>
@@ -578,7 +581,7 @@ async function ensureAudio(){
   conv.buffer=impulse(ROOMS[st.room][1]);applyMix();
   try{const r=await fetch(ORIG_AUDIO);origBuf=await ac.decodeAudioData(await r.arrayBuffer())}catch(e){origBuf=null}
 }
-function applyMix(){if(!ac)return;master.gain.value=st.vol*1.1;wet.gain.value=st.reverb*1.4;dry.gain.value=1-st.reverb*.35;toneF.frequency.value=900*Math.pow(18,st.bright)}
+function applyMix(){if(!ac)return;master.gain.value=1.1;wet.gain.value=st.reverb*1.4*st.vol;dry.gain.value=(1-st.reverb*.35)*st.vol;toneF.frequency.value=900*Math.pow(18,st.bright)}
 function voice(n,when){
   const P=PIANOS[st.piano],f0=440*Math.pow(2,(n.p+(P.oct||0)-69)/12),amp=Math.pow(n.v/127,1.6)*.16;
   const dec=P.dec*Math.pow(2,-(n.p-60)/24), rel=.12+st.pedal*3.2, end=when+(n.e-n.s), stop=end+rel+.05;
@@ -1945,10 +1948,10 @@ function clipBar(){const b=$('#clipBox');if(!b)return;b.hidden=!CLIP;if(CLIP)$('
 /* ================= PROYECTOS: guardar, autoguardado, copia, copia de seguridad, importar ================= */
 let dirty=false,saving=false,saveTimer=null,lastSig='',autosave=true;
 function noteSig(){let h=notes.length;for(const n of notes)h=(h*31+Math.round(n.s*100)*7+Math.round(n.e*100)*3+n.p+(n.color?n.color.length:0)+(n.marks?17:0))%1e9;return h+'|'+(st.gridFixed?st.gridFixed.bpm+':'+st.gridFixed.t0.toFixed(3):'')+'|'+st.meter}
-function getSettings(){return {hide:st.hide,im:st.im,tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
+function getSettings(){return {ts:st.ts,iv:st.iv,hide:st.hide,im:st.im,tpl:st.tpl,R:st.R,L:st.L,bg:st.bg==='foto'?'negro':st.bg,fx:[...st.fx],names:st.names,gridLines:st.gridLines,piano:st.piano,pedal:st.pedal,reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room,meter:st.meter,sub:st.sub,look:LOOK}}
 function defaultSettings(){return {tpl:'mont',R:TPL.mont.R,L:TPL.mont.L,bg:'negro',fx:['brillo'],names:false,gridLines:true,piano:origBuf?'orig':'cola',pedal:.45,reverb:.3,bright:.55,vol:.8,room:'sala',hide:{},im:{},look:2.4}}
 function applySettings(a){if(!a)return;
-  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);st.hide=a.hide||{};st.im=a.im||{};if(typeof INST!=='undefined'&&ac)Object.keys(INST).forEach(k=>{if(instGains[k])instBus(k)});if(typeof trackBar==='function')trackBar();if(a.look)LOOK=a.look;
+  ['tpl','R','L','bg','names','gridLines','piano','pedal','reverb','bright','vol','room','meter','sub'].forEach(k=>{if(a[k]!==undefined&&a[k]!==null)st[k]=a[k]});if(Array.isArray(a.fx))st.fx=new Set(a.fx);st.hide=a.hide||{};st.im=a.im||{};st.ts=a.ts||{};st.iv=a.iv||{};if(typeof INST!=='undefined'&&ac)Object.keys(INST).forEach(k=>{if(instGains[k])instBus(k)});if(typeof trackBar==='function')trackBar();if(a.look)LOOK=a.look;
   [['pedal',st.pedal],['reverb',st.reverb],['bright',st.bright],['vol',st.vol]].forEach(([id,v])=>{const el=$('#'+id);if(el){el.value=Math.round(v*100);$('#o-'+id).textContent=el.value}});
   $$('#rooms .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===st.room));if(ac&&conv)conv.buffer=impulse(ROOMS[st.room][1]);
   const gt=$('#gridT');if(gt)gt.checked=st.gridLines!==false;buildPianos();syncPedal();applyMix();syncVisual();stats();
@@ -2053,14 +2056,14 @@ function ksBuffer(k,p){const key=k+p;if(ksCache[key])return ksCache[key];const P
   let prev=0;for(let i=0;i<N;i++){const r=Math.random()*2-1;prev=prev+(r-prev)*P.bright;ring[i]=prev}
   const dec=Math.pow(P.decay,440/Math.max(60,f)*.6);let idx=0;for(let i=0;i<len;i++){const a=ring[idx],b2=ring[(idx+1)%N];d[i]=a;ring[idx]=(a+b2)*.5*dec;idx=(idx+1)%N}
   let mx=0;for(let i=0;i<Math.min(len,4000);i++)mx=Math.max(mx,Math.abs(d[i]));if(mx>0)for(let i=0;i<len;i++)d[i]/=mx;ksCache[key]=b;return b}
-function vibrato(P,f,when,targets){if(!P.vib)return null;const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=P.vib[0];const depth=f*(Math.pow(2,P.vib[1]/1200)-1);lg.gain.setValueAtTime(0,when);lg.gain.linearRampToValueAtTime(0,when+P.vib[2]);lg.gain.linearRampToValueAtTime(depth,when+P.vib[2]+.35);l.connect(lg);targets.forEach(t=>lg.connect(t));l.start(when);return l}
+function vibrato(P,f,when,targets){if(!P.vib)return null;const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=P.vib[0];const depth=f*(Math.pow(2,P.vib[1]*(P._vm??1)/1200)-1);lg.gain.setValueAtTime(0,when);lg.gain.linearRampToValueAtTime(0,when+P.vib[2]);lg.gain.linearRampToValueAtTime(depth,when+P.vib[2]+.35);l.connect(lg);targets.forEach(t=>lg.connect(t));l.start(when);return l}
 function instVoice(n,when){
-  const k=n.inst,P=INST[k];if(!P||!ac)return;const f=440*Math.pow(2,(n.p-69)/12),amp=Math.pow((n.v||80)/127,1.3)*P.gain,end=when+Math.max(.08,n.e-n.s),out=instBus(k),nodes=[];
+  const k=n.inst,P=INST[k];if(!P||!ac)return;P._vm=trackSet(k).vib;const f=440*Math.pow(2,(n.p-69)/12),amp=Math.pow((n.v||80)/127,1.3)*P.gain,end=when+Math.max(.06,(n.e-n.s)*artMul(k)),out=instBus(k),nodes=[];
   if(P.kind==='ks'){const s=ac.createBufferSource();s.buffer=ksBuffer(k,n.p);const g=ac.createGain();g.gain.value=amp;s.connect(g);g.connect(out);s.start(when);s.stop(when+P.len);live.push(s);return}
   const g=ac.createGain();let stopT;
   if(P.kind==='fm'){const c=ac.createOscillator(),m=ac.createOscillator(),mg=ac.createGain();c.frequency.value=f;m.frequency.value=f*P.ratio;mg.gain.setValueAtTime(f*P.index,when);mg.gain.exponentialRampToValueAtTime(f*.05,when+.35);m.connect(mg);mg.connect(c.frequency);
     g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(amp,when+.004);g.gain.exponentialRampToValueAtTime(.0001,when+P.dec);c.connect(g);g.connect(out);stopT=when+P.dec+.05;[c,m].forEach(o=>{o.start(when);o.stop(stopT);nodes.push(o)});live.push(...nodes);return}
-  g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(amp,when+P.att);g.gain.setValueAtTime(amp,Math.max(when+P.att,end));g.gain.linearRampToValueAtTime(0,Math.max(when+P.att,end)+P.rel);stopT=Math.max(when+P.att,end)+P.rel+.05;
+  g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(amp,when+P.att);g.gain.setValueAtTime(amp,Math.max(when+P.att,end));g.gain.linearRampToValueAtTime(0,Math.max(when+P.att,end)+P.rel*relMul(k));stopT=Math.max(when+P.att,end)+P.rel*relMul(k)+.05;
   let head=g;
   if(P.kind==='flute'){const o1=ac.createOscillator(),o2=ac.createOscillator(),g2=ac.createGain();o1.type='sine';o2.type='sine';o1.frequency.value=f;o2.frequency.value=f*2;g2.gain.value=.22;o2.connect(g2);g2.connect(g);o1.connect(g);
     const nz=ac.createBufferSource();nz.buffer=getNoise();nz.loop=true;const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=Math.min(8000,f*2.2);bp.Q.value=1.2;const ng=ac.createGain();ng.gain.value=.12;nz.connect(bp);bp.connect(ng);ng.connect(g);
@@ -2165,7 +2168,7 @@ function newTrackSheet(pre){
 /* ================= DINÁMICA EN VIVO (automatización de volumen) ================= */
 st.autom=[];st.autoArm=false;st.autoShow=true;let autoRec=null;
 function autoAt(t){const A=st.autom;if(!A.length)return 1;if(t<=A[0].t)return A[0].v;if(t>=A[A.length-1].t)return A[A.length-1].v;let lo=0,hi=A.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(A[m].t<=t)lo=m;else hi=m}const a=A[lo],b=A[hi];return a.v+(b.v-a.v)*(t-a.t)/((b.t-a.t)||1)}
-function baseGain(){return st.vol*1.1}
+function baseGain(){return 1.1}
 function scheduleAutom(now){if(!ac||!master)return;const g=master.gain;g.cancelScheduledValues(now);
   if(st.autoArm||!st.autom.length){g.setValueAtTime(baseGain()*(st.autoArm?liveV:1),now);return}
   g.setValueAtTime(baseGain()*autoAt(st.t),now);st.autom.forEach(p=>{if(p.t>st.t)g.linearRampToValueAtTime(baseGain()*p.v,now+(p.t-st.t))})}
@@ -2252,6 +2255,37 @@ trackBar();
 /* botón Grabar junto al Play */
 (function(){const b=document.createElement('button');b.className='play';b.type='button';b.id='recBtn';b.setAttribute('aria-label','Grabar una toma');b.style.cssText='background:var(--danger);color:#fff';b.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="7"/></svg>';
   const pb=$('#playBtn');pb.parentNode.insertBefore(b,pb.nextSibling);b.onclick=()=>newTrackSheet(st.focus||'piano')})();
+
+
+/* ================= SONIDO POR PISTA ================= */
+st.ts=st.ts||{};
+const TS_DEF={vol:.8,reverb:.35,bright:.6,room:'sala',artic:.5,vib:1};
+function trackSet(k){st.ts[k]={...TS_DEF,...(st.ts[k]||{})};return st.ts[k]}
+function artMul(k){const a=trackSet(k).artic;return a<.5?(.3+1.4*a):(1+(a-.5)*.6)}
+function relMul(k){const a=trackSet(k).artic;return a<.5?(.5+a):(1+(a-.5)*2)}
+const ROOMBUF={};function roomImpulse(r){if(!ROOMBUF[r])ROOMBUF[r]=impulse(ROOMS[r][1]);return ROOMBUF[r]}
+const CH={};
+instBus=function(k){if(!CH[k]){const c={in:ac.createGain(),lp:ac.createBiquadFilter(),dry:ac.createGain(),conv:ac.createConvolver(),wet:ac.createGain(),room:null};c.lp.type='lowpass';c.in.connect(c.lp);c.lp.connect(c.dry);c.lp.connect(c.conv);c.conv.connect(c.wet);c.dry.connect(master);c.wet.connect(master);CH[k]=c;instGains[k]=c.in}
+  const c=CH[k],t=trackSet(k),v=st.iv[k]??t.vol;c.in.gain.value=st.im[k]?0:v*1.25;c.lp.frequency.value=900*Math.pow(18,t.bright);c.dry.gain.value=1-t.reverb*.35;c.wet.gain.value=t.reverb*1.4;if(c.room!==t.room){c.conv.buffer=roomImpulse(t.room);c.room=t.room}return c.in};
+function sndTarget(){return st.focus&&st.focus!=='piano'&&INST[st.focus]?st.focus:null}
+function articLabel(a){return a<.2?'Staccato':a<.42?'Corto':a<.58?'Normal':a<.8?'Ligado':'Legato'}
+function syncSoundPanel(){const k=sndTarget(),isP=!k;
+  $('#sndCtx').innerHTML=isP?'Ajustes de sonido: <b>Piano</b>. Elige otra pista en la barra para ajustar su sonido.':`Ajustes de sonido: <b>${INST[k].name}</b>. Solo afectan a esta pista.`;
+  ['#pianoLbl','#pianos','#s-pedal'].forEach(q=>{const e=$(q);if(e)e.hidden=!isP});const ph=$('#pedalHint');if(ph)ph.hidden=!isP||st.piano!=='orig';
+  $('#s-artic').hidden=isP;$('#s-vibr').hidden=isP||!(INST[k]&&INST[k].vib);
+  const t=isP?{reverb:st.reverb,bright:st.bright,vol:st.vol,room:st.room}:trackSet(k);const vol=isP?st.vol:(st.iv[k]??t.vol);
+  [['reverb',t.reverb],['bright',t.bright],['vol',vol]].forEach(([id,v])=>{$('#'+id).value=Math.round(v*100);$('#o-'+id).textContent=Math.round(v*100)});
+  $$('#rooms .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===t.room));
+  if(!isP){$('#artic').value=Math.round(t.artic*100);$('#o-artic').textContent=articLabel(t.artic);$('#vibr').value=Math.round(t.vib*100);$('#o-vibr').textContent=Math.round(t.vib*100)}}
+[['reverb','reverb'],['bright','bright'],['vol','vol']].forEach(([id,key])=>{const el=$('#'+id);el.oninput=()=>{$('#o-'+id).textContent=el.value;const v=el.value/100,k=sndTarget();
+  if(k){if(key==='vol'){st.iv[k]=v}trackSet(k)[key]=v;if(ac)instBus(k);if(typeof mixUI==='function'&&key==='vol')mixUI()}else{st[key]=v;applyMix()}}});
+$('#artic').oninput=()=>{const k=sndTarget();if(!k)return;trackSet(k).artic=$('#artic').value/100;$('#o-artic').textContent=articLabel(trackSet(k).artic)};$('#artic').onchange=()=>restartIfPlaying();
+$('#vibr').oninput=()=>{const k=sndTarget();if(!k)return;trackSet(k).vib=$('#vibr').value/100;$('#o-vibr').textContent=$('#vibr').value};$('#vibr').onchange=()=>restartIfPlaying();
+$$('#rooms .chip').forEach(b=>b.onclick=()=>{const k=sndTarget(),r=b.dataset.k;if(k){trackSet(k).room=r;if(ac)instBus(k)}else{st.room=r;if(ac)conv.buffer=impulse(ROOMS[r][1])}$$('#rooms .chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k===r));if(CURRENT&&CURRENT.id&&typeof saveProject==='function'){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}});
+['#reverb','#bright','#vol','#artic','#vibr','#pedal'].forEach(q=>$(q).addEventListener('change',()=>{if(CURRENT&&CURRENT.id&&typeof saveProject==='function'){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}}));
+const _tbS=trackBar;trackBar=function(){_tbS();if(document.getElementById('sndCtx'))syncSoundPanel()};
+document.querySelector('[data-tab="sound"]').addEventListener('click',()=>syncSoundPanel());
+syncSoundPanel();
 
 qSync();
 syncVisual();
