@@ -1655,7 +1655,7 @@ VS.addEventListener('pointerdown',e=>{
     selSet.clear();if(n)selSet.add(n.id);
   }
   sel=n?n.id:null;stats();groupPanel();
-  if(n){pushUndo();const group=(st.multi&&mode==='move')?notes.filter(q=>selSet.has(q.id)):[n];
+  if(n){pushUndo();const group=(selSet.size>1&&selSet.has(n.id))?notes.filter(q=>selSet.has(q.id)):[n];
     drag2={n,mode,x0:x,y0:y,s0:n.s,e0:n.e,p0:n.p,moved:false,group:group.map(q=>({q,s:q.s,e:q.e,p:q.p}))};(()=>{try{stage.setPointerCapture(e.pointerId)}catch(_){}})()}
 },true);
 VS.addEventListener('pointermove',e=>{
@@ -1663,8 +1663,8 @@ VS.addEventListener('pointermove',e=>{
   if(rect){e.stopImmediatePropagation();const {x,y}=toCanvas(e);rect.x1=x;rect.y1=y;return}
   if(!drag2)return;e.stopImmediatePropagation();const {x,y}=toCanvas(e),n=drag2.n;if(Math.abs(x-drag2.x0)+Math.abs(y-drag2.y0)>4)drag2.moved=true;if(!drag2.moved)return;
   const dt=(y-drag2.y0)/geo.pps;
-  if(drag2.mode==='resizeEnd'){let e2=drag2.e0-dt;if(st.snap)e2=snapT(e2,st.div)-.02;n.e=Math.max(n.s+.05,e2)}
-  else if(drag2.mode==='resizeStart'){let s2=Math.max(0,drag2.s0-dt);if(st.snap)s2=snapT(s2,st.div);n.s=Math.min(n.e-.05,s2)}
+  if(drag2.mode==='resizeEnd'){let e2=drag2.e0-dt;if(st.snap)e2=snapT(e2,st.div)-.02;n.e=Math.max(n.s+.05,e2);const L=n.e-n.s;drag2.group.forEach(g=>{if(g.q!==n){g.q.e=g.q.s+L;g.q.doubt=false}})}
+  else if(drag2.mode==='resizeStart'){let s2=Math.max(0,drag2.s0-dt);if(st.snap)s2=snapT(s2,st.div);n.s=Math.min(n.e-.05,s2);const L=n.e-n.s;drag2.group.forEach(g=>{if(g.q!==n){g.q.s=Math.max(0,g.q.e-L);g.q.doubt=false}})}
   else{let s=Math.max(0,drag2.s0-dt);if(st.snap)s=snapT(s,st.div);const ds=s-drag2.s0,dp=keyAt(x,geo.L)-drag2.p0;drag2.group.forEach(g=>{g.q.s=Math.max(0,g.s+ds);g.q.e=g.e+ds;g.q.p=Math.max(21,Math.min(108,g.p+dp));g.q.doubt=false})}
   n.doubt=false;stats()},true);
 VS.addEventListener('pointerup',e=>{
@@ -1898,7 +1898,7 @@ function applySettings(a){if(!a)return;
   const gt=$('#gridT');if(gt)gt.checked=st.gridLines!==false;buildPianos();syncPedal();applyMix();syncVisual();stats();
 }
 function setSaveState(t,ok){const el=$('#saveState');if(!el)return;el.textContent=t;el.style.color=ok?'var(--accent)':'var(--muted)'}
-function projDoc(extra){const base=CURRENT?(({id,_buf,...r})=>r)(CURRENT):{};return {...base,notas:notes.map(n=>[+n.s.toFixed(3),+n.e.toFixed(3),n.p,n.v,n.h,n.doubt?1:0,n.marks||null,n.color||null,n.inst||null]),grid:st.gridFixed||null,bpm:curBpm(),compas:st.meter,duracion:+DUR.toFixed(1),estado:'lista',ajustes:getSettings(),editado:new Date().toISOString(),...(extra||{})}}
+function projDoc(extra){const base=CURRENT?(({id,_buf,...r})=>r)(CURRENT):{};return {...base,notas:notes.map(n=>[+n.s.toFixed(3),+n.e.toFixed(3),n.p,n.v,n.h,n.doubt?1:0,n.marks||null,n.color||null,n.inst||null]),grid:st.gridFixed||null,bpm:curBpm(),compas:st.meter,duracion:+DUR.toFixed(1),estado:'lista',ajustes:getSettings(),autom:st.autom||[],editado:new Date().toISOString(),...(extra||{})}}
 async function saveProject(silent){
   if(!dbP){setSaveState('No se puede guardar aquí');if(!silent)toast('No se puede guardar en esta vista.');return}
   if(!CURRENT||!CURRENT.id){if(!silent)saveAsSheet(false);else setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto');return}
@@ -1970,8 +1970,8 @@ async function importProject(file){
 /* marca cambios y autoguarda */
 const _stats7=stats;stats=function(){_stats7();const sg=noteSig();if(lastSig&&sg!==lastSig&&CURRENT){dirty=true;setSaveState(CURRENT.id?'Cambios sin guardar':'Pieza de ejemplo: toca Guardar para crear tu proyecto');if(autosave&&CURRENT.id){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}}if(!lastSig)lastSig=sg};
 ['#pianos','#tpls','#fx','#bgs','#rooms','#swR','#swL'].forEach(sel=>{const el=$(sel);if(el)el.addEventListener('click',()=>setTimeout(()=>{if(CURRENT&&CURRENT.id&&autosave){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),2000)}},0))});
-const _openPiece=openPiece;openPiece=async function(p){await _openPiece(p);applySettings(p.ajustes);lastSig=noteSig();dirty=false;setSaveState(p.id?'Guardado ✓':'Sin guardar',!!p.id)};
-const _openExample=openExample;openExample=async function(){await _openExample();lastSig=noteSig();setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto')};
+const _openPiece=openPiece;openPiece=async function(p){await _openPiece(p);st.autom=Array.isArray(p.autom)?p.autom:[];if(typeof autoSync==='function')autoSync();applySettings(p.ajustes);lastSig=noteSig();dirty=false;setSaveState(p.id?'Guardado ✓':'Sin guardar',!!p.id)};
+const _openExample=openExample;openExample=async function(){await _openExample();st.autom=[];if(typeof autoSync==='function')autoSync();lastSig=noteSig();setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto')};
 $('#exPiece').onclick=openExample;
 window.addEventListener('beforeunload',e=>{if(dirty&&CURRENT&&CURRENT.id){saveProject(true)}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty&&CURRENT&&CURRENT.id)saveProject(true)});
@@ -2106,6 +2106,55 @@ function newTrackSheet(){
     toast(added.length?`Pista de ${INST[inst].name}: ${added.length} notas. Quedan seleccionadas por si quieres ajustarlas.`:'No se detectaron notas nuevas. Prueba a tocar más fuerte o más cerca del móvil.');
   }
 }
+/* ================= DINÁMICA EN VIVO (automatización de volumen) ================= */
+st.autom=[];st.autoArm=false;st.autoShow=true;let autoRec=null;
+function autoAt(t){const A=st.autom;if(!A.length)return 1;if(t<=A[0].t)return A[0].v;if(t>=A[A.length-1].t)return A[A.length-1].v;let lo=0,hi=A.length-1;while(hi-lo>1){const m=(lo+hi)>>1;if(A[m].t<=t)lo=m;else hi=m}const a=A[lo],b=A[hi];return a.v+(b.v-a.v)*(t-a.t)/((b.t-a.t)||1)}
+function baseGain(){return st.vol*1.1}
+function scheduleAutom(now){if(!ac||!master)return;const g=master.gain;g.cancelScheduledValues(now);
+  if(st.autoArm||!st.autom.length){g.setValueAtTime(baseGain()*(st.autoArm?liveV:1),now);return}
+  g.setValueAtTime(baseGain()*autoAt(st.t),now);st.autom.forEach(p=>{if(p.t>st.t)g.linearRampToValueAtTime(baseGain()*p.v,now+(p.t-st.t))})}
+let liveV=1;
+/* deslizador sobre el escenario */
+(function(){
+  const sw=$('.stagewrap'),box=document.createElement('div');box.id='autoBox';box.hidden=true;
+  box.style.cssText='position:absolute;right:8px;top:10px;bottom:30%;width:44px;display:flex;flex-direction:column;align-items:center;gap:6px;z-index:5;touch-action:none';
+  box.innerHTML='<span id="autoVal" style="font:600 10px var(--mono);color:#fff;background:rgba(0,0,0,.55);padding:2px 5px;border-radius:6px">100%</span><div id="autoTrack" style="flex:1;width:14px;border-radius:8px;background:rgba(255,255,255,.14);position:relative;cursor:ns-resize"><div id="autoFill" style="position:absolute;left:0;right:0;bottom:0;border-radius:8px;background:linear-gradient(to top,#5fd0a4,#ffd56e)"></div><div id="autoThumb" style="position:absolute;left:50%;width:30px;height:30px;margin-left:-15px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div></div><span id="autoRecDot" style="font:700 9px var(--body);color:#ef6b6b" hidden>● REC</span>';
+  sw.appendChild(box);
+  const tr=$('#autoTrack');
+  const setV=v=>{liveV=Math.max(0,Math.min(1.5,v));const f=liveV/1.5;$('#autoFill').style.height=(f*100)+'%';$('#autoThumb').style.bottom=`calc(${f*100}% - 15px)`;$('#autoVal').textContent=Math.round(liveV*100)+'%'};
+  setV(1);window.__setAutoV=setV;
+  const fromY=e=>{const r=tr.getBoundingClientRect();return (1-(e.clientY-r.top)/r.height)*1.5};
+  let dragging=false;
+  const apply=v=>{setV(v);if(ac&&master&&st.playing)master.gain.setTargetAtTime(baseGain()*liveV,ac.currentTime,.03);
+    if(st.autoArm&&st.playing){const t=st.t;if(!autoRec)autoRec={t0:t,pts:[]};const L=autoRec.pts[autoRec.pts.length-1];if(!L||t-L.t>.04)autoRec.pts.push({t:+t.toFixed(3),v:+liveV.toFixed(3)})}};
+  tr.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();dragging=true;try{tr.setPointerCapture(e.pointerId)}catch(_){}apply(fromY(e))});
+  tr.addEventListener('pointermove',e=>{if(!dragging)return;e.stopPropagation();apply(fromY(e))});
+  tr.addEventListener('pointerup',e=>{dragging=false;e.stopPropagation()});
+  box.addEventListener('pointerdown',e=>e.stopPropagation());
+  // panel en Sonido
+  const p=document.createElement('div');p.className='box';p.innerHTML=`<p class="label" style="margin:0">Dinámica en vivo</p>
+   <div class="toggle"><span>Mostrar el deslizador de volumen<small>Aparece a la derecha del Synthesia</small></span><input type="checkbox" class="sw2" id="autoShowT"></div>
+   <div class="row-btns"><button class="cta" type="button" id="autoArmB">● Grabar dinámica</button><button class="ghost" type="button" id="autoClr" style="text-align:center">Borrar dinámica</button></div>
+   <p class="hint" id="autoHint">Activa <b>Grabar dinámica</b>, reproduce la pieza y sube o baja el deslizador mientras suena. Al reproducir de nuevo, el volumen seguirá tus movimientos solo.</p>`;
+  $('#p-sound').insertBefore(p,$('#mixBox'));
+  $('#autoShowT').onchange=e=>{box.hidden=!e.target.checked};
+  $('#autoArmB').onclick=()=>{st.autoArm=!st.autoArm;$('#autoShowT').checked=true;box.hidden=false;autoSync();if(st.autoArm){toast('Grabando dinámica: reproduce y mueve el deslizador. Vuelve a tocar el botón para terminar.');if(!st.playing)play()}else{commitAuto();if(st.playing){stopAll()}}};
+  $('#autoClr').onclick=()=>{if(!st.autom.length){toast('No hay dinámica grabada.');return}st.autom=[];autoSync();markDirtyAuto();toast('Dinámica borrada: volumen constante.');restartIfPlaying()};
+})();
+function autoSync(){$('#autoArmB').textContent=st.autoArm?'■ Terminar de grabar':'● Grabar dinámica';$('#autoRecDot').hidden=!st.autoArm;$('#autoHint').innerHTML=st.autom.length?`Dinámica grabada: ${st.autom.length} puntos. Al reproducir, el volumen la sigue solo. Para regrabar un tramo, colócate ahí y graba de nuevo.`:'Activa <b>Grabar dinámica</b>, reproduce la pieza y sube o baja el deslizador mientras suena. Al reproducir de nuevo, el volumen seguirá tus movimientos solo.'}
+function commitAuto(){if(!autoRec||!autoRec.pts.length){autoRec=null;return}const a=autoRec.t0,b=autoRec.pts[autoRec.pts.length-1].t;
+  st.autom=[...st.autom.filter(p=>p.t<a-.01||p.t>b+.01),...autoRec.pts].sort((x,y)=>x.t-y.t);autoRec=null;autoSync();markDirtyAuto()}
+function markDirtyAuto(){if(CURRENT&&CURRENT.id&&typeof saveProject==='function'){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProject(true),1500)}}
+/* al parar la reproducción se cierra el tramo grabado */
+const _stopAllA=stopAll;stopAll=function(){_stopAllA();if(autoRec)commitAuto();if(ac&&master){master.gain.cancelScheduledValues(ac.currentTime);master.gain.setValueAtTime(baseGain(),ac.currentTime)}};
+const _playA=play;play=async function(){await _playA();if(!ac)return;if(st.autoArm){autoRec={t0:st.t,pts:[{t:+st.t.toFixed(3),v:+liveV.toFixed(3)}]}}scheduleAutom(PLAY_AT||ac.currentTime)};
+/* el deslizador se mueve solo siguiendo la curva al reproducir */
+(function autoFollow(){requestAnimationFrame(autoFollow);if(st.playing&&!st.autoArm&&st.autom.length&&!$('#autoBox').hidden)window.__setAutoV(autoAt(st.t))})();
+/* curva dibujada junto a las notas */
+const _dgl=drawGridLines;drawGridLines=function(g,W,hit,pps,t){_dgl(g,W,hit,pps,t);const A=st.autom;if(!A.length||$('#autoBox').hidden)return;const d=devicePixelRatio||1,x0=W-64*d,w=50*d;
+  g.strokeStyle='rgba(255,213,110,.55)';g.lineWidth=2*d;g.beginPath();let started=false;
+  for(let y=hit;y>=0;y-=4*d){const tt=t+(hit-y)/pps,v=autoAt(tt),x=x0+w*Math.min(1,v/1.5);if(!started){g.moveTo(x,y);started=true}else g.lineTo(x,y)}g.stroke()};
+
 qSync();
 syncVisual();
 })();
