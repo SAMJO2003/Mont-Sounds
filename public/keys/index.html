@@ -564,6 +564,7 @@ const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
 requestAnimationFrame(frame);
 
 /* ---------- audio ---------- */
+let busG=null,limiter=null;
 let ac=null, master, toneF, dry, wet, conv, origBuf=null, live=[];
 const PIANOS={
   orig:{name:'Original',desc:'Tu grabación, tal cual'},
@@ -579,7 +580,7 @@ async function ensureAudio(){
   if(ac)return;
   ac=new (window.AudioContext||window.webkitAudioContext)();
   master=ac.createGain();toneF=ac.createBiquadFilter();toneF.type='lowpass';dry=ac.createGain();wet=ac.createGain();conv=ac.createConvolver();
-  toneF.connect(dry);toneF.connect(conv);conv.connect(wet);dry.connect(master);wet.connect(master);master.connect(ac.destination);
+  toneF.connect(dry);toneF.connect(conv);conv.connect(wet);dry.connect(master);wet.connect(master);busG=ac.createGain();limiter=ac.createDynamicsCompressor();limiter.threshold.value=-9;limiter.knee.value=6;limiter.ratio.value=14;limiter.attack.value=.003;limiter.release.value=.22;master.connect(busG);busG.connect(limiter);limiter.connect(ac.destination);
   conv.buffer=impulse(ROOMS[st.room][1]);applyMix();
   try{const r=await fetch(ORIG_AUDIO);origBuf=await ac.decodeAudioData(await r.arrayBuffer())}catch(e){origBuf=null}
 }
@@ -605,7 +606,8 @@ async function wakeAudio(){
     if(ac.state!=='running'&&!micBusy)await rebuildAudio()}
 }
 if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(ac&&!micBusy)needRebuild=true});
-function applyMix(){if(!ac)return;master.gain.value=1.1;wet.gain.value=st.reverb*1.4*st.vol;dry.gain.value=(1-st.reverb*.35)*st.vol;toneF.frequency.value=900*Math.pow(18,st.bright)}
+function activeTracks(){const set=new Set();for(const n of notes){const k=n.inst||'piano';if(!(st.im&&st.im[k]))set.add(k)}return Math.max(1,set.size)}
+function applyMix(){if(!ac)return;master.gain.value=1.1;if(busG)busG.gain.value=1/Math.sqrt(activeTracks());wet.gain.value=st.reverb*1.4*st.vol;dry.gain.value=(1-st.reverb*.35)*st.vol;toneF.frequency.value=900*Math.pow(18,st.bright)}
 function voice(n,when){
   const P=PIANOS[st.piano],f0=440*Math.pow(2,(n.p+(P.oct||0)-69)/12),amp=Math.pow(n.v/127,1.6)*.16;
   const dec=P.dec*Math.pow(2,-(n.p-60)/24), rel=.12+st.pedal*3.2, end=when+(n.e-n.s), stop=end+rel+.05;
