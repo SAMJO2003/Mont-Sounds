@@ -2200,6 +2200,17 @@ const _dgl=drawGridLines;drawGridLines=function(g,W,hit,pps,t){_dgl(g,W,hit,pps,
   g.strokeStyle='rgba(255,213,110,.55)';g.lineWidth=2*d;g.beginPath();let started=false;
   for(let y=hit;y>=0;y-=4*d){const tt=t+(hit-y)/pps,v=autoAt(tt),x=x0+w*Math.min(1,v/1.5);if(!started){g.moveTo(x,y);started=true}else g.lineTo(x,y)}g.stroke()};
 
+/* ================= SELECCIONAR TODO ================= */
+function selectAll(){const ns=notes.filter(n=>!st.focus||(n.inst||'piano')===st.focus);if(!ns.length){toast('No hay notas para seleccionar.');return}
+  selSet.clear();ns.forEach(n=>selSet.add(n.id));sel=null;st.multi=true;$('#tMulti').setAttribute('aria-pressed','true');stats();groupPanel();
+  toast(`${ns.length} notas seleccionadas${st.focus?' de '+trackName(st.focus):''}. Las opciones están debajo.`)}
+(function(){const row=document.createElement('div');row.className='chips';row.style.cssText='flex:none';
+  row.innerHTML='<button class="chip" type="button" id="selAll">Seleccionar todo</button><button class="chip" type="button" id="selNone">Quitar selección</button>';
+  const tools=$('#p-edit .tools');tools.parentNode.insertBefore(row,tools.nextSibling);
+  $('#selAll').onclick=selectAll;$('#selNone').onclick=()=>{selSet.clear();sel=null;stats();groupPanel()};
+  const gp=$('#groupBox'),b=document.createElement('button');b.className='chip';b.type='button';b.textContent='Seleccionar todo';b.onclick=selectAll;b.style.alignSelf='flex-start';gp.insertBefore(b,gp.children[1]);
+})();
+
 qSync();
 syncVisual();
 })();
