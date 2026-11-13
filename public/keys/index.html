@@ -583,7 +583,7 @@ async function play(){
   stopNodes(); applyMix();
   const now=ac.currentTime+.06;
   if(st.piano==='orig'){if(origBuf){const s=ac.createBufferSource();s.buffer=origBuf;s.connect(toneF);s.start(now,Math.min(st.t,origBuf.duration-.01));live.push(s)}}
-  else for(const n of (typeof playList==='function'?playList():notes)){if(n.e>st.t){const w=now+Math.max(0,n.s-st.t);voice(n,w)}}
+  ;for(const n of (typeof playList==='function'?playList():notes)){if(n.e<=st.t)continue;const w=now+Math.max(0,n.s-st.t);if(n.inst&&n.inst!=='piano'){if(typeof instVoice==='function')instVoice(n,w)}else if(st.piano!=='orig')voice(n,w)}
   t0=st.t;wall0=performance.now()+60;st.playing=true;setPlayIcon();
 }
 function stopNodes(){for(const n of live){try{n.stop?n.stop():n.disconnect()}catch(e){}}live=[]}
@@ -764,7 +764,7 @@ function buildItems(){
   const per=st.meter*st.sub, res={R:[],L:[]};let maxSlot=0;
   for(const hand of ['R','L']){
     const evs=[];
-    for(const o of ana.on){const ids=o.ids.filter(id=>{const n=notes.find(x=>x.id===id);return n&&n.h===hand});if(!ids.length)continue;
+    for(const o of ana.on){const ids=o.ids.filter(id=>{const n=notes.find(x=>x.id===id);return n&&n.h===hand&&(!n.inst||st.scoreInst)});if(!ids.length)continue;
       const ns=ids.map(id=>notes.find(x=>x.id===id));const len=Math.max(1,Math.round(Math.max(...ns.map(n=>n.e-n.s))/(o.g||ana.g)));
       evs.push({slot:o.slot,ps:[...new Set(ns.map(n=>n.p))].sort((a,b)=>a-b),ids,len,hand})}
     const items=res[hand];let cur=0;
@@ -1352,7 +1352,7 @@ async function openPiece(p){
   toast('Cargando "'+(p.titulo||'pieza')+'"…');
   await ensureAudio();
   if(p._buf)origBuf=p._buf;else try{const j=JSON.parse(await (await fetch('/_blob/'+p.audio)).text());const bin=atob(j.wav),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);origBuf=await new Promise((res,rej)=>{const pr=ac.decodeAudioData(u.buffer,res,rej);if(pr&&pr.then)pr.then(res,rej)})}catch(e){origBuf=null;toast('No pude cargar el audio de esta pieza; se usará un piano de la app.')}
-  notes=p.notas.map((n,i)=>({id:i,s:n[0],e:n[1],p:n[2],v:n[3],h:n[4],doubt:!!n[5],marks:n[6]||null,color:n[7]||null}));st.gridFixed=p.grid||null;if(p.compas)st.meter=p.compas;
+  notes=p.notas.map((n,i)=>({id:i,s:n[0],e:n[1],p:n[2],v:n[3],h:n[4],doubt:!!n[5],marks:n[6]||null,color:n[7]||null,inst:n[8]||null}));st.gridFixed=p.grid||null;if(p.compas)st.meter=p.compas;
   const ps=notes.map(n=>n.p);LO=Math.max(21,Math.min(...ps)-2);HI=Math.min(108,Math.max(...ps)+2);while(HI-LO<36){if(LO>21)LO--;if(HI<108)HI++;if(LO===21&&HI===108)break}while(isBlack(LO))LO--;while(isBlack(HI))HI++;
   DUR=Math.max(p.duracion||0,Math.max(...notes.map(n=>n.e))+1);
   CURRENT=p;resetEditorState();if(!origBuf){st.piano='cola';buildPianos();syncPedal()}
@@ -1529,7 +1529,7 @@ function quantize2(){
 function qReset2(){if(!orig2){toast('Las notas ya están como en la grabación.');return}pushUndo();notes=JSON.parse(orig2.notes);st.gridFixed=orig2.grid;DUR=orig2.dur;orig2=null;sel=null;stats();qSync();toast('Notas devueltas a la grabación original.');restartIfPlaying()}
 async function saveEdits(){
   if(!CURRENT||!CURRENT.id||!dbP){toast(CURRENT&&CURRENT.id?'No se puede guardar en esta vista.':'Esta es la pieza de ejemplo: graba una pieza tuya para guardar cambios.');return}
-  try{const {id,...rest}=CURRENT;const upd={...rest,notas:notes.map(n=>[+n.s.toFixed(3),+n.e.toFixed(3),n.p,n.v,n.h,n.doubt?1:0,n.marks||null,n.color||null]),grid:st.gridFixed||null,bpm:st.bpm,compas:st.meter,editado:new Date().toISOString()};delete upd._buf;
+  try{const {id,...rest}=CURRENT;const upd={...rest,notas:notes.map(n=>[+n.s.toFixed(3),+n.e.toFixed(3),n.p,n.v,n.h,n.doubt?1:0,n.marks||null,n.color||null,n.inst||null]),grid:st.gridFixed||null,bpm:st.bpm,compas:st.meter,editado:new Date().toISOString()};delete upd._buf;
     await dbP.doc('piezas/'+id).set(upd);CURRENT={id,...upd};toast('Cambios guardados.')}catch(e){toast('No se pudieron guardar los cambios ('+((e&&e.code)||'error')+').')}
 }
 /* arrastrar y estirar en el escenario (sustituye al editor anterior) */
@@ -1555,8 +1555,8 @@ wrap.addEventListener('pointerup',e=>{if(!drag2)return;e.stopPropagation();if(!d
 function playList(){
   const DV={pp:30,p:45,mp:62,mf:78,f:98,ff:118},cur={},out=[];
   [...notes].sort((a,b)=>a.s-b.s).forEach(n=>{const m=n.marks||{};if(m.dyn)cur[n.h]=DV[m.dyn];let v=cur[n.h]!=null?cur[n.h]:n.v;if(m.acc)v=Math.min(127,v+22);let e=n.e;if(m.stacc)e=Math.min(n.e,n.s+.12);
-    if(m.tr){const up=n.p+([4,11].includes(n.p%12)?1:2);let t=n.s,k=0;while(t<e-.02){out.push({s:t,e:Math.min(e,t+.07),p:k%2?up:n.p,v:Math.max(30,v-(k%2?8:0))});t+=.075;k++}}
-    else out.push({s:n.s,e,p:n.p,v})});
+    if(m.tr){const up=n.p+([4,11].includes(n.p%12)?1:2);let t=n.s,k=0;while(t<e-.02){out.push({s:t,e:Math.min(e,t+.07),p:k%2?up:n.p,v:Math.max(30,v-(k%2?8:0)),inst:n.inst});t+=.075;k++}}
+    else out.push({s:n.s,e,p:n.p,v,inst:n.inst})});
   return out;
 }
 GRID=computeGrid();qSync();
@@ -1845,7 +1845,7 @@ function divBeats(){return st.div==='bar'?(GRID?GRID.meter:4):st.div}
 function copySel(cut){
   const ns=selNotes();if(!ns.length){toast('Selecciona primero las notas que quieres copiar.');return}
   const p0=Math.min(...ns.map(n=>beatPos(n.s)));
-  CLIP=ns.map(n=>({off:beatPos(n.s)-p0,dur:beatPos(n.e)-beatPos(n.s),p:n.p,v:n.v,h:n.h,marks:n.marks?JSON.parse(JSON.stringify(n.marks)):null,color:n.color||null}));
+  CLIP=ns.map(n=>({off:beatPos(n.s)-p0,dur:beatPos(n.e)-beatPos(n.s),p:n.p,v:n.v,h:n.h,marks:n.marks?JSON.parse(JSON.stringify(n.marks)):null,color:n.color||null,inst:n.inst||null}));
   CLIP.span=Math.max(...CLIP.map(c=>c.off+c.dur));
   if(cut){pushUndo();notes=notes.filter(n=>!selSet.has(n.id));selSet.clear();sel=null;stats();restartIfPlaying()}
   clipBar();groupPanel();toast(`${CLIP.length} nota${CLIP.length>1?'s':''} ${cut?'cortada':'copiada'}${CLIP.length>1?'s':''}. Ve adonde quieras y toca "Pegar aquí".`);
@@ -1853,7 +1853,7 @@ function copySel(cut){
 function pasteAt(P){
   if(!CLIP){toast('No hay nada copiado.');return}
   pushUndo();const base=Date.now();selSet.clear();
-  CLIP.forEach((c,i)=>{const s=beatTime(P+c.off),e=beatTime(P+c.off+c.dur)-.02,id=base+i;notes.push({id,s:Math.max(0,s),e:Math.max(s+.05,e),p:c.p,v:c.v,h:c.h,doubt:false,marks:c.marks?JSON.parse(JSON.stringify(c.marks)):null,color:c.color});selSet.add(id)});
+  CLIP.forEach((c,i)=>{const s=beatTime(P+c.off),e=beatTime(P+c.off+c.dur)-.02,id=base+i;notes.push({id,s:Math.max(0,s),e:Math.max(s+.05,e),p:c.p,v:c.v,h:c.h,doubt:false,marks:c.marks?JSON.parse(JSON.stringify(c.marks)):null,color:c.color,inst:c.inst||null});selSet.add(id)});
   sel=null;st.multi=true;$('#tMulti').setAttribute('aria-pressed','true');
   DUR=Math.max(DUR,Math.max(...notes.map(n=>n.e))+1);
   if(st.piano==='orig'){st.piano='cola';buildPianos();syncPedal()}
@@ -1892,7 +1892,7 @@ function applySettings(a){if(!a)return;
   const gt=$('#gridT');if(gt)gt.checked=st.gridLines!==false;buildPianos();syncPedal();applyMix();syncVisual();stats();
 }
 function setSaveState(t,ok){const el=$('#saveState');if(!el)return;el.textContent=t;el.style.color=ok?'var(--accent)':'var(--muted)'}
-function projDoc(extra){const base=CURRENT?(({id,_buf,...r})=>r)(CURRENT):{};return {...base,notas:notes.map(n=>[+n.s.toFixed(3),+n.e.toFixed(3),n.p,n.v,n.h,n.doubt?1:0,n.marks||null,n.color||null]),grid:st.gridFixed||null,bpm:curBpm(),compas:st.meter,duracion:+DUR.toFixed(1),estado:'lista',ajustes:getSettings(),editado:new Date().toISOString(),...(extra||{})}}
+function projDoc(extra){const base=CURRENT?(({id,_buf,...r})=>r)(CURRENT):{};return {...base,notas:notes.map(n=>[+n.s.toFixed(3),+n.e.toFixed(3),n.p,n.v,n.h,n.doubt?1:0,n.marks||null,n.color||null,n.inst||null]),grid:st.gridFixed||null,bpm:curBpm(),compas:st.meter,duracion:+DUR.toFixed(1),estado:'lista',ajustes:getSettings(),editado:new Date().toISOString(),...(extra||{})}}
 async function saveProject(silent){
   if(!dbP){setSaveState('No se puede guardar aquí');if(!silent)toast('No se puede guardar en esta vista.');return}
   if(!CURRENT||!CURRENT.id){if(!silent)saveAsSheet(false);else setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto');return}
@@ -1970,6 +1970,86 @@ $('#exPiece').onclick=openExample;
 window.addEventListener('beforeunload',e=>{if(dirty&&CURRENT&&CURRENT.id){saveProject(true)}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirty&&CURRENT&&CURRENT.id)saveProject(true)});
 setSaveState('Pieza de ejemplo: toca Guardar para crear tu proyecto');
+
+/* ================= INSTRUMENTOS SINTETIZADOS (cuerdas, vientos, celesta) ================= */
+const INST={
+  strings:{name:'Cuerdas',fam:'Cuerdas',color:'#e8b46a',kind:'pad',waves:['sawtooth','sawtooth','sawtooth'],det:[-9,0,9],lp:2100,att:.3,rel:.8,vib:[5,4,.4],gain:.075},
+  cello:{name:'Violonchelo',fam:'Cuerdas',color:'#d9895b',kind:'pad',waves:['sawtooth','sawtooth'],det:[-4,4],lp:1700,peak:[320,6,1.2],att:.15,rel:.4,vib:[5.5,8,.25],gain:.11},
+  violin:{name:'Violín',fam:'Cuerdas',color:'#f2d36b',kind:'pad',waves:['sawtooth','sawtooth'],det:[-3,3],hp:220,peak:[2700,5,1.4],lp:5500,att:.1,rel:.3,vib:[6,10,.2],gain:.085},
+  pizz:{name:'Pizzicato',fam:'Cuerdas',color:'#c9a0ff',kind:'ks',decay:.9925,len:1.1,bright:.45,gain:.55},
+  harp:{name:'Arpa',fam:'Cuerdas',color:'#b38cff',kind:'ks',decay:.9978,len:3.2,bright:.75,gain:.5},
+  flute:{name:'Flauta',fam:'Vientos',color:'#8fd3ff',kind:'flute',att:.08,rel:.2,vib:[5,12,.25],gain:.17},
+  clarinet:{name:'Clarinete',fam:'Vientos',color:'#5fd0c4',kind:'pad',waves:['square'],det:[0],lp:2300,att:.05,rel:.14,vib:[5,3,.45],gain:.06},
+  oboe:{name:'Oboe',fam:'Vientos',color:'#a6e36b',kind:'pad',waves:['sawtooth'],det:[0],bp:[1350,2.2],lp:4200,att:.045,rel:.14,vib:[5.5,7,.3],gain:.2},
+  horn:{name:'Trompa',fam:'Vientos',color:'#e0a060',kind:'pad',waves:['sawtooth','sawtooth'],det:[-3,3],lp:750,lpEnv:1400,att:.13,rel:.35,vib:[4.5,3,.5],gain:.1},
+  celesta:{name:'Celesta',fam:'Otros',color:'#ff9ad5',kind:'fm',ratio:3.5,index:2.6,dec:1.7,gain:.13}
+};
+st.iv={};st.im={};const instGains={};let noiseBuf=null;const ksCache={};
+function instBus(k){if(!instGains[k]){const g=ac.createGain();g.connect(toneF);instGains[k]=g}instGains[k].gain.value=st.im[k]?0:(st.iv[k]??.8)*1.25;return instGains[k]}
+function getNoise(){if(!noiseBuf){noiseBuf=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}return noiseBuf}
+function ksBuffer(k,p){const key=k+p;if(ksCache[key])return ksCache[key];const P=INST[k],sr=ac.sampleRate,f=440*Math.pow(2,(p-69)/12),N=Math.max(2,Math.round(sr/f)),len=Math.floor(sr*P.len),b=ac.createBuffer(1,len,sr),d=b.getChannelData(0),ring=new Float32Array(N);
+  let prev=0;for(let i=0;i<N;i++){const r=Math.random()*2-1;prev=prev+(r-prev)*P.bright;ring[i]=prev}
+  const dec=Math.pow(P.decay,440/Math.max(60,f)*.6);let idx=0;for(let i=0;i<len;i++){const a=ring[idx],b2=ring[(idx+1)%N];d[i]=a;ring[idx]=(a+b2)*.5*dec;idx=(idx+1)%N}
+  let mx=0;for(let i=0;i<Math.min(len,4000);i++)mx=Math.max(mx,Math.abs(d[i]));if(mx>0)for(let i=0;i<len;i++)d[i]/=mx;ksCache[key]=b;return b}
+function vibrato(P,f,when,targets){if(!P.vib)return null;const l=ac.createOscillator(),lg=ac.createGain();l.frequency.value=P.vib[0];const depth=f*(Math.pow(2,P.vib[1]/1200)-1);lg.gain.setValueAtTime(0,when);lg.gain.linearRampToValueAtTime(0,when+P.vib[2]);lg.gain.linearRampToValueAtTime(depth,when+P.vib[2]+.35);l.connect(lg);targets.forEach(t=>lg.connect(t));l.start(when);return l}
+function instVoice(n,when){
+  const k=n.inst,P=INST[k];if(!P||!ac)return;const f=440*Math.pow(2,(n.p-69)/12),amp=Math.pow((n.v||80)/127,1.3)*P.gain,end=when+Math.max(.08,n.e-n.s),out=instBus(k),nodes=[];
+  if(P.kind==='ks'){const s=ac.createBufferSource();s.buffer=ksBuffer(k,n.p);const g=ac.createGain();g.gain.value=amp;s.connect(g);g.connect(out);s.start(when);s.stop(when+P.len);live.push(s);return}
+  const g=ac.createGain();let stopT;
+  if(P.kind==='fm'){const c=ac.createOscillator(),m=ac.createOscillator(),mg=ac.createGain();c.frequency.value=f;m.frequency.value=f*P.ratio;mg.gain.setValueAtTime(f*P.index,when);mg.gain.exponentialRampToValueAtTime(f*.05,when+.35);m.connect(mg);mg.connect(c.frequency);
+    g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(amp,when+.004);g.gain.exponentialRampToValueAtTime(.0001,when+P.dec);c.connect(g);g.connect(out);stopT=when+P.dec+.05;[c,m].forEach(o=>{o.start(when);o.stop(stopT);nodes.push(o)});live.push(...nodes);return}
+  g.gain.setValueAtTime(0,when);g.gain.linearRampToValueAtTime(amp,when+P.att);g.gain.setValueAtTime(amp,Math.max(when+P.att,end));g.gain.linearRampToValueAtTime(0,Math.max(when+P.att,end)+P.rel);stopT=Math.max(when+P.att,end)+P.rel+.05;
+  let head=g;
+  if(P.kind==='flute'){const o1=ac.createOscillator(),o2=ac.createOscillator(),g2=ac.createGain();o1.type='sine';o2.type='sine';o1.frequency.value=f;o2.frequency.value=f*2;g2.gain.value=.22;o2.connect(g2);g2.connect(g);o1.connect(g);
+    const nz=ac.createBufferSource();nz.buffer=getNoise();nz.loop=true;const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=Math.min(8000,f*2.2);bp.Q.value=1.2;const ng=ac.createGain();ng.gain.value=.12;nz.connect(bp);bp.connect(ng);ng.connect(g);
+    const v=vibrato(P,f,when,[o1.frequency,o2.frequency]);[o1,o2,nz].forEach(o=>{o.start(when);o.stop(stopT);nodes.push(o)});if(v){v.stop(stopT);nodes.push(v)}g.connect(out);live.push(...nodes);return}
+  // pad (cuerdas, clarinete, oboe, trompa)
+  let chainIn=ac.createGain();let last=chainIn;
+  if(P.hp){const h=ac.createBiquadFilter();h.type='highpass';h.frequency.value=P.hp;last.connect(h);last=h}
+  if(P.bp){const b=ac.createBiquadFilter();b.type='bandpass';b.frequency.value=P.bp[0];b.Q.value=P.bp[1];last.connect(b);last=b}
+  if(P.peak){const pk=ac.createBiquadFilter();pk.type='peaking';pk.frequency.value=P.peak[0];pk.gain.value=P.peak[1];pk.Q.value=P.peak[2];last.connect(pk);last=pk}
+  const lp=ac.createBiquadFilter();lp.type='lowpass';lp.Q.value=.7;const lpBase=Math.min(16000,P.lp*(f>700?1.4:1));
+  if(P.lpEnv){lp.frequency.setValueAtTime(lpBase*.6,when);lp.frequency.linearRampToValueAtTime(lpBase+P.lpEnv*((n.v||80)/127),when+P.att*1.5)}else lp.frequency.value=lpBase;
+  last.connect(lp);lp.connect(g);g.connect(out);
+  const oscs=P.waves.map((w,i)=>{const o=ac.createOscillator();o.type=w;o.frequency.value=f;o.detune.value=P.det[i]||0;o.connect(chainIn);return o});
+  chainIn.gain.value=1/Math.sqrt(oscs.length);
+  const v=vibrato(P,f,when,oscs.map(o=>o.frequency));oscs.forEach(o=>{o.start(when);o.stop(stopT);nodes.push(o)});if(v){v.stop(stopT);nodes.push(v)}
+  live.push(...nodes);
+}
+async function previewInst(k){await ensureAudio();try{await ac.resume()}catch(e){}const t=ac.currentTime+.05;
+  if(k==='piano'){const keep=st.piano;if(keep==='orig')st.piano='cola';[60,64,67].forEach((p,i)=>voice({p,v:80,s:0,e:.6},t+i*.12));st.piano=keep;return}
+  const P=INST[k],seq=P.kind==='ks'||P.kind==='fm'?[60,64,67,72]:[60,67,64];seq.forEach((p,i)=>instVoice({inst:k,p:p-(k==='cello'||k==='horn'?12:0),v:85,s:0,e:P.kind==='pad'||P.kind==='flute'?.7:.3},t+i*(P.kind==='pad'||P.kind==='flute'?.45:.18)))}
+/* --- selección: cambiar instrumento, capa y octava --- */
+(function(){
+  const gp=$('#groupBox'),box=document.createElement('div');box.style.cssText='display:flex;flex-direction:column;gap:8px';
+  box.innerHTML=`<p class="label" style="margin:0">Instrumento</p><div class="chips" id="gInst"></div>
+   <div class="row-btns"><button class="cta" type="button" id="gInstSet">Cambiar a este</button><button class="ghost" type="button" id="gInstLayer" style="text-align:center">Añadir como capa</button></div>
+   <div class="chips"><button class="chip" type="button" id="gOctDn">Bajar una octava</button><button class="chip" type="button" id="gOctUp">Subir una octava</button></div>
+   <p class="hint">Toca un instrumento para oírlo. <b>Añadir como capa</b> duplica las notas con ese instrumento, por ejemplo la mano izquierda con violonchelo una octava abajo.</p>`;
+  const anchor=$('#gDur');gp.insertBefore(box,anchor.previousElementSibling);
+  chips($('#gInst'),[['piano','Piano'],...Object.entries(INST).map(([k,v])=>[k,v.name])],null,k=>{st.ginst=k;$$('#gInst .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===k));previewInst(k)});
+  $$('#gInst .chip').forEach(b=>{const P=INST[b.dataset.k];if(P)b.style.boxShadow=`inset 3px 0 0 ${P.color}`});
+  st.ginst='strings';$$('#gInst .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k==='strings'));
+  const recolor=(n,k)=>{const oldC=n.inst&&INST[n.inst]?INST[n.inst].color:null,newC=k==='piano'?null:INST[k].color;if(!n.color||n.color===oldC)n.color=newC;n.inst=k==='piano'?null:k};
+  $('#gInstSet').onclick=()=>{groupEdit(n=>recolor(n,st.ginst),`Notas pasadas a ${st.ginst==='piano'?'piano':INST[st.ginst].name}.`);mixUI()};
+  $('#gInstLayer').onclick=()=>{const ns=selNotes();if(!ns.length){toast('Selecciona primero algunas notas.');return}if(st.ginst==='piano'){toast('Elige un instrumento distinto al piano para la capa.');return}
+    pushUndo();const base=Date.now();selSet.clear();ns.forEach((n,i)=>{const c={...n,id:base+i,marks:n.marks?JSON.parse(JSON.stringify(n.marks)):null,color:null,inst:null,doubt:false};recolor(c,st.ginst);notes.push(c);selSet.add(c.id)});
+    sel=null;stats();groupPanel();mixUI();restartIfPlaying();toast(`Capa de ${INST[st.ginst].name} añadida. Las notas nuevas quedan seleccionadas (puedes bajarlas una octava).`)};
+  $('#gOctDn').onclick=()=>groupEdit(n=>n.p=Math.max(21,n.p-12),'Una octava abajo.');$('#gOctUp').onclick=()=>groupEdit(n=>n.p=Math.min(108,n.p+12),'Una octava arriba.');
+  // mezclador en Sonido
+  const mx=document.createElement('div');mx.className='box';mx.id='mixBox';mx.innerHTML='<p class="label" style="margin:0">Instrumentos de la pieza</p><div id="mixList" style="display:flex;flex-direction:column;gap:10px"></div><p class="hint">Para añadir instrumentos: en <b>Notas</b>, selecciona notas y elige un instrumento.</p>';
+  $('#p-sound').appendChild(mx);
+  // partitura: solo piano o con instrumentos
+  const tg=document.createElement('div');tg.className='toggle';tg.innerHTML='<span>Incluir instrumentos<small>Si está apagado, la partitura muestra solo el piano</small></span><input type="checkbox" class="sw2" id="scInst">';
+  const ref=$('#scFollow').closest('.toggle');ref.parentNode.insertBefore(tg,ref.nextSibling);$('#scInst').onchange=e=>{st.scoreInst=e.target.checked;drawScore()};
+  document.querySelector('[data-tab="sound"]').addEventListener('click',()=>mixUI());
+})();
+const _statsI=stats;stats=function(){_statsI();if(notes.length){const lo=Math.min(...notes.map(n=>n.p)),hi=Math.max(...notes.map(n=>n.p));let ch=false;if(lo<LO){LO=Math.max(21,lo-2);while(isBlack(LO))LO--;ch=true}if(hi>HI){HI=Math.min(108,hi+2);while(isBlack(HI))HI++;ch=true}}};
+function mixUI(){const el=$('#mixList');if(!el)return;const ks=[...new Set(notes.map(n=>n.inst||'piano'))];
+  el.innerHTML=ks.map(k=>{const P=INST[k],cnt=notes.filter(n=>(n.inst||'piano')===k).length;return P?`<div class="slider" style="grid-template-columns:100px 1fr 48px"><span style="display:flex;align-items:center;gap:6px"><i style="width:10px;height:10px;border-radius:50%;background:${P.color};display:inline-block"></i>${P.name}</span><input type="range" min="0" max="100" value="${Math.round((st.iv[k]??.8)*100)}" data-iv="${k}" aria-label="Volumen ${P.name}"><button class="chip" type="button" data-im="${k}" aria-pressed="${!!st.im[k]}" style="padding:4px 8px">${st.im[k]?'Off':'On'}</button></div>`:`<p class="hint">Piano · ${cnt} notas (volumen general arriba)</p>`}).join('');
+  el.querySelectorAll('[data-iv]').forEach(r=>r.oninput=()=>{st.iv[r.dataset.iv]=r.value/100;if(ac&&instGains[r.dataset.iv])instBus(r.dataset.iv)});
+  el.querySelectorAll('[data-im]').forEach(b=>b.onclick=()=>{const k=b.dataset.im;st.im[k]=!st.im[k];b.setAttribute('aria-pressed',st.im[k]);b.textContent=st.im[k]?'Off':'On';if(ac)instBus(k)});
+}
 
 qSync();
 syncVisual();
