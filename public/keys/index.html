@@ -1058,7 +1058,13 @@ function micStart(box,q,onDone,opt){
     q('stop').onclick=finish;
   }).catch(err=>{q('go').disabled=false;q('go').lastChild.textContent=opt.label||'Grabar';
     const inClaude=/claude/i.test(location.hostname);
-    msg.innerHTML=(err&&err.name==='NotAllowedError'?'El micrófono no tiene permiso. ':'No se pudo abrir el micrófono. ')+(inClaude?'Dentro de claude.ai el micrófono está bloqueado: usa <b>Elegir una grabación</b>, o abre la versión web de Mont Keys.':'Revisa en Ajustes › Safari › Micrófono que esté permitido para esta página e inténtalo otra vez.')});
+    micBusy=false;const and=/Android/i.test(navigator.userAgent);const det=((err&&err.name)||'Error')+(err&&err.message?': '+err.message:'');audioErrs.push('micrófono: '+det);
+    const perm=err&&(err.name==='NotAllowedError'||err.name==='SecurityError');const busy=err&&(err.name==='NotReadableError'||err.name==='AbortError');const none=err&&(err.name==='NotFoundError'||err.name==='OverconstrainedError');
+    msg.innerHTML=(perm?'El micrófono no tiene permiso. ':busy?'El micrófono está ocupado por otra app (llamada, grabadora, asistente de voz…). ':none?'No encontré un micrófono disponible. ':'No se pudo empezar a grabar. ')+
+      (inClaude?'Dentro de claude.ai el micrófono está bloqueado: usa <b>Elegir una grabación</b>, o abre la versión web de Mont Keys.':
+       perm?(and?'En Chrome toca el candado junto a la dirección › <b>Permisos</b> › <b>Micrófono</b> › Permitir, y recarga la página. Revisa también Ajustes del teléfono › Apps › Chrome › Permisos › Micrófono.':'Revisa en Ajustes › Safari › Micrófono que esté permitido para esta página e inténtalo otra vez.'):
+       busy?'Cierra la otra app e inténtalo otra vez.':'Inténtalo otra vez.')+
+      `<br><small style="opacity:.7">Detalle técnico: ${det.replace(/</g,'&lt;')}</small>`});
 }
 const MIC_FILE={name:'Micrófono',type:'audio/pcm',size:0};
 
