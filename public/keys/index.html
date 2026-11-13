@@ -583,6 +583,28 @@ async function ensureAudio(){
   conv.buffer=impulse(ROOMS[st.room][1]);applyMix();
   try{const r=await fetch(ORIG_AUDIO);origBuf=await ac.decodeAudioData(await r.arrayBuffer())}catch(e){origBuf=null}
 }
+
+/* salida de audio que cambia (Bluetooth desconectado, llamada, etc.) */
+let needRebuild=false,micBusy=false;
+function watchCtx(){if(!ac)return;ac.onstatechange=()=>{if(ac&&ac.state!=='running'&&ac.state!=='closed'&&!micBusy)needRebuild=true}}
+async function rebuildAudio(){
+  try{stopNodes()}catch(e){}
+  const old=ac;ac=null;needRebuild=false;
+  try{for(const k in instGains)delete instGains[k];for(const k in ksCache)delete ksCache[k];noiseBuf=null;for(const k in ROOMBUF)delete ROOMBUF[k];for(const k in CH)delete CH[k]}catch(e){}
+  const keepOrig=origBuf;
+  try{if(old)old.close()}catch(e){}
+  try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}
+  await ensureAudio();if(keepOrig&&!origBuf)origBuf=keepOrig;watchCtx();
+  try{await ac.resume()}catch(e){}
+  try{if(typeof mixUI==='function')mixUI()}catch(e){}
+}
+async function wakeAudio(){
+  if(!ac){await ensureAudio();watchCtx()}
+  if(needRebuild&&!micBusy){await rebuildAudio();return}
+  if(ac.state!=='running'){try{await Promise.race([ac.resume(),new Promise(r=>setTimeout(r,500))])}catch(e){}
+    if(ac.state!=='running'&&!micBusy)await rebuildAudio()}
+}
+if(navigator.mediaDevices&&navigator.mediaDevices.addEventListener)navigator.mediaDevices.addEventListener('devicechange',()=>{if(ac&&!micBusy)needRebuild=true});
 function applyMix(){if(!ac)return;master.gain.value=1.1;wet.gain.value=st.reverb*1.4*st.vol;dry.gain.value=(1-st.reverb*.35)*st.vol;toneF.frequency.value=900*Math.pow(18,st.bright)}
 function voice(n,when){
   const P=PIANOS[st.piano],f0=440*Math.pow(2,(n.p+(P.oct||0)-69)/12),amp=Math.pow(n.v/127,1.6)*.16;
@@ -598,7 +620,7 @@ function voice(n,when){
   live.push(...nodes);
 }
 async function play(){
-  await ensureAudio(); if(ac.state==='suspended')await ac.resume();
+  await ensureAudio(); await wakeAudio();
   stopNodes(); applyMix();
   const now=ac.currentTime+.06;
   if(st.piano==='orig'){if(origBuf&&!(st.im&&st.im.piano)){const s=ac.createBufferSource();s.buffer=origBuf;s.connect(toneF);s.start(now,Math.min(st.t,origBuf.duration-.01));live.push(s)}}
@@ -914,7 +936,7 @@ $('#metPlay').onchange=()=>restartIfPlaying();
 let metIv=null,during='clic',countIn=2;
 let metToken=0;const metIvs=new Set();
 function metStop(){metToken++;metIvs.forEach(i=>clearInterval(i));metIvs.clear();clearInterval(metIv);metIv=null;const b=$('#rTry');if(b)b.textContent='Probar metrónomo';document.querySelectorAll('#rBeats i').forEach(d=>d.classList.remove('on'))}
-async function metStart(T,ci,silent){metStop();const my=metToken;await ensureAudio();if(ac.state==='suspended')await ac.resume();if(my!==metToken)return;let next=T||ac.currentTime+.1,beat=0;const cin=ci??countIn;
+async function metStart(T,ci,silent){metStop();const my=metToken;await ensureAudio();await wakeAudio();if(my!==metToken)return;let next=T||ac.currentTime+.1,beat=0;const cin=ci??countIn;
   metIv=setInterval(()=>{if(my!==metToken)return;while(next<ac.currentTime+.12){const acc=beat%st.meter===0,inCount=beat<cin*st.meter,b=beat%st.meter;
     if((during==='clic'&&!silent)||inCount)click(next,acc);
     setTimeout(()=>{$$('#rBeats i').forEach((d,i)=>d.classList.toggle('on',i===b));if(st.vib&&navigator.vibrate)try{navigator.vibrate(acc?30:12)}catch(e){}},Math.max(0,(next-ac.currentTime)*1000));
@@ -1011,7 +1033,7 @@ function micStart(box,q,onDone,opt){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.innerHTML='Este navegador no deja usar el micrófono aquí. Usa <b>Elegir una grabación</b>.';return}
   const p0=ensureAudio();try{ac.resume()}catch(e){}
   q('go').disabled=true;q('go').lastChild.textContent='Pidiendo permiso del micrófono…';
-  try{if(navigator.audioSession)navigator.audioSession.type='play-and-record'}catch(e){}
+  try{if(navigator.audioSession)navigator.audioSession.type='play-and-record'}catch(e){}micBusy=true;
   navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}}).then(async stream=>{
     await p0;try{await ac.resume()}catch(e){}
     const metro=opt.metro&&$('#rMet')&&$('#rMet').checked;const ci=opt.metro?Math.max(countIn||0,2):0;const T=ac.currentTime+.25;const waitS=.25+ci*st.meter*60/st.recBpm;
@@ -1023,7 +1045,7 @@ function micStart(box,q,onDone,opt){
     sp.onaudioprocess=e=>{const a=e.inputBuffer.getChannelData(0);let s=0;for(let i=0;i<a.length;i+=4)s+=a[i]*a[i];const db=20*Math.log10(Math.sqrt(s/(a.length/4))+1e-7);lv.push(db);if(lv.length>240)lv.shift();
       if(!stopped)chunks.push({ts:chunkTime(e),d:new Float32Array(a)})};
     const iv=setInterval(()=>{const el=ac.currentTime-t0;q('time').textContent=el<0?`Prepárate… entra en ${Math.max(1,Math.ceil(-el/(60/st.recBpm)-.001))}`:`● Grabando ${fmt(el)}`;drawWave(cv,lv);if(el>(opt.max||300))finish()},100);
-    async function finish(){if(stopped)return;stopped=true;setTimeout(()=>{try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}},300);clearInterval(iv);metStop();try{alongSrc&&alongSrc.stop()}catch(e){}if(opt.onStop)try{opt.onStop()}catch(e){}try{sp.disconnect();src.disconnect();g.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());
+    async function finish(){if(stopped)return;stopped=true;setTimeout(()=>{micBusy=false;needRebuild=false},400);setTimeout(()=>{try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}},300);clearInterval(iv);metStop();try{alongSrc&&alongSrc.stop()}catch(e){}if(opt.onStop)try{opt.onStop()}catch(e){}try{sp.disconnect();src.disconnect();g.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());
       const R=opt.metro||opt.alignAlways?getLatency():0;const xa=alignChunks(chunks,t0,R);const n=xa.length;if(n<ac.sampleRate*.5){q('live').hidden=true;q('go').hidden=false;q('go').disabled=false;q('go').lastChild.textContent='Grabar';msg.textContent='La grabación fue demasiado corta. Inténtalo otra vez.';return}
       q('time').textContent='Procesando…';
       const SR=22050,buf=ac.createBuffer(1,n,ac.sampleRate);buf.getChannelData(0).set(xa);const oc=new OfflineAudioContext(1,Math.ceil(n/ac.sampleRate*SR),SR),s2=oc.createBufferSource();s2.buffer=buf;s2.connect(oc.destination);s2.start();
@@ -2366,6 +2388,9 @@ function setAudioSession(type){try{if(navigator.audioSession)navigator.audioSess
 function unlockIOS(){if(iosUnlocked)return;iosUnlocked=true;setAudioSession('playback');
   if(!navigator.audioSession){try{silentEl=document.createElement('audio');silentEl.src=silentWavURL();silentEl.loop=true;silentEl.setAttribute('playsinline','');silentEl.volume=.01;const p=silentEl.play();if(p&&p.catch)p.catch(()=>{iosUnlocked=false})}catch(e){iosUnlocked=false}}
   if(ac)try{ac.resume()}catch(e){}}
+function healAudio(){if(!ac||micBusy)return;if(needRebuild||ac.state!=='running'){if(st.playing&&needRebuild)stopAll();wakeAudio()}}
+['pointerup','touchend'].forEach(ev=>document.addEventListener(ev,healAudio,{capture:true,passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ac&&ac.state!=='running'&&!micBusy)needRebuild=true});
 ['pointerup','touchend','click'].forEach(ev=>document.addEventListener(ev,unlockIOS,{capture:true,passive:true}));
 
 qSync();
