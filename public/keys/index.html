@@ -2226,9 +2226,22 @@ let liveV=1;
   fab.onclick=()=>{box.hidden=false;fab.hidden=true;$('#autoShowT').checked=true;autoSync();toast(`Dinámica de ${autoName(autoKey())}: mueve el deslizador. Toca REC para grabar esos cambios mientras suena.`)};
   $('#autoClose').onclick=()=>{if(st.autoArm)$('#autoArmB').click();box.hidden=true;fab.hidden=false;$('#autoShowT').checked=false};
   $('#autoRecMini').onclick=()=>$('#autoArmB').click();
-  $('#autoArmB').onclick=()=>{st.autoArm=!st.autoArm;$('#autoShowT').checked=true;box.hidden=false;fab.hidden=true;autoSync();if(st.autoArm){toast(`Grabando la dinámica de ${autoName(autoKey())}. Vuelve a tocar el botón para terminar.`);if(!st.playing)play();else scheduleAutom(ac.currentTime)}else{commitAuto();if(st.playing){stopAll()}}};
+  $('#autoArmB').onclick=()=>{st.autoArm=!st.autoArm;$('#autoShowT').checked=true;box.hidden=false;fab.hidden=true;autoSync();if(st.autoArm){toast(`Dos compases de preparación y empieza a grabar la dinámica de ${autoName(autoKey())}.`);autoCountIn()}else{autoCancelCount();commitAuto();if(st.playing){stopAll()}}};
   $('#autoClr').onclick=()=>{const k=autoKey();if(!autoArr(k).length){toast(`${autoName(k)} no tiene dinámica grabada.`);return}setAutoArr(k,[]);autoSync();markDirtyAuto();toast(`Dinámica de ${autoName(k)} borrada.`);restartIfPlaying()};
 })();
+
+/* cuenta previa de 2 compases antes de grabar la dinámica */
+let acTimers=[];
+function autoCancelCount(){acTimers.forEach(t=>{clearTimeout(t);clearInterval(t)});acTimers=[];metStop();const d=$('#autoRecDot');if(d)d.textContent='● REC'}
+async function autoCountIn(){
+  if(st.playing)stopAll();autoCancelCount();await ensureAudio();try{await ac.resume()}catch(e){}
+  const bpm=curBpm(),bl=60/bpm,beats=2*st.meter,T=ac.currentTime+.25,startAt=T+beats*bl;st.recBpm=bpm;
+  metStart(T,2,true);
+  const dot=$('#autoRecDot');dot.hidden=false;
+  const iv=setInterval(()=>{const left=Math.ceil((startAt-ac.currentTime)/bl-.001);dot.textContent=left>0?`Entra en ${left}`:'● REC'},60);acTimers.push(iv);
+  acTimers.push(setTimeout(()=>{clearInterval(iv);metStop();dot.textContent='● REC';if(st.autoArm)play()},Math.max(0,(startAt-ac.currentTime)*1000-60)));
+}
+
 function autoSync(){const k=autoKey(),A=autoArr(k);$('#autoArmB').textContent=st.autoArm?'■ Terminar de grabar':'● Grabar dinámica';const rm=$('#autoRecMini');if(rm){rm.textContent=st.autoArm?'■':'REC';rm.style.background=st.autoArm?'#ef6b6b':'rgba(239,107,107,.9)'}
   const fb=$('#autoFab');if(fb)fb.style.borderColor=A.length?'#ffd56e':'rgba(255,255,255,.25)';$('#autoRecDot').hidden=!st.autoArm;const w=$('#autoWho');if(w)w.textContent=k==='_all'?'Todas':autoName(k);
   const others=Object.keys(st.automT||{}).filter(x=>x!==k).map(autoName);
