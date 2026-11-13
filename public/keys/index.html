@@ -898,12 +898,13 @@ play=async function(){await basePlay();if(!$('#metPlay').checked)return;const bt
 $('#metPlay').onchange=()=>restartIfPlaying();
 // metronome in the record sheet
 let metIv=null,during='clic',countIn=1;
-function metStop(){clearInterval(metIv);metIv=null;const b=$('#rTry');if(b)b.textContent='Probar metrónomo'}
-async function metStart(){await ensureAudio();if(ac.state==='suspended')await ac.resume();let next=ac.currentTime+.1,beat=0;
-  metIv=setInterval(()=>{while(next<ac.currentTime+.12){const acc=beat%st.meter===0,inCount=beat<countIn*st.meter,b=beat%st.meter;
+let metToken=0;const metIvs=new Set();
+function metStop(){metToken++;metIvs.forEach(i=>clearInterval(i));metIvs.clear();clearInterval(metIv);metIv=null;const b=$('#rTry');if(b)b.textContent='Probar metrónomo';document.querySelectorAll('#rBeats i').forEach(d=>d.classList.remove('on'))}
+async function metStart(){metStop();const my=metToken;await ensureAudio();if(ac.state==='suspended')await ac.resume();if(my!==metToken)return;let next=ac.currentTime+.1,beat=0;
+  metIv=setInterval(()=>{if(my!==metToken)return;while(next<ac.currentTime+.12){const acc=beat%st.meter===0,inCount=beat<countIn*st.meter,b=beat%st.meter;
     if(during==='clic'||inCount)click(next,acc);
     setTimeout(()=>{$$('#rBeats i').forEach((d,i)=>d.classList.toggle('on',i===b));if(st.vib&&navigator.vibrate)try{navigator.vibrate(acc?30:12)}catch(e){}},Math.max(0,(next-ac.currentTime)*1000));
-    next+=60/st.recBpm;beat++}},25);$('#rTry').textContent='Parar metrónomo'}
+    next+=60/st.recBpm;beat++}},25);metIvs.add(metIv);const rt=$('#rTry');if(rt)rt.textContent='Parar metrónomo'}
 function recMetroUI(){
   const upd=()=>{$('#rBpm').innerHTML=`${st.recBpm}<small>BPM</small>`;$('#rBeats').innerHTML=Array.from({length:st.meter},(_,i)=>`<i class="${i===0?'acc':''}"></i>`).join('');$$('#rMeters .chip').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.k===st.meter));$$('#rCount .chip').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.k===countIn));$$('#rDuring .chip').forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===during))};
   chips($('#rMeters'),[[2,'2/4'],[3,'3/4'],[4,'4/4']],null,k=>{st.meter=+k;upd()});
