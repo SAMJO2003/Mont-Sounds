@@ -995,7 +995,7 @@ function alignChunks(chunks,t0,R){const sr=ac.sampleRate;if(!chunks.length)retur
 /* medir: 6 clics por el altavoz, se graban y se mide cuánto tardan en llegar */
 async function measureLatency(out){
   out.textContent='Quita los auriculares y deja el móvil en silencio unos segundos…';
-  let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}})}catch(e){out.textContent='No se pudo usar el micrófono.';return}
+  let stream;try{stream=await getMic()}catch(e){out.textContent='No se pudo usar el micrófono.';return}
   await ensureAudio();try{await ac.resume()}catch(e){}
   const src=ac.createMediaStreamSource(stream),sp=ac.createScriptProcessor(BUF,1,1),g=ac.createGain();g.gain.value=0;src.connect(sp);sp.connect(g);g.connect(ac.destination);
   const chunks=[];sp.onaudioprocess=e=>chunks.push({ts:chunkTime(e),d:new Float32Array(e.inputBuffer.getChannelData(0))});
@@ -1032,13 +1032,16 @@ function micUI(box,onDone,opt={}){
   const q=k=>box.querySelector(`[data-m="${k}"]`);
   q('go').onclick=()=>micStart(box,q,onDone,opt);
 }
+function getMic(){const md=navigator.mediaDevices;return md.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}}).catch(err=>{if(err&&(err.name==='NotAllowedError'||err.name==='SecurityError'))throw err;
+  if(typeof audioErrs!=='undefined')audioErrs.push('micrófono (1er intento): '+err.name+(err.message?': '+err.message:''));
+  return md.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}}).catch(()=>md.getUserMedia({audio:true}))})}
 function micStart(box,q,onDone,opt){
   const msg=q('msg');msg.textContent='';
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.innerHTML='Este navegador no deja usar el micrófono aquí. Usa <b>Elegir una grabación</b>.';return}
   const p0=ensureAudio();try{ac.resume()}catch(e){}
   q('go').disabled=true;q('go').lastChild.textContent='Pidiendo permiso del micrófono…';
   try{if(navigator.audioSession)navigator.audioSession.type='play-and-record'}catch(e){}micBusy=true;
-  navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}}).then(async stream=>{
+  getMic().then(async stream=>{
     await p0;try{await ac.resume()}catch(e){}
     const metro=opt.metro&&$('#rMet')&&$('#rMet').checked;const ci=opt.metro?Math.max(countIn||0,2):0;const T=ac.currentTime+.25;const waitS=.25+ci*st.meter*60/st.recBpm;
     if(ci>0)metStart(T,ci,!metro);
@@ -1064,7 +1067,7 @@ function micStart(box,q,onDone,opt){
       (inClaude?'Dentro de claude.ai el micrófono está bloqueado: usa <b>Elegir una grabación</b>, o abre la versión web de Mont Keys.':
        perm?(and?'En Chrome toca el candado junto a la dirección › <b>Permisos</b> › <b>Micrófono</b> › Permitir, y recarga la página. Revisa también Ajustes del teléfono › Apps › Chrome › Permisos › Micrófono.':'Revisa en Ajustes › Safari › Micrófono que esté permitido para esta página e inténtalo otra vez.'):
        busy?'Cierra la otra app e inténtalo otra vez.':'Inténtalo otra vez.')+
-      `<br><small style="opacity:.7">Detalle técnico: ${det.replace(/</g,'&lt;')}</small>`});
+      `<br><small style="opacity:.7">Detalle técnico: ${det.replace(/</g,'&lt;')}</small>`;try{msg.style.cssText+=';display:block;padding:10px 12px;border-radius:10px;background:rgba(239,107,107,.14);border:1px solid rgba(239,107,107,.5)';msg.scrollIntoView({behavior:'smooth',block:'center'})}catch(e){}toast('No se pudo grabar · '+det)});
 }
 const MIC_FILE={name:'Micrófono',type:'audio/pcm',size:0};
 
