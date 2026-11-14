@@ -2482,7 +2482,7 @@ function openSoundCheck(){
   $('#sndT1').onclick=()=>testTone('direct');$('#sndT2').onclick=()=>testTone('piano');fillSoundCheck()}
 
 
-(function(){const a=$('#learnDoor');if(a&&/claude/i.test(location.hostname)){a.href='https://www.montsounds.com/keys/aprender/';a.target='_blank';a.rel='noopener'}})();
+(function(){const a=$('#learnDoor');if(!a)return;if(/claude/i.test(location.hostname)){a.href='https://www.montsounds.com/keys/aprender/';a.target='_blank';a.rel='noopener'}else a.href=location.pathname.replace(/\/?$/,'/')+'aprender/'})();
 /* ================= COMPOSICIONES QUE LLEGAN DESDE "APRENDER" ================= */
 (function importFromLearn(tries){let raw=null;try{raw=localStorage.getItem('mk_import')}catch(e){}if(!raw)return;
   if(typeof dbP==='undefined'||!dbP){if((tries||0)<40)setTimeout(()=>importFromLearn((tries||0)+1),250);return}
