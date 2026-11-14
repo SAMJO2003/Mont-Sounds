@@ -368,11 +368,21 @@ function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const
 function rng(seed){let s=seed;return()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0)>>>0)/4294967296}
 function spline(pts){let d=`M${pts[0][0]} ${pts[0][1]}`;for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;d+=` C${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)} ${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)} ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)} ${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)} ${p2[0]} ${p2[1]}`}return d}
 function islandPath(dy,seed){const r=rng(seed),a=r()*3,b=r()*3;const L=[],R=[];for(let y=150;y<=1450;y+=26){const t=(y-150)/1300;let hw=150+28*Math.sin(t*9.3+a)+18*Math.sin(t*21+b);if(y<300)hw*=Math.sin((y-150)/150*Math.PI/2)*.85+.15;if(y>1380)hw*=Math.max(.2,1-(y-1380)/90);const cx=210+14*Math.sin(t*5+a);L.push([cx-hw,y+dy]);R.unshift([cx+hw*(1+.05*Math.sin(t*13)),y+dy])}return 'M'+L.concat(R).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L')+' Z'}
-let curW=Math.min(S.world||0,WORLDS.length-1),dustColor='#ffd99a';
+let curW=Math.min(S.world||0,WORLDS.length-1),dustColor='#ffd99a',clouds=[];
+(function cloudLoop(){let last=performance.now();const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const place=c=>{c.cl.setAttribute('transform',`translate(${c.x.toFixed(1)},${c.y.toFixed(1)})`);c.sh.setAttribute('transform',`translate(${(c.x+c.dx).toFixed(1)},${(c.y+c.dy).toFixed(1)})`)};
+ function f(t){const dt=Math.min(.1,(t-last)/1000);last=t;for(const c of clouds){if(!still){c.x+=c.sp*dt;if(c.x-c.w>c.W+c.dx)c.x=-c.w*1.2}place(c)}requestAnimationFrame(f)}requestAnimationFrame(f)})();
 function drawImgMap(W){
  const I=W.img,k=I.w/420;svg.setAttribute('viewBox',`0 0 ${I.w} ${I.h}`);svg.innerHTML='';
  const defs=el('defs',{});defs.innerHTML=`<radialGradient id="gGold" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff0c4"/><stop offset=".45" stop-color="#e8c27a"/><stop offset="1" stop-color="#8c6326"/></radialGradient><radialGradient id="gWax" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#c2483f"/><stop offset=".6" stop-color="#8e2b2b"/><stop offset="1" stop-color="#561616"/></radialGradient><radialGradient id="gStone" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#8e8678"/><stop offset="1" stop-color="#4a443c"/></radialGradient><radialGradient id="gGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${W.acc}" stop-opacity=".6"/><stop offset="1" stop-color="${W.acc}" stop-opacity="0"/></radialGradient><radialGradient id="gVig" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>`;
- el('image',{href:BASE+I.src,x:0,y:0,width:I.w,height:I.h,preserveAspectRatio:'xMidYMid slice'});el('rect',{x:0,y:0,width:I.w,height:I.h,fill:'url(#gVig)'});
+ el('image',{href:BASE+I.src,x:0,y:0,width:I.w,height:I.h,preserveAspectRatio:'xMidYMid slice'});
+ // nubes que cruzan el mapa, con su sombra sobre el terreno
+ defs.insertAdjacentHTML('beforeend',`<filter id="cblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${14*k}"/></filter><filter id="sblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${22*k}"/></filter>`);
+ const shadowL=el('g',{filter:'url(#sblur)',opacity:.28}),cloudL=el('g',{filter:'url(#cblur)',opacity:.42});clouds=[];
+ const rr=rng(7+curW);for(let i=0;i<6;i++){const w=(120+rr()*110)*k,y=I.h*(.08+i*.155+rr()*.05),x=rr()*I.w,sp=(5+rr()*6)*k;
+  const blob=(g,col)=>{const c=el('g',{},g);for(let j=0;j<5;j++)el('ellipse',{cx:(j-2)*w*.22+(rr()-.5)*w*.1,cy:(rr()-.5)*w*.12,rx:w*(.22+rr()*.12),ry:w*(.13+rr()*.07),fill:col},c);return c};
+  const sh=blob(shadowL,'#1a0f05'),cl=blob(cloudL,'#fffaf0');clouds.push({sh,cl,x,y,w,sp,W:I.w,dx:70*k,dy:110*k})}
+ el('rect',{x:0,y:0,width:I.w,height:I.h,fill:'url(#gVig)'});
  const items=W.lessons.concat([Object.assign({fin:true},W.finale)]);const prog=W.lessons.findIndex(l=>!S.done[l.id]);const curIdx=prog<0?(S.done[W.finale.id]?8:7):prog;
  // camino de progreso: línea dorada punteada entre las lecciones completadas
  const N=I.nodes;let d='';for(let i=0;i<Math.min(curIdx,7);i++)d+=`M${N[i][0]} ${N[i][1]} L${N[i+1][0]} ${N[i+1][1]} `;if(d)el('path',{d,stroke:W.acc,"stroke-width":5*k,"stroke-dasharray":`${2*k} ${9*k}`,"stroke-linecap":'round',fill:'none',opacity:.9});
@@ -396,7 +406,7 @@ function drawImgMap(W){
  });
  return curIdx}
 function drawMap(){
- const W=WORLDS[curW],c=W.pal,seed=curW*97+13,r=rng(seed);svg.innerHTML='';svg.setAttribute('viewBox','0 0 420 1560');
+ const W=WORLDS[curW],c=W.pal,seed=curW*97+13,r=rng(seed);svg.innerHTML='';clouds=[];svg.setAttribute('viewBox','0 0 420 1560');
  if(W.img){document.documentElement.style.setProperty('--acc',W.acc);$('#sky').style.background='radial-gradient(120% 70% at 50% 40%,#3a2a1c,#120c08)';dustColor=c.dust;svg.setAttribute('aria-label','Mapa del mundo '+W.num+': '+W.name);drawImgMap(W);
   $('#wEyebrow').textContent='Mundo '+W.num+' · '+W.place;$('#wName').textContent=W.name;$('#wTag').textContent=W.tag;$('#wBanner').hidden=true;$('#wPrev').disabled=curW===0;$('#wNext').disabled=curW===WORLDS.length-1;updateStats();return}document.documentElement.style.setProperty('--acc',W.acc);$('#sky').style.background=W.sky;dustColor=c.dust;
  svg.setAttribute('aria-label','Mapa del mundo '+W.num+': '+W.name);
