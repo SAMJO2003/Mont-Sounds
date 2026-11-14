@@ -16,6 +16,8 @@ button{font-family:var(--body);color:inherit}
 .view{min-height:100%}
 #sky{position:fixed;inset:0;z-index:0;transition:background 1s}
 #dust{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+#wx{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+#map.sunny{filter:drop-shadow(0 30px 40px rgba(0,0,0,.45)) saturate(1.12) brightness(1.04)}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .wrap{max-width:560px;margin:0 auto}
 /* cabecera del mapa */
@@ -117,6 +119,7 @@ main{position:relative;z-index:2}
 
 <div id="sky"></div>
 <canvas id="dust"></canvas>
+<canvas id="wx" aria-hidden="true"></canvas>
 
 <section class="view" id="vMap">
   <header class="top gut"><div class="wrap">
@@ -324,7 +327,7 @@ const outline=(arr)=>arr.map((x,i)=>({id:'o'+i,t:x[0],d:x[1]}));
 const WORLDS=[W1,
  {id:'w2',num:'II',place:'Londres',name:'Londres a través del tiempo',tag:'De los conciertos victorianos a la música de hoy',
   sky:'linear-gradient(180deg,#0a0f1c 0%,#18233a 35%,#33405a 65%,#7a6a58 100%)',acc:'#d8c08a',
-  pal:{top:['#8e8a84','#5f5b56'],cliff:['#3c3a38','#141312'],mid:'#36332f',house:'#a8634a',houseSh:'#82493a',roof:'#3a3e48',roofSh:'#25282f',tree:'#26332a',tree2:'#34443a',plaza:'#9b958c',cloud:'#aab4c0',rim:'#ffcf7a',dust:'#ffe2a8'},landmark:'clock',stampColor:'#d8c08a',
+  pal:{top:['#8e8a84','#5f5b56'],cliff:['#3c3a38','#141312'],mid:'#36332f',house:'#a8634a',houseSh:'#82493a',roof:'#3a3e48',roofSh:'#25282f',tree:'#26332a',tree2:'#34443a',plaza:'#9b958c',cloud:'#aab4c0',rim:'#ffcf7a',dust:'#ffe2a8'},landmark:'clock',stampColor:'#d8c08a',weather:'rain',
   img:{src:'w2i.webp',w:768,h:2048,float:true,nodes:[[373,1735],[510,1618],[335,1482],[546,1363],[484,1233],[602,1138],[552,806],[435,704],[576,588],[501,468]],chest:[450,1425]},
   chapters:[[0,'Capítulo I · Leer la música'],[4,'Capítulo II · La armonía'],[6,'Capítulo III · Clásicos, románticos y modernos']],
   lessons:[
@@ -425,20 +428,20 @@ const WORLDS=[W1,
   lessons:outline([['La isla de las melodías', 'La música tradicional irlandesa y cómo se transmite de oído.'], ['La sesión', 'Cómo se toca en grupo en una sesión tradicional.'], ['El violín tradicional', 'El fiddle: el mismo violín, otra manera de tocarlo.'], ['Los modos irlandeses', 'Melodías en modo mixolidio y dórico.'], ['Cuts y taps', 'Los primeros ornamentos.'], ['Los rolls', 'Un ornamento que adorna una sola nota.'], ['El jig', 'Danza en 6/8.'], ['El reel', 'Danza rápida en 4/4.'], ['Slip jig y hornpipe', 'Otras danzas: 9/8 y el ritmo con punto.'], ['El arpa irlandesa', 'Un símbolo con siglos de historia y la música de Turlough O’Carolan.'], ['El bodhrán', 'El tambor de marco y su técnica.'], ['Fraseo y variación', 'Cómo se adorna una melodía distinta cada vez.']]),finale:{t:'La sesión',d:'Únete a una sesión con melodía, ornamentos y bodhrán.'}},
  {id:'w4',num:'IV',place:'Escandinavia',name:'Los Reinos del Norte',tag:'Historias cantadas entre fiordos',preview:true,
   sky:'linear-gradient(180deg,#050b18 0%,#0d2033 35%,#123c45 60%,#2e6b6a 85%,#9ad0c4 100%)',acc:'#8fe3d4',
-  pal:{top:['#dfe7ee','#a9b8c4'],cliff:['#46505a','#151a1f'],mid:'#6f7d89',house:'#6b4a32',houseSh:'#4f3624',roof:'#3a2a1e',roofSh:'#271c14',tree:'#1b2e2a',tree2:'#28423b',plaza:'#c9d6df',cloud:'#9fd8cf',rim:'#b8fff0',dust:'#d8fff6'},img:{src:'w4i.webp',w:768,h:2048,float:true,nodes:[[414,1752],[539,1610],[318,1498],[506,1365],[398,1208],[544,1076],[428,924],[565,794],[404,684],[545,608],[476,440]],chest:[412,1431]},landmark:'longhouse',stampColor:'#8fe3d4',
+  pal:{top:['#dfe7ee','#a9b8c4'],cliff:['#46505a','#151a1f'],mid:'#6f7d89',house:'#6b4a32',houseSh:'#4f3624',roof:'#3a2a1e',roofSh:'#271c14',tree:'#1b2e2a',tree2:'#28423b',plaza:'#c9d6df',cloud:'#9fd8cf',rim:'#b8fff0',dust:'#d8fff6'},img:{src:'w4i.webp',w:768,h:2048,float:true,nodes:[[414,1752],[539,1610],[318,1498],[506,1365],[398,1208],[544,1076],[428,924],[565,794],[404,684],[545,608],[476,440]],chest:[412,1431]},weather:'snow',landmark:'longhouse',stampColor:'#8fe3d4',
   lessons:outline([['El bordón', 'Una nota que sostiene toda la música.'], ['Patrones que se repiten', 'La fuerza de la repetición.'], ['Los modos', 'Escalas más allá de mayor y menor.'], ['Percusión que avanza', 'Ritmos para marchar y remar.'], ['Contar historias con música', 'Motivos para personajes y viajes.'], ['El canto y la saga', 'La voz que narra.'], ['Instrumentos históricos', 'Liras, cuernos y lo que muestran los hallazgos.'], ['Lo que sabemos y lo que se reconstruye', 'Separar los datos de la imaginación.'], ['El norte hoy', 'Interpretaciones contemporáneas.'], ['Tu propia saga', 'Motivos y bordones para tu historia.']]),finale:{t:'La saga',d:'Compón una pieza que cuente un viaje.'}},
  {id:'w5',num:'V',place:'Asia oriental',name:'El Reino del Bambú',tag:'China, Japón y Corea: tres tradiciones, una familia de sonidos',preview:true,
   sky:'linear-gradient(180deg,#0c1416 0%,#1d3330 40%,#4d6b5c 70%,#d8c9a2 100%)',acc:'#bfe6c4',
   pal:{top:['#7f9e7a','#5a7856'],cliff:['#55524a','#1c1b18'],mid:'#4b6447',house:'#c9b89a',houseSh:'#a8977a',roof:'#2f4a40',roofSh:'#1f332c',tree:'#3f6b3a',tree2:'#5c8f52',plaza:'#b8c7a8',cloud:'#e6efe2',rim:'#f2ffe0',dust:'#f4ffe8'},img:{src:'w5i.webp',w:768,h:2048,float:true,nodes:[[568,1676],[561,1454],[394,1326],[505,1212],[338,1076],[520,941],[497,736],[360,626],[605,478],[532,364]],chest:[449,1269]},landmark:'pagoda',stampColor:'#bfe6c4',
   lessons:outline([['Tres tradiciones, una región', 'China, Japón y Corea: siglos de intercambio y caminos propios.'], ['Las escalas de cinco notas', 'La pentatónica china y las escalas japonesas con semitonos: parecidas, pero no iguales.'], ['La familia de las cítaras', 'Guzheng (China), koto (Japón) y gayageum (Corea): primos con su propia voz.'], ['Los laúdes', 'La pipa china y el biwa japonés.'], ['Flautas de bambú', 'Dizi (China), shakuhachi (Japón) y daegeum (Corea).'], ['Cuerdas frotadas', 'El erhu chino y el haegeum coreano.'], ['El arte del matiz', 'Deslizamientos, vibratos y el valor del silencio.'], ['Música y escena', 'Ópera de Pekín, teatro nō y kabuki, y el pansori coreano.'], ['Paisajes sonoros', 'Música que pinta montañas, agua y estaciones.']]),finale:{t:'El jardín de la niebla',d:'Una pieza pentatónica con ornamentos, inspirada en la tradición que elijas.'}},
  {id:'w6',num:'VI',place:'África occidental · tradición mandinga',name:'Las Tierras del Ritmo',tag:'El ritmo como conversación',preview:true,
-  sky:'linear-gradient(180deg,#140c08 0%,#3a1e10 40%,#8a4a1e 70%,#f0b45a 100%)',acc:'#ffc773',
-  pal:{top:['#c79a5a','#9a7040'],cliff:['#6a4628','#22160d'],mid:'#7a5530',house:'#b88a5a',houseSh:'#966c42',roof:'#6b5a3a',roofSh:'#4f4228',tree:'#3b3a1e',tree2:'#565428',plaza:'#d9b98a',cloud:'#f3c58a',rim:'#ffd98a',dust:'#ffe2b0'},img:{src:'w6i.webp',w:768,h:2048,float:true,nodes:[[383,1709],[519,1585],[384,1447],[542,1346],[397,1230],[520,1125],[558,925],[411,816],[537,703],[605,507],[503,419]],chest:[463,1397]},landmark:'baobab',stampColor:'#ffc773',
+  sky:'linear-gradient(180deg,#3a1606 0%,#7a2c0c 30%,#c4561a 60%,#f2a43a 85%,#ffd27a 100%)',acc:'#ffc773',
+  pal:{top:['#c79a5a','#9a7040'],cliff:['#6a4628','#22160d'],mid:'#7a5530',house:'#b88a5a',houseSh:'#966c42',roof:'#6b5a3a',roofSh:'#4f4228',tree:'#3b3a1e',tree2:'#565428',plaza:'#d9b98a',cloud:'#f3c58a',rim:'#ffd98a',dust:'#ffe2b0'},img:{src:'w6i.webp',w:768,h:2048,float:true,nodes:[[383,1709],[519,1585],[384,1447],[542,1346],[397,1230],[520,1125],[558,925],[411,816],[537,703],[605,507],[503,419]],chest:[463,1397]},weather:'sun',landmark:'baobab',stampColor:'#ffc773',
   lessons:outline([['Pregunta y respuesta', 'Una voz llama, el grupo contesta.'], ['Patrones que encajan', 'Ritmos simples que juntos forman uno complejo.'], ['El djembé', 'Su origen en la tradición mandinga y su técnica.'], ['Los dunun', 'Los tambores graves que sostienen el ritmo.'], ['La kora', 'El arpa-laúd de los griots mandingas.'], ['El balafón', 'El xilófono de madera de la región mandé.'], ['Polirritmia', 'Dos contra tres.'], ['Coordinación', 'Manos independientes.'], ['El ritmo en comunidad','La música como encuentro.'],['El griot','Músicos, historiadores y narradores de la tradición mandinga.']]),finale:{t:'El círculo',d:'Toca tu parte dentro de un ritmo de conjunto.'}},
  {id:'w7',num:'VII',place:'El escenario',name:'La Frontera Eléctrica',tag:'Riffs, groove y luces de neón',preview:true,
   sky:'linear-gradient(180deg,#07040f 0%,#1a0b33 40%,#3a1060 70%,#0e5f74 100%)',acc:'#7ff3ff',
-  pal:{top:['#3a3550','#24203a'],cliff:['#1e1a2e','#08060f'],mid:'#2a2540',house:'#2c2a3e',houseSh:'#1f1d2d',roof:'#ff3fa4',roofSh:'#b52a75',tree:'#14d4ff',tree2:'#7ff3ff',plaza:'#3d3858',cloud:'#9a5cff',rim:'#7ff3ff',dust:'#c0f8ff'},landmark:'stage',stampColor:'#7ff3ff',
-  lessons:outline([['El riff','Una idea corta que se repite y engancha.'],['El groove','Por qué un ritmo invita a moverse.'],['La síncopa','Acentos donde no se esperan.'],['Líneas de bajo','El puente entre ritmo y armonía.'],['Patrones de batería','Bombo, caja y platillos.'],['La canción de rock','Estrofa, estribillo y puente.'],['Sintetizadores','Del oscilador a la música electrónica.']]),finale:{t:'El escenario',d:'Arma y presenta tu propia canción.'}}
+  pal:{top:['#3a3550','#24203a'],cliff:['#1e1a2e','#08060f'],mid:'#2a2540',house:'#2c2a3e',houseSh:'#1f1d2d',roof:'#ff3fa4',roofSh:'#b52a75',tree:'#14d4ff',tree2:'#7ff3ff',plaza:'#3d3858',cloud:'#9a5cff',rim:'#7ff3ff',dust:'#c0f8ff'},img:{src:'w7i.webp',w:768,h:2048,float:true,nodes:[[501,1744],[363,1616],[504,1460],[548,1224],[377,1118],[519,1016],[388,871],[489,672],[498,571],[590,513],[492,436]],chest:[525,1340]},landmark:'stage',stampColor:'#7ff3ff',
+  lessons:outline([['El riff', 'Una idea corta que se repite y engancha.'], ['El groove', 'Por qué un ritmo invita a moverse.'], ['La síncopa', 'Acentos donde no se esperan.'], ['Líneas de bajo', 'El puente entre ritmo y armonía.'], ['Patrones de batería', 'Bombo, caja y platillos.'], ['Los acordes del rock y el pop', 'Power chords y progresiones que se repiten.'], ['La canción', 'Estrofa, estribillo y puente.'], ['Sintetizadores', 'Del oscilador al sonido electrónico.'], ['El DJ y el estudio', 'Mezclar, repetir y transformar sonidos.'], ['Tu banda', 'Melodía, bajo, batería y acordes juntos.']]),finale:{t:'El escenario',d:'Arma y presenta tu propia canción.'}}
 ];
 
 /* ===================== ESTADO ===================== */
@@ -530,17 +533,17 @@ let curW=Math.min(S.world||0,WORLDS.length-1),dustColor='#ffd99a',clouds=[];
 (function cloudLoop(){let last=performance.now();const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const place=c=>{c.cl.setAttribute('transform',`translate(${c.x.toFixed(1)},${c.y.toFixed(1)})`);c.sh.setAttribute('transform',`translate(${(c.x+c.dx).toFixed(1)},${(c.y+c.dy).toFixed(1)})`)};
  function f(t){const dt=Math.min(.1,(t-last)/1000);last=t;for(const c of clouds){if(!still){c.x+=c.sp*dt;if(c.x-c.w>c.W+c.dx)c.x=-c.w*1.2}place(c)}requestAnimationFrame(f)}requestAnimationFrame(f)})();
-function drawImgMap(W){
+function drawImgMap(W){setWeather(W.weather||'clouds');svg.classList.toggle('sunny',W.weather==='sun');
  const I=W.img,kc=I.w/420,k=I.w/Math.max(300,svg.getBoundingClientRect().width||375);svg.setAttribute('viewBox',`0 0 ${I.w} ${I.h}`);svg.innerHTML='';
  const defs=el('defs',{});defs.innerHTML=`<radialGradient id="gGold" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff0c4"/><stop offset=".45" stop-color="#e8c27a"/><stop offset="1" stop-color="#8c6326"/></radialGradient><radialGradient id="gWax" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#c2483f"/><stop offset=".6" stop-color="#8e2b2b"/><stop offset="1" stop-color="#561616"/></radialGradient><radialGradient id="gStone" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#8e8678"/><stop offset="1" stop-color="#4a443c"/></radialGradient><radialGradient id="gGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${W.acc}" stop-opacity=".6"/><stop offset="1" stop-color="${W.acc}" stop-opacity="0"/></radialGradient><radialGradient id="gVig" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>`;
  const FL=!!I.float;svg.classList.toggle('float',FL);const backL=FL?el('g',{filter:'url(#cblur)',opacity:.75}):null;
  el('image',{href:BASE+I.src,x:0,y:0,width:I.w,height:I.h,preserveAspectRatio:'xMidYMid meet'});
  // nubes que cruzan el mapa, con su sombra sobre el terreno
  defs.insertAdjacentHTML('beforeend',`<filter id="cblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${14*kc}"/></filter><filter id="sblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${22*kc}"/></filter>`);
- const shadowL=el('g',{filter:'url(#sblur)',opacity:FL?0:.36}),cloudL=el('g',{filter:'url(#cblur)',opacity:FL?.55:.68});clouds=[];
- const rr=rng(7+curW);for(let i=0;i<6;i++){const w=(120+rr()*110)*kc,y=I.h*(.08+i*.155+rr()*.05),x=rr()*I.w,sp=(5+rr()*6)*kc;
+ const WX=W.weather||'clouds',CC=WX==='rain'?'#c3cad4':WX==='snow'?'#eef4fb':'#fffaf0';const shadowL=el('g',{filter:'url(#sblur)',opacity:FL?0:.36}),cloudL=el('g',{filter:'url(#cblur)',opacity:FL?(WX==='rain'?.7:.55):.68});clouds=[];
+ const rr=rng(7+curW);for(let i=0;i<(WX==='sun'?0:WX==='snow'?4:6);i++){const w=(120+rr()*110)*kc,y=I.h*(.08+i*.155+rr()*.05),x=rr()*I.w,sp=(5+rr()*6)*kc;
   const blob=(g,col)=>{const c=el('g',{},g);for(let j=0;j<5;j++)el('ellipse',{cx:(j-2)*w*.22+(rr()-.5)*w*.1,cy:(rr()-.5)*w*.12,rx:w*(.22+rr()*.12),ry:w*(.13+rr()*.07),fill:col},c);return c};
-  const sh=blob(shadowL,'#1a0f05'),cl=blob(FL&&i%2===0?backL:cloudL,'#fffaf0');clouds.push({sh,cl,x,y,w,sp,W:I.w,dx:70*kc,dy:110*kc})}
+  const sh=blob(shadowL,'#1a0f05'),cl=blob(FL&&i%2===0?backL:cloudL,CC);clouds.push({sh,cl,x,y,w,sp,W:I.w,dx:70*kc,dy:110*kc})}
  if(!FL)el('rect',{x:0,y:0,width:I.w,height:I.h,fill:'url(#gVig)'});
  const items=W.lessons.concat([Object.assign({fin:true},W.finale)]);const NL=W.lessons.length,prog=W.lessons.findIndex(l=>!S.done[l.id]);const curIdx=W.preview?-1:(prog<0?(S.done[W.finale.id]?NL+1:NL):prog);
  // camino de progreso: línea dorada punteada entre las lecciones completadas
@@ -565,7 +568,7 @@ function drawImgMap(W){
  });
  return curIdx}
 function drawMap(){
- const W=WORLDS[curW],c=W.pal,seed=curW*97+13,r=rng(seed);svg.innerHTML='';clouds=[];svg.classList.remove('float');svg.setAttribute('viewBox','0 0 420 1560');
+ const W=WORLDS[curW],c=W.pal,seed=curW*97+13,r=rng(seed);svg.innerHTML='';clouds=[];svg.classList.remove('float','sunny');setWeather('clouds');svg.setAttribute('viewBox','0 0 420 1560');
  if(W.img){document.documentElement.style.setProperty('--acc',W.acc);$('#sky').style.background=W.img.float?W.sky:'radial-gradient(120% 70% at 50% 40%,#3a2a1c,#120c08)';dustColor=c.dust;svg.setAttribute('aria-label','Mapa del mundo '+W.num+': '+W.name);drawImgMap(W);
   $('#wEyebrow').textContent='Mundo '+W.num+' · '+W.place;$('#wName').textContent=W.name;$('#wTag').textContent=W.tag;{const bn=$('#wBanner');bn.hidden=!W.preview;if(W.preview)bn.textContent='En preparación: el contenido de este mundo se está investigando para presentarlo con rigor histórico y cultural. Puedes explorar su mapa.'}$('#wPrev').disabled=curW===0;$('#wNext').disabled=curW===WORLDS.length-1;updateStats();return}document.documentElement.style.setProperty('--acc',W.acc);$('#sky').style.background=W.sky;dustColor=c.dust;
  svg.setAttribute('aria-label','Mapa del mundo '+W.num+': '+W.name);
@@ -815,6 +818,28 @@ function scrollCur(){const W=WORLDS[curW];let i=W.preview?0:W.lessons.findIndex(
 $('#nStudio').href=STUDIO;
 let rzT=0,lastW=innerWidth;addEventListener('resize',()=>{if(Math.abs(innerWidth-lastW)<8)return;lastW=innerWidth;clearTimeout(rzT);rzT=setTimeout(()=>{if(WORLDS[curW].img&&!$('#vMap').hidden)drawMap()},200)});
 drawMap();requestAnimationFrame(()=>window.scrollTo(0,scrollCur()));
+
+
+/* ===================== CLIMA: lluvia, nieve, sol ===================== */
+var WXC=document.getElementById('wx'),wctx=WXC.getContext('2d');var WXM=WXM||'clouds',WP=WP||[],WW=0,WH=0,wLast=performance.now(),wT=0;
+function wResize(){const d=devicePixelRatio||1;WW=WXC.width=innerWidth*d;WH=WXC.height=innerHeight*d;wSeed()}
+function wSeed(){const d=devicePixelRatio||1;WP=[];if(WXM==='rain'){for(let i=0;i<150;i++)WP.push({x:Math.random()*WW,y:Math.random()*WH,l:(12+Math.random()*14)*d,v:(650+Math.random()*350)*d,a:.18+Math.random()*.25})}
+ else if(WXM==='snow'){for(let i=0;i<120;i++)WP.push({x:Math.random()*WW,y:Math.random()*WH,r:(1+Math.random()*2.4)*d,v:(25+Math.random()*45)*d,ph:Math.random()*6,a:.5+Math.random()*.45})}
+ else if(WXM==='sun'){for(let i=0;i<40;i++)WP.push({x:Math.random()*WW,y:Math.random()*WH,r:(1+Math.random()*1.8)*d,v:(10+Math.random()*25)*d,ph:Math.random()*6})}}
+function setWeather(m){WXM=m;if(!wctx)return;wSeed();if(m==='clouds')wctx.clearRect(0,0,WW,WH);else setTimeout(()=>wDraw(0),50)}
+addEventListener('resize',wResize);wResize();setTimeout(()=>wDraw(0),100);
+function wDraw(dt){const still=matchMedia('(prefers-reduced-motion: reduce)').matches||dt===0;wT+=dt;
+ if(!$('#vMap')||$('#vMap').hidden||WXM==='clouds'){wctx.clearRect(0,0,WW,WH);return}const d=devicePixelRatio||1;wctx.clearRect(0,0,WW,WH);
+ if(WXM==='rain'){wctx.lineCap='round';for(const p of WP){if(!still){p.y+=p.v*dt;p.x-=p.v*dt*.18;if(p.y>WH){p.y=-p.l;p.x=Math.random()*WW*1.2}}wctx.strokeStyle=`rgba(190,210,235,${p.a})`;wctx.lineWidth=1.2*d;wctx.beginPath();wctx.moveTo(p.x,p.y);wctx.lineTo(p.x+p.l*.18,p.y-p.l);wctx.stroke()}
+  wctx.fillStyle='rgba(20,30,50,.10)';wctx.fillRect(0,0,WW,WH)}
+ else if(WXM==='snow'){for(const p of WP){if(!still){p.y+=p.v*dt;p.ph+=dt;p.x+=Math.sin(p.ph)*12*d*dt;if(p.y>WH+5){p.y=-5;p.x=Math.random()*WW}}wctx.fillStyle=`rgba(255,255,255,${p.a})`;wctx.beginPath();wctx.arc(p.x,p.y,p.r,0,7);wctx.fill()}}
+ else if(WXM==='sun'){const cx=WW*.9,cy=WH*.3,R=Math.max(WW,WH)*.7,pulse=still?1:.92+.08*Math.sin(wT*1.3);
+  let g=wctx.createRadialGradient(cx,cy,0,cx,cy,R*pulse);g.addColorStop(0,'rgba(255,240,190,.55)');g.addColorStop(.12,'rgba(255,190,90,.35)');g.addColorStop(.45,'rgba(255,140,40,.12)');g.addColorStop(1,'rgba(255,120,30,0)');wctx.fillStyle=g;wctx.fillRect(0,0,WW,WH);
+  wctx.save();wctx.translate(cx,cy);wctx.rotate(still?0:wT*.03);wctx.globalCompositeOperation='lighter';for(let i=0;i<12;i++){wctx.rotate(Math.PI*2/12);wctx.fillStyle='rgba(255,210,120,.045)';wctx.beginPath();wctx.moveTo(0,0);wctx.lineTo(R*1.1,-R*.05);wctx.lineTo(R*1.1,R*.05);wctx.closePath();wctx.fill()}wctx.restore();
+  wctx.fillStyle=`rgba(255,160,60,${.05+.03*Math.sin(wT*.8)})`;wctx.fillRect(0,0,WW,WH);
+  for(const p of WP){if(!still){p.y-=p.v*dt;p.ph+=dt;p.x+=Math.sin(p.ph)*8*d*dt;if(p.y<-5){p.y=WH+5;p.x=Math.random()*WW}}wctx.fillStyle='rgba(255,215,140,.55)';wctx.beginPath();wctx.arc(p.x,p.y,p.r,0,7);wctx.fill()}}
+}
+(function wLoop(t){requestAnimationFrame(wLoop);const dt=Math.min(.05,(t-wLast)/1000)||0;wLast=t;wDraw(dt||.016)})(performance.now());
 
 /* ===================== POLVO ===================== */
 const cv=$('#dust'),cx=cv.getContext('2d');let DW,DH,parts=[];
