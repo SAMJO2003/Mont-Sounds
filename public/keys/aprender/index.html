@@ -134,7 +134,19 @@ main{position:relative;z-index:2}
 .lamps{display:flex;justify-content:center;gap:14px}.lamp{color:rgba(241,230,207,.3)}.lamp.cur{color:var(--parch)}.lamp.on{color:#ffd56e;filter:drop-shadow(0 0 8px #ffd56e)}
 .seqcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px}.seqc{border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:2px;font-size:14px}.seqc b{color:var(--gold)}.seqc.cur{border-color:var(--gold)}.seqc.ok{border-color:var(--ok);background:rgba(95,208,164,.1)}
 .mcards{display:flex;flex-direction:column;gap:8px}.mc{display:flex;justify-content:space-between;align-items:center}.mc.sel{border-color:var(--gold)}
-@media (prefers-reduced-motion:reduce){.pulse,.float,.flick{animation:none}#sheet,#scrim,.lbar i{transition:none}}
+
+.lscene{position:relative;width:100%;aspect-ratio:1200/896;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#1a1410}
+.lscene.portada{aspect-ratio:1264/848}
+.lscene .ls{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat}
+.ls-clouds{overflow:hidden}.ls-clouds .cl{position:absolute;left:-60%;height:auto;animation-name:drift;animation-timing-function:linear;animation-iteration-count:infinite;will-change:transform}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(var(--d,420%))}}
+.bellfield{background:none!important}.bellfield .lscene{position:absolute;inset:0;border:0;border-radius:0;aspect-ratio:auto}
+.bellfield .ls{background-size:157.9% auto;background-position:52.3% 32.2%}
+.bf-bells{position:absolute;inset:0;z-index:3}
+.lscene canvas.water{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none}
+.lscene.plaza{aspect-ratio:1200/896}.luz{position:absolute;opacity:0;transition:opacity 1.4s ease;pointer-events:none;mix-blend-mode:screen}.luz.on{opacity:1;animation:flame 3.2s ease-in-out infinite alternate}
+@keyframes flame{0%{filter:brightness(1)}50%{filter:brightness(1.12)}100%{filter:brightness(.94)}}
+@media (prefers-reduced-motion:reduce){.ls-clouds .cl,.luz.on{animation:none}.pulse,.float,.flick{animation:none}#sheet,#scrim,.lbar i{transition:none}}
 </style>
 
 <div id="sky"></div>
@@ -211,7 +223,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
  {id:'w1m01',t:'La ciudad de la música',d:'La plaza de Florencia se quedó en silencio. Despierta sus campanas, su fuente y sus luces descubriendo la altura, la duración y la intensidad del sonido.',scene:true,
   disc:{id:'a-florencia',name:'La vida musical en Florencia',per:'Renacimiento · siglos XV y XVI',text:'En la Florencia de los Médici la música sonaba en iglesias, en la corte, en fiestas públicas y en las casas de las familias ricas. Las campanas marcaban las horas y las celebraciones de la ciudad, y la música se conservaba en la memoria y en manuscritos copiados a mano.',sig:'Sin grabaciones, cada interpretación era única: la música solo existía mientras alguien la tocaba.'},
   steps:[
-   {type:'story',ph:'La plaza dormida',art:'city',title:'Florencia se quedó en silencio',text:'Llegas a una antigua plaza de Florencia. Sus campanas, su fuente y sus luces funcionaban con música, pero se detuvieron. Para despertarlas tendrás que descubrir los tres secretos del sonido: la altura, la duración y la intensidad.',fact:'Arriba verás la plaza: cada parte se ilumina cuando la despiertas. Con 👁 activas o quitas las ayudas visuales y con 🎹 eliges teclado, micrófono o MIDI.'},
+   {type:'story',ph:'La plaza dormida',art:'city',scene:'portada',title:'Florencia se quedó en silencio',text:'Llegas a una antigua plaza de Florencia. Sus campanas, su fuente y sus luces funcionaban con música, pero se detuvieron. Para despertarlas tendrás que descubrir los tres secretos del sonido: la altura, la duración y la intensidad.',fact:'Arriba verás la plaza: cada parte se ilumina cuando la despiertas. Con 👁 activas o quitas las ayudas visuales y con 🎹 eliges teclado, micrófono o MIDI.'},
    {type:'bells',ph:'Desafío I · Las campanas escondidas',q:'La primera campana',sub:'El mecanismo de la torre empieza con la campana más grave. Encuéntrala.',mode:'low',n:3,gap:9,lo:48,hi:84,win:'¡La primera campana suena!'},
    {type:'bells',ph:'Desafío I · Las campanas escondidas',q:'La campana más aguda',sub:'Ahora la torre pide la campana más aguda.',mode:'high',n:4,gap:5,lo:52,hi:84,win:'¡La campana más aguda responde!'},
    {type:'bells',ph:'Desafío I · Las campanas escondidas',q:'La secuencia de las campanas',sub:'Ordénalas de la más grave a la más aguda para que el mecanismo gire.',mode:'order',n:4,gap:3,lo:55,hi:79,win:'¡El mecanismo gira!',why:'Ordenar sonidos por altura es la base de las escalas: de grave a agudo, como subir una escalera.'},
@@ -729,9 +741,38 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 function pickPitches(n,lo,hi,gap){for(let tries=0;tries<200;tries++){const out=[];for(let i=0;i<n;i++)out.push(lo+Math.floor(Math.random()*(hi-lo+1)));const s=[...out].sort((x,y)=>x-y);let ok=true;for(let i=1;i<s.length;i++)if(s[i]-s[i-1]<gap)ok=false;if(ok)return out}return Array.from({length:n},(_,i)=>lo+i*gap)}
 function explain(html){const fb=$('#fb');if(!fb)return;fb.className='fb on ok';fb.innerHTML=html}
 
+/* ===================== ESCENAS POR CAPAS (cielo · nubes · primer plano) ===================== */
+const M1=()=>BASE+'m1/';
+function cloudsHTML(n,top0,top1,op){let h='';const r=rng(n*31+7);for(let i=0;i<n;i++){const top=top0+(top1-top0)*r(),w=30+r()*28,dur=55+r()*60,del=-r()*dur,img=Math.floor(r()*3);h+=`<img class="cl" src="${M1()}nube${img}.webp" alt="" style="top:${top}%;width:${w}%;--d:${((165+w)/w*100).toFixed(0)}%;opacity:${op*(.65+r()*.35)};animation-duration:${dur}s;animation-delay:${del}s">`}return h}
+function layered({sky,fg,clouds=4,top0=2,top1=30,op=.85,cls='',extra=''}){return `<div class="lscene ${cls}"><div class="ls ls-sky" style="background-image:url(${sky})"></div><div class="ls ls-clouds">${cloudsHTML(clouds,top0,top1,op)}</div><div class="ls ls-fg" style="background-image:url(${fg})"></div>${extra}</div>`}
+/* agua animada de la fuente (coordenadas de la imagen 1200×896) */
+const SPOUTS=[{x:602,y:420,vx:0,vy:40,tx:602},{x:338,y:466,vx:-70,vy:30},{x:866,y:466,vx:70,vy:30}];
+function fountainWater(canvas){const ctx=canvas.getContext('2d');const st={level:0,target:0,flow:[0,0,0],want:[0,0,0],drops:[],rip:[],alive:true,t:0};
+ const fit=()=>{const r=canvas.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);canvas.width=Math.max(1,r.width*d);canvas.height=Math.max(1,r.height*d)};fit();
+ const S=()=>canvas.width/1200;let last=performance.now();
+ function frame(t){if(!st.alive||!canvas.isConnected){st.alive=false;return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;st.t+=dt;const k=S();ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,1200,896);
+  st.level+=(st.target-st.level)*Math.min(1,dt*.8);for(let i=0;i<3;i++)st.flow[i]+=(st.want[i]-st.flow[i])*Math.min(1,dt*10);
+  const surf=785-44*st.level;
+  // superficie del estanque (recortada al interior de la pila)
+  if(st.level>.02){ctx.save();ctx.beginPath();ctx.ellipse(602,752,338,40,0,0,Math.PI*2);ctx.clip();
+   const g=ctx.createLinearGradient(0,surf-30,0,surf+40);g.addColorStop(0,`rgba(150,205,225,${.55*st.level})`);g.addColorStop(1,`rgba(40,95,120,${.7*st.level})`);ctx.fillStyle=g;ctx.fillRect(250,surf-6,710,120);
+   ctx.strokeStyle=`rgba(255,240,215,${.35*st.level})`;ctx.lineWidth=2;for(let i=0;i<7;i++){const yy=surf+4+i*6,ph=st.t*1.6+i;ctx.beginPath();for(let x=270;x<=935;x+=10){const y=yy+Math.sin(x*.035+ph)*1.6;x===270?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()}
+   st.rip=st.rip.filter(r=>r.a>0);for(const r of st.rip){r.r+=60*dt;r.a-=dt*.9;ctx.strokeStyle=`rgba(230,245,255,${Math.max(0,r.a)*.6})`;ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(r.x,surf+6,r.r,r.r*.18,0,0,Math.PI*2);ctx.stroke()}ctx.restore()}
+  // chorros: gotas con gravedad
+  SPOUTS.forEach((s,i)=>{const f=st.flow[i];if(f<.03)return;const n=Math.ceil(f*7);for(let j=0;j<n;j++)st.drops.push({x:s.x+(Math.random()-.5)*4,y:s.y+Math.random()*3,vx:s.vx*(.85+Math.random()*.3)+(Math.random()-.5)*14,vy:s.vy+Math.random()*25,s:i,r:1.6+Math.random()*2.2});
+   ctx.strokeStyle=`rgba(210,235,250,${.55*f})`;ctx.lineWidth=6*f;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(s.x,s.y);const tx=s.x+s.vx*.62,ty=surf+2;ctx.quadraticCurveTo(s.x+s.vx*.25,s.y+(ty-s.y)*.35,tx,ty);ctx.stroke()});
+  const gy=1150;st.drops=st.drops.filter(d=>{d.vy+=gy*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;if(d.y>=surf){if(Math.random()<.08)st.rip.push({x:d.x,r:4,a:.9});return false}ctx.fillStyle='rgba(225,242,255,.75)';ctx.beginPath();ctx.ellipse(d.x,d.y,d.r*.7,d.r*1.6,0,0,Math.PI*2);ctx.fill();return true});
+  if(st.drops.length>900)st.drops.splice(0,st.drops.length-900)}
+ requestAnimationFrame(frame);
+ return {flow(i,on){st.want[i]=on?1:0},all(on){st.want=[on?1:0,on?1:0,on?1:0]},fill(v){st.target=v},stop(){st.alive=false},state:st}}
+/* plaza de noche: faroles por grupos */
+const LIGHTS=[[0,16.75,48.21,26.25,51.45],[1,54.17,51.45,28.17,48.55],[2,0,28.79,20.67,68.97],[3,79.25,32.7,20.75,65.85],[4,19.08,31.03,32.83,59.15],[5,51.42,38.17,27.83,46.09]];
+function plazaHTML(){return `<div class="lscene plaza"><div class="ls" style="background-image:url(${M1()}plaza_noche.webp)"></div>${LIGHTS.map(([i,l,t,w,h])=>`<img class="luz" data-luz="${i}" src="${M1()}luz${i}.webp" alt="" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%">`).join('')}</div>`}
+function plazaLights(){const total=LS.lightsTotal||9,done=LS.lightsDone||0,n=Math.min(6,Math.round(done/total*6));const order=[2,3,4,5,0,1];document.querySelectorAll('#lStage .luz').forEach(el=>{const i=+el.dataset.luz;el.classList.toggle('on',order.indexOf(i)<n)})}
+
 /* ===================== MOTOR DE LECCIONES ===================== */
 let LS=null;
-function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{}};$('#vLesson').hidden=false;document.body.style.overflow='hidden';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();renderStep()}
+function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();renderStep()}
 function exitLesson(){micOff();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;drawMap()}
 $('#lClose').onclick=()=>{if(!LS)return;sheet(`<h2>¿Salir de la lección?</h2><p>Perderás el avance de esta lección.</p><button class="cta" id="q1" type="button">Salir</button><button class="ghost" id="q2" type="button">Seguir aprendiendo</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet};
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
@@ -740,7 +781,7 @@ function head(ph,q,sub){return `<span class="lphase">${esc(ph)}</span>${q?`<p cl
 function renderStep(){const st=LS.L.steps[LS.i],box=$('#lStage');$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
  (STEP[st.type]||STEP.story)(st,box);$('.lbody').scrollTop=0}
 const STEP={
- story(st,box){box.innerHTML=head(st.ph)+`<div class="art">${art(st.art)}</div><p class="lq">${esc(st.title)}</p><p class="ltext">${esc(st.text)}</p>${st.fact?`<p class="fact">${esc(st.fact)}</p>`:''}`;foot('Continuar',next)},
+ story(st,box){box.innerHTML=head(st.ph)+(st.scene==='portada'?layered({sky:M1()+'portada.webp',fg:M1()+'portada_fg.webp',clouds:4,top0:0,top1:22,op:.5,cls:'portada'}):`<div class="art">${art(st.art)}</div>`)+`<p class="lq">${esc(st.title)}</p><p class="ltext">${esc(st.text)}</p>${st.fact?`<p class="fact">${esc(st.fact)}</p>`:''}`;foot('Continuar',next)},
  choice(st,box){box.innerHTML=head(st.ph,st.q)+`<div class="opts">${st.opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${esc(o)}</button>`).join('')}</div><div class="fb" id="fb"></div>`;let pick=-1,answered=false;
   const b=foot('Comprobar',()=>{if(answered)return next();if(pick<0)return;answered=true;const ok=pick===st.a;if(!ok)LS.miss++;box.querySelectorAll('.opt').forEach(x=>{const i=+x.dataset.i;x.disabled=true;if(i===st.a)x.classList.add('ok');else if(i===pick)x.classList.add('bad')});const fb=$('#fb');fb.className='fb on '+(ok?'ok':'bad');fb.innerHTML=`<b>${ok?'¡Correcto!':'Casi'}</b>${esc(st.why||'')}`;b.textContent='Continuar'},{disabled:true});
   box.querySelectorAll('.opt').forEach(x=>x.onclick=()=>{if(answered)return;pick=+x.dataset.i;box.querySelectorAll('.opt').forEach(y=>y.classList.toggle('sel',y===x));b.disabled=false})},
@@ -858,12 +899,12 @@ const STEP={
    else{const ps=pickPitches(st.n,st.lo||48,st.hi||84,st.gap||7),slots=shuffle(HOOKS.slice()).slice(0,st.n);P=ps.map((p,i)=>({p,i,x:slots[i][0],y:slots[i][1]}))}order=[];sel=-1;heard=new Set()};gen();
   const target=()=>lv==='low'?P.reduce((a,b)=>b.p<a.p?b:a).i:lv==='high'?P.reduce((a,b)=>b.p>a.p?b:a).i:lv==='broken'?P.bad:-1;
   const bellHTML=b=>`<button type="button" class="bellb" data-b="${b.i}" style="left:${b.x}%;top:${b.y}%"><img class="bimg" src="${BASE}bell.webp" alt="Campana" width="40" height="47" draggable="false"><b class="bn" hidden></b><span class="bw" hidden></span></button>`;
-  const renderBells=()=>{if(DEV){box.dataset.p=P.map(b=>b.p).join(',');box.dataset.bad=P.bad??''}const f=box.querySelector('.bellfield');f.innerHTML=P.map(bellHTML).join('');
+  const renderBells=()=>{if(DEV){box.dataset.p=P.map(b=>b.p).join(',');box.dataset.bad=P.bad??''}const f=box.querySelector('.bf-bells');f.innerHTML=P.map(bellHTML).join('');
    f.querySelectorAll('[data-b]').forEach(el=>el.onclick=()=>{const b=P[+el.dataset.b];bell(b.p);heard.add(b.i);if(lv==='order'){if(sel===b.i&&!order.includes(b.i))order.push(b.i);sel=b.i}else sel=b.i;el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring');refresh()});refresh()};
   const refresh=()=>{const aids=aidsOn();box.querySelectorAll('[data-b]').forEach(el=>{const i=+el.dataset.b,b=P[i];el.classList.toggle('sel',sel===i);el.classList.toggle('ord',order.includes(i));const bn=el.querySelector('.bn');bn.hidden=!order.includes(i);if(!bn.hidden)bn.textContent=order.indexOf(i)+1;const bw=el.querySelector('.bw');const show=aids&&heard.has(i);if(show&&bw.hidden)bw.innerHTML=waveSvg(b.p,{w:50,h:20});bw.hidden=!show});
    const c=$('#bcount');if(c)c.textContent=`${order.length}/${P.length}`;
    if(lv==='order')foot(order.length===P.length?'Comprobar el orden':`Ordena las ${P.length} campanas`,check,{disabled:order.length!==P.length});else foot('Esta es',check,{disabled:sel<0})};
-  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`<div class="bellfield" style="background-image:url(${BASE}campanario.webp)"></div>
+  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`<div class="bellfield">${layered({sky:BASE+"campanario.webp",fg:M1()+"campanario_fg.webp",clouds:5,top0:-2,top1:26,op:.9})}<div class="bf-bells"></div></div>
    ${lv==='order'?`<p class="small" style="color:var(--muted)">Toca una campana para oírla. Para ponerla en tu orden, tócala otra vez. <b id="bcount">0/${P.length}</b></p>`:lv==='broken'?'<p class="small" style="color:var(--muted)">Las campanas deberían subir paso a paso, de izquierda a derecha. Escúchalas en orden y toca la que rompe la subida.</p>':'<p class="small" style="color:var(--muted)">Toca cada campana para oírla. Cuando estés seguro, elige.</p>'}
    <div class="row">${lv==='broken'?'<button class="chipb" type="button" id="bplay">▶ Escuchar la secuencia</button>':''}${lv==='order'?'<button class="chipb" type="button" id="breset">Empezar el orden de nuevo</button>':''}</div><div class="fb" id="fb"></div>`;
    const bp=$('#bplay');if(bp)bp.onclick=()=>{const t=ac().currentTime+.05;P.forEach((b,i)=>{bell(b.p,.8,t+i*.55);heard.add(b.i);setTimeout(()=>{const el=box.querySelector(`[data-b="${b.i}"]`);if(el){el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring')}refresh()},i*550+60)})};
@@ -879,28 +920,29 @@ const STEP={
   const gen=()=>{if(st.pattern)return st.pattern.slice();const n=st.n||4,a=[];for(let i=0;i<n;i++)a.push(Math.random()<.5?'s':'l');if(!a.includes('s'))a[0]='s';if(!a.includes('l'))a[n-1]='l';if(st.rests){a.splice(1+Math.floor(Math.random()*(n-1)),0,'r')}return a};pat=gen();
   let rec=[],downAt=0,lastUp=0,playing=false,shown=!st.hidden;if(DEV)box.dataset.pat=pat.join(',');
   const bars=(arr,cls)=>`<div class="wbars ${cls||''}">${arr.map(x=>`<i class="wb ${x}"></i>`).join('')}</div>`;
-  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`<div class="fountain"><svg viewBox="0 0 300 110" width="100%"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe6ff"/><stop offset="1" stop-color="#3e88c8"/></linearGradient></defs><path d="M60 100h180l-14-30H74z" fill="#8a7a66" stroke="#4a3f35"/><ellipse cx="150" cy="70" rx="76" ry="8" fill="#2c5a82" id="pool"/><rect x="142" y="20" width="16" height="50" fill="#a89276"/><path id="stream" d="M150 20 Q150 6 150 0" stroke="url(#wg)" stroke-width="6" fill="none" opacity="0"/><path id="arc1" d="M150 18 Q118 10 104 66" stroke="url(#wg)" stroke-width="4" fill="none" opacity="0"/><path id="arc2" d="M150 18 Q182 10 196 66" stroke="url(#wg)" stroke-width="4" fill="none" opacity="0"/></svg></div>
+  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`${layered({sky:M1()+"fuente.webp",fg:M1()+"fuente_fg.webp",clouds:3,top0:-4,top1:12,op:.8,cls:"fuente",extra:'<canvas class="water"></canvas>'})}
    <p class="small" style="color:var(--muted);margin:0">Patrón del agua:</p>${shown?bars(pat):`<div class="wbars"><i class="wb q"></i><span class="small" style="color:var(--muted)">Escúchalo y repítelo de memoria${aidsOn()?' (el agua lo dibuja mientras suena)':''}</span></div>`}
    <p class="small" style="color:var(--muted);margin:0">Tu interpretación:</p>${bars(rec.map(r=>r.k),'mine')}
    <div id="kbh"></div><div class="row"><button class="chipb" type="button" id="wplay">▶ Escuchar el agua</button><button class="chipb" type="button" id="wclr">Borrar mi intento</button></div><div class="fb" id="fb"></div>`;
-   keyboard($('#kbh'),{lo:60,hi:72,labels:false,onKey:(p)=>{const now=performance.now();if(st.rests&&rec.length&&lastUp&&now-lastUp>600)rec.push({k:'r'});downAt=now},onRelease:(p,dur)=>{lastUp=performance.now();rec.push({k:dur<.5?'s':'l',dur});draw2();evaluate()}});
+   if(FW)FW.stop();FW=fountainWater(box.querySelector('canvas.water'));if(LS.scene&&LS.scene.water){FW.fill(1);FW.all(true)}
+   keyboard($('#kbh'),{lo:60,hi:72,labels:false,onKey:(p)=>{FW&&FW.flow(0,true);const now=performance.now();if(st.rests&&rec.length&&lastUp&&now-lastUp>600)rec.push({k:'r'});downAt=now},onRelease:(p,dur)=>{FW&&FW.flow(0,false);lastUp=performance.now();rec.push({k:dur<.5?'s':'l',dur});draw2();evaluate()}});
    $('#wplay').onclick=playPat;$('#wclr').onclick=()=>{rec=[];draw2()};foot('Toca el patrón',()=>{},{disabled:true})};
   const draw2=()=>{const m=box.querySelector('.wbars.mine');if(m)m.outerHTML=bars(rec.map(r=>r.k),'mine')};
-  const flow=(on,arc)=>{const s=$('#stream'),a1=$('#arc1'),a2=$('#arc2');if(!s)return;[s,a1,a2].forEach(e=>e&&e.setAttribute('opacity',on?(arc?1:.9):0))};
+  let FW=null;const flow=(on,arc)=>{if(!FW)return;arc?FW.all(on):FW.flow(0,on)};
   function playPat(){if(playing)return;playing=true;const a=ac();let t=a.currentTime+.08;const t0=performance.now()+80;let off=0;pat.forEach(x=>{const d=U[x];if(x!=='r'){tone(67,.7,d,'flute',t);if(aidsOn()||shown)setTimeout(()=>flow(true,true),off+80),setTimeout(()=>flow(false),off+80+d*1000)}t+=d+.18;off+=(d+.18)*1000});setTimeout(()=>{playing=false},off+100)}
   function evaluate(){const want=pat.filter(x=>x!=='r').length,got=rec.filter(r=>r.k!=='r').length;if(got<want)return;const ok=rec.map(r=>r.k).join()===pat.join(),fb=$('#fb');
-   if(ok){wake('water');flow(true,true);const pool=$('#pool');if(pool)pool.setAttribute('fill','#4aa3e0');explain(`<b>${st.win||'¡El agua vuelve a fluir!'}</b>${st.why||'Acabas de reproducir sonidos cortos y largos: la duración es cuánto tiempo dura cada sonido.'}`);foot('Continuar',next)}
+   if(ok){wake('water');if(FW){FW.all(true);FW.fill(1)}explain(`<b>${st.win||'¡El agua vuelve a fluir!'}</b>${st.why||'Acabas de reproducir sonidos cortos y largos: la duración es cuánto tiempo dura cada sonido.'}`);foot('Continuar',next)}
    else{LS.miss+=.5;fb.className='fb on bad';fb.innerHTML=`<b>El agua se detiene</b>Compara las barras: tu interpretación arriba debe coincidir con el patrón. ${st.rests?'Recuerda dejar el silencio: suelta y espera antes de la siguiente nota. ':''}Corto = toca y suelta enseguida · largo = mantén la tecla.`;setTimeout(()=>{rec=[];draw2()},1600)}}
   draw();setTimeout(playPat,500)},
  lights(st,box){/* la plaza en silencio: cada logro enciende una luz */
   let k=0,held={},chord=[],chordT=0,vels=[],trill=[];const T=st.tasks;
   const PCS={C:[0,4,7],F:[5,9,0],G:[7,11,2]},CN={C:'Do mayor',F:'Fa mayor',G:'Sol mayor'};
   const lamps=()=>`<div class="lamps">${T.map((t,i)=>`<span class="lamp ${i<k?'on':i===k?'cur':''}"><svg viewBox="0 0 24 24" width="26" height="26" fill="${i<k?'#ffd56e':'none'}" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></span>`).join('')}</div>`;
-  const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q)+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
-   if(!t){return}chord=[];vels=[];trill=[];
+  const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q)+plazaHTML()+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
+   plazaLights();if(!t){return}chord=[];vels=[];trill=[];
    const kbd=keyboard($('#kbh'),{lo:48,hi:72,labels:!!(t.chord&&k>0&&aidsOn()),dyn:true,onKey:(p,v)=>onKey(p,v,kbd),onRelease:(p,dur)=>onRel(p,dur)});
    const lh=$('#lhint');if(lh)lh.onclick=()=>{PCS[t.chord].forEach(pc=>{const p=[48,60].map(o=>o+pc).find(q=>q>=48&&q<=72);kbd.hint(p,true)})};foot(st.label||'Enciende las luces',()=>{},{disabled:true})};
-  const done=(msg)=>{explain(msg);k++;const lp=box.querySelector('.lamps');if(lp)lp.outerHTML=lamps();if(k>=T.length){wake('lights',st.wakeMsg);foot('Continuar',next)}else foot('Siguiente luz',()=>draw())};
+  const done=(msg)=>{explain(msg);k++;LS.lightsDone=(LS.lightsDone||0)+1;plazaLights();const lp=box.querySelector('.lamps');if(lp)lp.outerHTML=lamps();if(k>=T.length){wake('lights',st.wakeMsg);foot('Continuar',next)}else foot('Siguiente luz',()=>draw())};
   const bad=(msg)=>{LS.miss+=.3;const fb=$('#fb');fb.className='fb on bad';fb.innerHTML=msg};
   function onKey(p,v,kbd){const t=T[k];if(!t)return;const dm=$('#dm');if(dm)dm.style.width=(v*100)+'%';
    if(t.do==='soft'){v<.4?done('<b>Una luz tenue se enciende</b>Tocaste <i>piano</i>: suave. Con poca fuerza el martillo golpea la cuerda despacio y vibra menos.'):bad('<b>Demasiado fuerte</b>Toca más arriba en la tecla, cerca del fondo.');return}
