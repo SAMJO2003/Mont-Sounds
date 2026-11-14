@@ -267,6 +267,7 @@ div.li{cursor:default}
         <!-- HOME -->
         <section class="view" id="v-home">
           <div><p class="hello">¿Qué vas a tocar hoy?</p><p class="sub">Elige cómo quieres grabar tu piano.</p></div>
+          <a class="banner" id="learnDoor" href="aprender/" style="text-decoration:none;color:inherit;border-color:rgba(232,194,122,.45);background:linear-gradient(135deg,rgba(142,43,43,.35),rgba(232,194,122,.12))"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#e8c27a" stroke-width="1.8" stroke-linejoin="round"><path d="M9 4l6 2 6-2v16l-6 2-6-2-6 2V6z"/><path d="M9 4v16M15 6v16"/></svg><span><b>Aprender música</b> <small style="font-size:10px;padding:1px 6px;border-radius:6px;background:#e8c27a;color:#2b1d08;font-weight:800">BETA</small><br><small>Un viaje por los mundos de la música, empezando en Florencia</small></span></a>
           <button class="banner" type="button" id="startSetup"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#f2c14e" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/></svg><span><b>Primera vez: conoce tu piano</b><span id="setupSub">Unos 6 minutos, una sola vez. La app aprende cómo suena tu piano.</span></span></button>
           <button class="mode" data-rec="audio" type="button">
             <span class="ic"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
@@ -1451,7 +1452,7 @@ function resetEditorState(){if(typeof orig2!=='undefined')orig2=null;st.qBpm=nul
 async function openPiece(p){
   toast('Cargando "'+(p.titulo||'pieza')+'"…');
   await ensureAudio();
-  if(p._buf)origBuf=p._buf;else try{const j=JSON.parse(await (await fetch('/_blob/'+p.audio)).text());const bin=atob(j.wav),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);origBuf=await new Promise((res,rej)=>{const pr=ac.decodeAudioData(u.buffer,res,rej);if(pr&&pr.then)pr.then(res,rej)})}catch(e){origBuf=null;toast('No pude cargar el audio de esta pieza; se usará un piano de la app.')}
+  if(p._buf)origBuf=p._buf;else if(!p.audio)origBuf=null;else try{const j=JSON.parse(await (await fetch('/_blob/'+p.audio)).text());const bin=atob(j.wav),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);origBuf=await new Promise((res,rej)=>{const pr=ac.decodeAudioData(u.buffer,res,rej);if(pr&&pr.then)pr.then(res,rej)})}catch(e){origBuf=null;toast('No pude cargar el audio de esta pieza; se usará un piano de la app.')}
   notes=p.notas.map((n,i)=>({id:i,s:n[0],e:n[1],p:n[2],v:n[3],h:n[4],doubt:!!n[5],marks:n[6]||null,color:n[7]||null,inst:n[8]||null}));st.gridFixed=p.grid||null;if(p.compas)st.meter=p.compas;
   const ps=notes.map(n=>n.p);LO=Math.max(21,Math.min(...ps)-2);HI=Math.min(108,Math.max(...ps)+2);while(HI-LO<36){if(LO>21)LO--;if(HI<108)HI++;if(LO===21&&HI===108)break}while(isBlack(LO))LO--;while(isBlack(HI))HI++;
   DUR=Math.max(p.duracion||0,Math.max(...notes.map(n=>n.e))+1);
@@ -2479,6 +2480,16 @@ function openSoundCheck(){
    <div id="sndChkInfo" style="font-size:14px;margin-top:8px"></div>
    <p class="hint">Si algo falla, haz una captura de esta pantalla y envíamela.</p>`);
   $('#sndT1').onclick=()=>testTone('direct');$('#sndT2').onclick=()=>testTone('piano');fillSoundCheck()}
+
+
+(function(){const a=$('#learnDoor');if(a&&/claude/i.test(location.hostname)){a.href='https://www.montsounds.com/keys/aprender/';a.target='_blank';a.rel='noopener'}})();
+/* ================= COMPOSICIONES QUE LLEGAN DESDE "APRENDER" ================= */
+(function importFromLearn(tries){let raw=null;try{raw=localStorage.getItem('mk_import')}catch(e){}if(!raw)return;
+  if(typeof dbP==='undefined'||!dbP){if((tries||0)<40)setTimeout(()=>importFromLearn((tries||0)+1),250);return}
+  try{localStorage.removeItem('mk_import')}catch(e){}
+  (async()=>{try{const j=JSON.parse(raw);if(!j||j.app!=='Mont Keys'||!j.pieza)return;const id='k'+Date.now().toString(36);
+    await dbP.doc('piezas/'+id).set({...j.pieza,audio:null,fotogramas:[],partitura:[],importado:new Date().toISOString()});
+    toast(`"${j.pieza.titulo||'Tu composición'}" está en Mis piezas. Ábrela para darle instrumentos y efectos.`)}catch(e){toast('No pude traer la composición ('+((e&&e.message)||'error')+').')}})()})(0);
 
 qSync();
 syncVisual();
