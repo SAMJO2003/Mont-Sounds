@@ -722,8 +722,15 @@ function makeEar(sr){/* procesador puro (se puede probar sin micrófono): recibe
  const st={env:0,peak:0,active:null,last:-1,prevMag:null,pend:null,t:0};
  function velFromRms(r){const lo=Math.log(Math.max(C.soft,1e-4)),hi=Math.log(Math.max(C.loud,C.soft*1.5));return Math.max(.05,Math.min(1,.2+.7*(Math.log(Math.max(r,1e-5))-lo)/(hi-lo)))}
  function frame(buf,mag,t,opts={}){st.t=t;const ev=[];let s=0;for(let i=0;i<buf.length;i++)s+=buf[i]*buf[i];const rms=Math.sqrt(s/buf.length);
+  let lflux=0;const preMag=st.prevMag;if(mag&&opts.fast){const kb=Math.min(mag.length-1,Math.floor(4000/(sr/(mag.length*2)))),c=new Float32Array(kb);for(let k=0;k<kb;k++)c[k]=Math.log(1+200*mag[k]);if(st.prevLog){const P=st.prevLog;for(let k=3;k<kb-1;k++){const m=Math.max(P[k-1],P[k],P[k+1]),d=c[k]-m;if(d>0)lflux+=d}}st.prevLog=c}
   let flux=0;if(mag&&st.prevMag){for(let k=2;k<mag.length/4;k++){const dlt=mag[k]-st.prevMag[k];if(dlt>0)flux+=dlt}}if(mag)st.prevMag=Float32Array.from(mag);
   const gate=Math.max(C.floor*3.5,.004),rise=rms>st.env*1.6+gate*.5&&rms>gate;const fluxHit=mag&&flux>Math.max(.6,st.fluxAvg*3||0)&&rms>gate;st.fluxAvg=(st.fluxAvg||0)*.9+flux*.1;
+  if(opts.fast){const thr=Math.max(st.lfMin||4,(st.lfAvg||0)*1.5);const hit=lflux>thr&&rms>gate&&t-st.last>.07&&!opts.mute;st.lfAvg=(st.lfAvg||0)*.8+lflux*.2;
+   if(hit){if(st.active){ev.push({type:'off',p:st.active.p,dur:t-st.active.t0});st.active=null}st.pend=null;st.last=t;st.fp={t0:t,peak:rms,pre:preMag,acc:null,n:0}}
+   if(st.fp&&mag){const F=st.fp;F.peak=Math.max(F.peak,rms);if(!F.acc)F.acc=new Float32Array(mag.length);for(let k=0;k<mag.length;k++){const d=mag[k]-(F.pre?F.pre[k]:0);if(d>0)F.acc[k]+=d}F.n++;
+    if(F.n>=2){const rise=chromaOf(F.acc,sr,mag.length*2,170,2000);let bi=0;for(let i=1;i<12;i++)if(rise[i]>rise[bi])bi=i;st.active={p:60+bi,t0:F.t0,peak:F.peak,ps:null,acc:null,chromaSent:true};ev.push({type:'on',p:60+bi,vel:velFromRms(F.peak),peak:F.peak,t:F.t0,rise});st.fp=null}}
+   st.env=st.env*.6+rms*.4;if(st.active&&rms<Math.max(st.active.peak*.12,gate)){ev.push({type:'off',p:st.active.p,dur:t-st.active.t0});st.active=null}
+   return {ev,rms,flux,lflux}}
   const onset=(rise||fluxHit)&&t-st.last>.09&&!opts.mute;
   if(onset){if(st.active){if(st.active.acc&&!st.active.chromaSent){st.active.chromaSent=true;ev.push({type:'chroma',ch:chromaOf(st.active.acc,sr,st.active.acc.length*2,170,2000),t:st.active.t0})}ev.push({type:'off',p:st.active.p,dur:t-st.active.t0,ps:st.active.ps});st.active=null}st.last=t;st.pend={t0:t,peak:rms,frames:[],mags:[]}}
   st.env=st.env*.6+rms*.4;
@@ -737,7 +744,7 @@ function makeEar(sr){/* procesador puro (se puede probar sin micrófono): recibe
   if(st.active&&mag&&st.active.acc&&!st.active.chromaSent){mag.forEach((v,i)=>st.active.acc[i]+=v);if(t-st.active.t0>=.25)sendChroma(st.active)}
   if(st.active&&rms<Math.max(st.active.peak*.12,gate)){sendChroma(st.active);ev.push({type:'off',p:st.active.p,dur:t-st.active.t0,ps:st.active.ps});st.active=null}
   if(!st.active&&!st.pend)C.floor=C.floor*.98+Math.min(rms,.05)*.02;
-  return {ev,rms,flux}}
+  return {ev,rms,flux,lflux}}
  return {frame,C,st,velFromRms}}
 
 /* ---- micrófono en vivo ---- */
@@ -749,7 +756,7 @@ async function earStart(){if(EAR.on)return true;const a=ac();try{let st;try{st=a
  EAR.on=true;EAR.stream=st;EAR.an=an;EAR.ear=E;
  const sp=a.createScriptProcessor(2048,1,1),mute=a.createGain();mute.gain.value=0;RING.sr=a.sampleRate;RING.buf=new Float32Array(Math.ceil(a.sampleRate*3));RING.w=0;sp.onaudioprocess=e=>{const x=e.inputBuffer.getChannelData(0),B=RING.buf,n=B.length;for(let i=0;i<x.length;i++)B[(RING.w+i)%n]=x[i];RING.w+=x.length;RING.at=performance.now()};src.connect(sp);sp.connect(mute);mute.connect(a.destination);EAR.sp=sp;EAR.mute=mute;if(ACTIVE_KB&&Array.isArray(ACTIVE_KB.wantChord))bpLoad();
  EAR.iv=setInterval(()=>{an.getFloatTimeDomainData(td);an.getFloatFrequencyData(fd);for(let k=0;k<2048;k++)mag[k]=Math.pow(10,fd[k]/20)*4.8;
-  const t=a.currentTime;EAR.muted=t<APP_SOUND_UNTIL;const r=E.frame(td.subarray(2048),mag,t,{mute:EAR.muted});EAR.level=r.rms;
+  const t=a.currentTime;EAR.muted=t<APP_SOUND_UNTIL;const r=E.frame(td.subarray(2048),mag,t,{mute:EAR.muted,fast:!!(ACTIVE_KB&&ACTIVE_KB.wantTrill)});EAR.level=r.rms;
   r.ev.forEach(ev=>{if(ev.type==='on')EAR.last=ev;if(EAR.onEvent)EAR.onEvent(ev);earRoute(ev)});earHud()},23);
  return true}catch(e){toast('No pude usar el micrófono'+(e&&e.name?' ('+e.name+')':'')+'. Revisa el permiso del navegador.');return false}}
 function earStop(){if(!EAR.on)return;clearInterval(EAR.iv);try{EAR.sp&&EAR.sp.disconnect();EAR.mute&&EAR.mute.disconnect()}catch(e){}try{EAR.stream.getTracks().forEach(t=>t.stop())}catch(e){}EAR.on=false;earHud()}
@@ -791,10 +798,11 @@ function earRoute(ev){const K=ACTIVE_KB;if(!K)return;const want=Array.isArray(K.
   if(!J||J.K!==K)return;
   if(ev.type==='chroma'){J.ch=ev.ch;if(!J.done&&want.every(pc=>ev.ch[pc]>=.5))chordDecide(J);return}
   if(ev.type==='off'){J.dur=ev.dur;if(J.done)chordRelease(J);else chordBP(J)}return}
+ if(K.wantTrill){const [a,c]=K.wantTrill;if(ev.type==='on'){let q;const r=ev.rise;if(r&&Math.max(r[a%12],r[c%12])>=.2)q=r[a%12]>=r[c%12]?a:c;else q=EAR.trillLast===a?c:a;EAR.trillLast=q;EAR.trillQ=q;K.press(q,ev.vel,{silent:true,fromMic:true})}else if(ev.type==='off'&&EAR.trillQ!=null)K.release(EAR.trillQ,ev.dur);return}
  if(ev.type==='on')K.press(foldInto(ev.p,K.lo,K.hi),ev.vel,{silent:true,fromMic:true});
  else if(ev.type==='off')K.release(foldInto(ev.p,K.lo,K.hi),ev.dur)}
 function earHud(){const h=$('#earHud');if(!h)return;h.hidden=!EAR.on;if(!EAR.on)return;const lv=Math.min(1,Math.sqrt(EAR.level/.25));h.querySelector('i').style.width=(lv*100)+'%';const chordMode=ACTIVE_KB&&Array.isArray(ACTIVE_KB.wantChord);
- h.querySelector('span').textContent=EAR.muted?'Escuchando… (en pausa mientras suena la app)':chordMode&&EAR.thinking?'Analizando el acorde…':(chordMode&&EAR.heard)?'Oigo en el acorde: '+(EAR.heard.length?EAR.heard.map(x=>NAMES[x]).join(' · '):'…')+((()=>{const m=ACTIVE_KB.wantChord.filter(pc=>!EAR.heard.includes(pc));return m.length&&m.length<3?' (me falta '+m.map(x=>NAMES[x]).join(' y ')+')':''})()):chordMode&&BP.st==='loading'?'Preparando el oído para acordes…':EAR.last?'Escucho: '+nmOct(EAR.last.p):'Escuchando tu piano…'}
+ h.querySelector('span').textContent=EAR.muted?'Escuchando… (en pausa mientras suena la app)':chordMode&&EAR.thinking?'Analizando el acorde…':(chordMode&&EAR.heard)?'Oigo en el acorde: '+(EAR.heard.length?EAR.heard.map(x=>NAMES[x]).join(' · '):'…')+((()=>{const m=ACTIVE_KB.wantChord.filter(pc=>!EAR.heard.includes(pc));return m.length&&m.length<3?' (me falta '+m.map(x=>NAMES[x]).join(' y ')+')':''})()):chordMode&&BP.st==='loading'?'Preparando el oído para acordes…':(ACTIVE_KB&&ACTIVE_KB.wantTrill&&EAR.trillQ!=null)?'Trino · escucho: '+nmOct(EAR.trillQ):EAR.last?'Escucho: '+nmOct(EAR.last.p):'Escuchando tu piano…'}
 async function earCalibrate(){if(!(await earStart()))return;const steps=[['Silencio','Quédate en silencio 2 segundos para que mida el ruido de la sala.'],['Suave','Toca una nota suave (pianissimo).'],['Fuerte','Toca la misma nota con fuerza (forte).']];let i=0;const got={};
  const show=()=>{sheet(`<span class="eyebrow">Ajustar micrófono · ${i+1}/3</span><h2>${steps[i][0]}</h2><p>${steps[i][1]}</p><div class="meter"><i id="calm"></i></div><p class="small" id="cals">Escuchando…</p><button class="ghost" id="calskip" type="button">Usar valores normales</button>`);$('#calskip').onclick=()=>{EAR.onEvent=null;closeSheet()}};show();
  const meter=setInterval(()=>{const m=$('#calm');if(m)m.style.width=Math.min(100,Math.sqrt(EAR.level/.25)*100)+'%'},60);
@@ -1044,7 +1052,7 @@ const STEP={
   const lamps=()=>`<div class="lamps">${T.map((t,i)=>`<span class="lamp ${i<k?'on':i===k?'cur':''}"><svg viewBox="0 0 24 24" width="26" height="26" fill="${i<k?'#ffd56e':'none'}" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></span>`).join('')}</div>`;
   const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q)+plazaHTML()+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
    plazaLights();if(!t){return}chord=[];vels=[];trill=[];
-   const kbd=keyboard($('#kbh'),{lo:48,hi:72,labels:!!(t.chord&&k>0&&aidsOn()),dyn:true,onKey:(p,v)=>onKey(p,v,kbd),onRelease:(p,dur)=>onRel(p,dur)});kbd.wantChord=t.chord?PCS[t.chord]:null;if(EAR.on&&LS.L.steps.some(x=>x.type==='lights'&&x.tasks.some(y=>y.chord)))bpLoad();
+   const kbd=keyboard($('#kbh'),{lo:48,hi:72,labels:!!(t.chord&&k>0&&aidsOn()),dyn:true,onKey:(p,v)=>onKey(p,v,kbd),onRelease:(p,dur)=>onRel(p,dur)});kbd.wantChord=t.chord?PCS[t.chord]:null;kbd.wantTrill=t.do==='trill'?[64,65]:null;if(EAR.on&&LS.L.steps.some(x=>x.type==='lights'&&x.tasks.some(y=>y.chord)))bpLoad();
    const lh=$('#lhint');if(lh)lh.onclick=()=>{PCS[t.chord].forEach(pc=>{const p=[48,60].map(o=>o+pc).find(q=>q>=48&&q<=72);kbd.hint(p,true)})};foot(st.label||'Enciende las luces',()=>{},{disabled:true})};
   const done=(msg)=>{explain(msg);k++;LS.lightsDone=(LS.lightsDone||0)+1;plazaLights();const lp=box.querySelector('.lamps');if(lp)lp.outerHTML=lamps();if(k>=T.length){wake('lights',st.wakeMsg);foot('Continuar',next)}else foot('Siguiente luz',()=>draw())};
   const bad=(msg)=>{LS.miss+=.3;const fb=$('#fb');fb.className='fb on bad';fb.innerHTML=msg};
