@@ -118,6 +118,7 @@ main{position:relative;z-index:2}
 .mini{border:1px solid var(--line);background:none;border-radius:10px;padding:7px 10px;font:700 13px var(--body);cursor:pointer}
 .empty{color:var(--muted);font-size:15px}
 
+.microw{display:flex;gap:8px;margin-top:-4px}.micbtn{flex:1;border:1.5px solid var(--ok);background:rgba(95,208,164,.1);color:var(--ok);border-radius:12px;padding:10px;font:800 15px var(--body);cursor:pointer}.micbtn.on{background:rgba(95,208,164,.22)}.micbtn.sm{flex:none;font-size:13px;padding:10px 12px}#micb{display:none}
 .earhud{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ok);padding:4px 0}.earhud span{flex:none;max-width:70%}.earhud .meter{flex:1;height:6px}
 .scene{display:flex;justify-content:space-around;gap:6px;padding:6px 8px;border-radius:14px;background:rgba(241,230,207,.05);border:1px solid var(--line)}
 .sc{display:flex;flex-direction:column;align-items:center;gap:1px;color:rgba(241,230,207,.3);font-size:11px;transition:color .6s}.sc small{font-size:10px}
@@ -524,7 +525,7 @@ function micOff(){if(mic)mic.stop()}
 
 /* ===================== TECLADO ===================== */
 function keyboard(host,{lo,hi,labels,onKey,dyn,kind,onRelease}){
-  host.innerHTML='';const kb=document.createElement('div');kb.className='kb';host.appendChild(kb);
+  host.innerHTML='';if(typeof micRow==='function')micRow(host);const kb=document.createElement('div');kb.className='kb';host.appendChild(kb);
   const whites=[];for(let p=lo;p<=hi;p++)if(!isBlack(p))whites.push(p);const ww=100/whites.length,els={};
   whites.forEach((p,i)=>{const k=document.createElement('div');k.className='kw';k.style.left=(i*ww)+'%';k.style.width=ww+'%';k.dataset.p=p;if(labels)k.textContent=nm(p);kb.appendChild(k);els[p]=k});
   for(let p=lo;p<=hi;p++)if(isBlack(p)){const i=whites.indexOf(p-1);if(i<0)continue;const k=document.createElement('div');k.className='kbk';k.style.left=((i+1)*ww-ww*.3)+'%';k.style.width=(ww*.6)+'%';k.dataset.p=p;kb.appendChild(k);els[p]=k}
@@ -774,10 +775,16 @@ async function enableMidi(){if(midiOK)return true;if(!navigator.requestMIDIAcces
   acc.inputs.forEach(hook);acc.onstatechange=e=>{if(e.port.type==='input'&&e.port.state==='connected')hook(e.port)};midiOK=true;
   if(!acc.inputs.size)toast('MIDI activado. Conecta tu piano digital por USB o Bluetooth.');else toast('Piano MIDI conectado.');return true}catch(e){toast('No se pudo activar MIDI ('+(e.name||'error')+').');return false}}
 let micGlobal=false;
-async function applyInput(){micOff();earStop();micGlobal=false;const m=inputMode();
+async function applyInput(){setTimeout(()=>document.querySelectorAll('.microw').forEach(r=>micRow(r.previousElementSibling)),50);micOff();earStop();micGlobal=false;const m=inputMode();
  if(m==='mic'){micGlobal=await earStart();if(!micGlobal){S.input='touch';save()}else if(!S.micCal)earCalibrate()}
  if(m==='midi'){if(!(await enableMidi())){S.input='touch';save()}}
  syncLessonBar()}
+
+function micLabel(){return inputMode()==='mic'?'🎹 Volver al teclado de la pantalla':'🎤 Tocar con mi piano'}
+function micRow(host){if(!LS)return;let row=host.nextElementSibling;if(!row||!row.classList.contains('microw')){row=document.createElement('div');row.className='microw';host.after(row)}
+ row.innerHTML=`<button class="micbtn ${inputMode()==='mic'?'on':''}" type="button">${micLabel()}</button>${inputMode()==='mic'?'<button class="micbtn sm" type="button" data-cal>🎚 Ajustar</button>':''}`;
+ row.querySelector('.micbtn').onclick=async()=>{S.input=inputMode()==='mic'?'touch':'mic';save();await applyInput();document.querySelectorAll('.microw').forEach(r=>micRow(r.previousElementSibling));if(inputMode()==='mic')toast('Toca en tu piano: la app te escucha. Mira el indicador verde arriba.')};
+ const c=row.querySelector('[data-cal]');if(c)c.onclick=()=>earCalibrate()}
 function syncLessonBar(){const b=$('#lInput');if(b)b.textContent=({touch:'🎹',mic:'🎤',midi:'🎛'})[inputMode()];const a=$('#lAids');if(a){a.setAttribute('aria-pressed',aidsOn());a.style.opacity=aidsOn()?1:.45}}
 function lessonBarSetup(){const bar=$('.lhead');if(!bar||$('#lInput'))return;
  bar.insertAdjacentHTML('beforeend',`<button class="lx" id="lAids" type="button" aria-label="Ayudas visuales" title="Ayudas visuales">👁</button><button class="lx" id="lInput" type="button" aria-label="Elegir instrumento" title="Instrumento">🎹</button>`);
