@@ -747,21 +747,54 @@ async function earStart(){if(EAR.on)return true;const a=ac();try{let st;try{st=a
  const src=a.createMediaStreamSource(st),an=a.createAnalyser();an.fftSize=4096;an.smoothingTimeConstant=0;src.connect(an);
  const E=makeEar(a.sampleRate);if(S.micCal)Object.assign(E.C,S.micCal);const td=new Float32Array(4096),fd=new Float32Array(2048),mag=new Float32Array(2048);
  EAR.on=true;EAR.stream=st;EAR.an=an;EAR.ear=E;
+ const sp=a.createScriptProcessor(2048,1,1),mute=a.createGain();mute.gain.value=0;RING.sr=a.sampleRate;RING.buf=new Float32Array(Math.ceil(a.sampleRate*3));RING.w=0;sp.onaudioprocess=e=>{const x=e.inputBuffer.getChannelData(0),B=RING.buf,n=B.length;for(let i=0;i<x.length;i++)B[(RING.w+i)%n]=x[i];RING.w+=x.length;RING.at=performance.now()};src.connect(sp);sp.connect(mute);mute.connect(a.destination);EAR.sp=sp;EAR.mute=mute;if(ACTIVE_KB&&Array.isArray(ACTIVE_KB.wantChord))bpLoad();
  EAR.iv=setInterval(()=>{an.getFloatTimeDomainData(td);an.getFloatFrequencyData(fd);for(let k=0;k<2048;k++)mag[k]=Math.pow(10,fd[k]/20)*4.8;
   const t=a.currentTime;EAR.muted=t<APP_SOUND_UNTIL;const r=E.frame(td.subarray(2048),mag,t,{mute:EAR.muted});EAR.level=r.rms;
   r.ev.forEach(ev=>{if(ev.type==='on')EAR.last=ev;if(EAR.onEvent)EAR.onEvent(ev);earRoute(ev)});earHud()},23);
  return true}catch(e){toast('No pude usar el micrófono'+(e&&e.name?' ('+e.name+')':'')+'. Revisa el permiso del navegador.');return false}}
-function earStop(){if(!EAR.on)return;clearInterval(EAR.iv);try{EAR.stream.getTracks().forEach(t=>t.stop())}catch(e){}EAR.on=false;earHud()}
+function earStop(){if(!EAR.on)return;clearInterval(EAR.iv);try{EAR.sp&&EAR.sp.disconnect();EAR.mute&&EAR.mute.disconnect()}catch(e){}try{EAR.stream.getTracks().forEach(t=>t.stop())}catch(e){}EAR.on=false;earHud()}
+/* ---- segundo oído para acordes: red neuronal Basic Pitch (Spotify, licencia Apache-2.0), entrenada con pianos reales ---- */
+const RING={buf:null,sr:0,w:0,at:0};
+function ringLast(sec){if(!RING.buf)return new Float32Array(0);const L=RING.buf.length,n=Math.min(L,Math.floor(sec*RING.sr),RING.w),out=new Float32Array(n);for(let i=0;i<n;i++)out[i]=RING.buf[(RING.w-n+i)%L];return out}
+function resample22(x,sr){const r=sr/22050;if(Math.abs(r-1)<1e-6)return x;const n=Math.floor(x.length/r),y=new Float32Array(n),h=Math.max(.5,r/2);for(let i=0;i<n;i++){const c=i*r,a=Math.max(0,Math.ceil(c-h)),b=Math.min(x.length-1,Math.floor(c+h));let s=0;for(let j=a;j<=b;j++)s+=x[j];y[i]=s/(b-a+1)}return y}
+const BP={st:'off',model:null,p:null};
+function bpLoad(){if(BP.p)return BP.p;BP.st='loading';BP.p=(async()=>{
+  if(!window.tf)await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.22.0/tf.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)});
+  try{await tf.setBackend('webgl')}catch(e){}await tf.ready();
+  const m=await tf.loadGraphModel(BASE+'bp/model.json');
+  const z=tf.zeros([1,43844,1]),o=m.execute(z,['Identity_1','Identity_2']);await o[0].data();o.forEach(t=>t.dispose());z.dispose();
+  BP.model=m;BP.st='ready';earHud();return m})().catch(e=>{BP.st='fail';console.warn('Basic Pitch',e);return null});return BP.p}
+async function bpScores(x){/* devuelve la presencia (0–1) de cada nota Do…Si, sumando octavas */
+  let pk=0;for(let i=0;i<x.length;i++)pk=Math.max(pk,Math.abs(x[i]));const g=pk>1e-4?.6/pk:1;
+  const inp=new Float32Array(43844),n=Math.min(43844,x.length);for(let i=0;i<n;i++)inp[i]=x[i]*g;
+  const t=tf.tensor(inp,[1,43844,1]),o=BP.model.execute(t,['Identity_1','Identity_2']);const fr=await o[0].data(),on=await o[1].data();t.dispose();o.forEach(q=>q.dispose());
+  const k0=Math.floor(.1*86),k1=Math.min(172,Math.ceil(n/256)+2),pc=new Array(12).fill(0);
+  for(let k=k0;k<k1;k++)for(let p=0;p<88;p++){const v=Math.max(fr[k*88+p],on[k*88+p]*.8),c=(p+21)%12;if(v>pc[c])pc[c]=v}return pc}
+async function chordBP(J){if(J.done||J.bpRun)return;clearTimeout(J.timer);const el=(performance.now()-J.t0)/1000;
+  if(el<.3){J.timer=setTimeout(()=>chordBP(J),(.3-el)*1000+10);return}J.bpRun=true;
+  if(BP.st==='ready'&&RING.buf){EAR.thinking=true;earHud();try{const raw=ringLast(Math.min(1.9,el+.15+(performance.now()-RING.at)/1000));J.bp=await bpScores(resample22(raw,RING.sr))}catch(e){console.warn(e)}EAR.thinking=false}
+  chordDecide(J)}
+function chordDecide(J){if(J.done)return;J.done=true;clearTimeout(J.timer);const want=J.want,ch=J.ch,bp=J.bp;
+  const present=want.filter(pc=>(bp&&bp[pc]>=.4)||(ch&&ch[pc]>=.3));
+  const extras=[];for(let i=0;i<12;i++)if(!want.includes(i)&&(bp?bp[i]>=.6:(ch&&ch[i]>=.85)))extras.push(i);
+  EAR.heard=present.concat(extras);EAR.lastChord={bp,ch};earHud();
+  const K=J.K;if(ACTIVE_KB!==K)return;const noteFor=pc=>{let q=48+pc;while(q<K.lo)q+=12;while(q>K.hi)q-=12;return q};
+  const send=present.length<want.length&&extras.length?present.concat(extras):present;
+  J.down=send.map(noteFor);J.down.forEach(q=>K.press(q,J.vel||.7,{silent:true,fromMic:true}));
+  if(J.dur!=null)chordRelease(J)}
+function chordRelease(J){const K=J.K;if(ACTIVE_KB!==K||!J.down)return;EAR.chordDur=J.dur;J.down.forEach(q=>K.release(q,J.dur));EAR.chordDur=null;J.down=null}
 function earRoute(ev){const K=ACTIVE_KB;if(!K)return;const want=Array.isArray(K.wantChord)?K.wantChord:null;
- const noteFor=pc=>{let q=48+pc;while(q<K.lo)q+=12;while(q>K.hi)q-=12;return q};
- if(want){if(ev.type==='on'){EAR.chordVel=ev.vel;return}
-  if(ev.type==='chroma'){const ch=ev.ch,present=want.filter(pc=>ch[pc]>=.3),extras=[...ch].map((v,i)=>[v,i]).filter(x=>!want.includes(x[1])&&x[0]>=.85).map(x=>x[1]);EAR.heard=present.concat(extras);
-   const send=present.length<want.length&&extras.length?present.concat(extras):present;send.forEach(pc=>{const q=noteFor(pc);if(!EAR.chordDown.includes(q)){EAR.chordDown.push(q);K.press(q,EAR.chordVel||.7,{silent:true,fromMic:true})}});return}
-  if(ev.type==='off'){EAR.chordDown.forEach(q=>K.release(q,ev.dur));EAR.chordDown=[];return}return}
+ if(want){const J=EAR.cj;
+  if(ev.type==='on'){if(J&&!J.done){J.dur=J.dur!=null?J.dur:(performance.now()-J.t0)/1000;chordDecide(J)}
+   const nj={t0:performance.now(),vel:ev.vel,ch:null,bp:null,dur:null,done:false,want,K};EAR.cj=nj;EAR.heard=null;
+   if(BP.st==='off')bpLoad();nj.timer=setTimeout(()=>chordBP(nj),650);return}
+  if(!J||J.K!==K)return;
+  if(ev.type==='chroma'){J.ch=ev.ch;if(!J.done&&want.every(pc=>ev.ch[pc]>=.5))chordDecide(J);return}
+  if(ev.type==='off'){J.dur=ev.dur;if(J.done)chordRelease(J);else chordBP(J)}return}
  if(ev.type==='on')K.press(foldInto(ev.p,K.lo,K.hi),ev.vel,{silent:true,fromMic:true});
  else if(ev.type==='off')K.release(foldInto(ev.p,K.lo,K.hi),ev.dur)}
-function earHud(){const h=$('#earHud');if(!h)return;h.hidden=!EAR.on;if(!EAR.on)return;const lv=Math.min(1,Math.sqrt(EAR.level/.25));h.querySelector('i').style.width=(lv*100)+'%';
- h.querySelector('span').textContent=EAR.muted?'Escuchando… (en pausa mientras suena la app)':(ACTIVE_KB&&Array.isArray(ACTIVE_KB.wantChord)&&EAR.heard)?'Oigo en el acorde: '+(EAR.heard.length?EAR.heard.map(x=>NAMES[x]).join(' · '):'…'):EAR.last?'Escucho: '+nmOct(EAR.last.p):'Escuchando tu piano…'}
+function earHud(){const h=$('#earHud');if(!h)return;h.hidden=!EAR.on;if(!EAR.on)return;const lv=Math.min(1,Math.sqrt(EAR.level/.25));h.querySelector('i').style.width=(lv*100)+'%';const chordMode=ACTIVE_KB&&Array.isArray(ACTIVE_KB.wantChord);
+ h.querySelector('span').textContent=EAR.muted?'Escuchando… (en pausa mientras suena la app)':chordMode&&EAR.thinking?'Analizando el acorde…':(chordMode&&EAR.heard)?'Oigo en el acorde: '+(EAR.heard.length?EAR.heard.map(x=>NAMES[x]).join(' · '):'…')+((()=>{const m=ACTIVE_KB.wantChord.filter(pc=>!EAR.heard.includes(pc));return m.length&&m.length<3?' (me falta '+m.map(x=>NAMES[x]).join(' y ')+')':''})()):chordMode&&BP.st==='loading'?'Preparando el oído para acordes…':EAR.last?'Escucho: '+nmOct(EAR.last.p):'Escuchando tu piano…'}
 async function earCalibrate(){if(!(await earStart()))return;const steps=[['Silencio','Quédate en silencio 2 segundos para que mida el ruido de la sala.'],['Suave','Toca una nota suave (pianissimo).'],['Fuerte','Toca la misma nota con fuerza (forte).']];let i=0;const got={};
  const show=()=>{sheet(`<span class="eyebrow">Ajustar micrófono · ${i+1}/3</span><h2>${steps[i][0]}</h2><p>${steps[i][1]}</p><div class="meter"><i id="calm"></i></div><p class="small" id="cals">Escuchando…</p><button class="ghost" id="calskip" type="button">Usar valores normales</button>`);$('#calskip').onclick=()=>{EAR.onEvent=null;closeSheet()}};show();
  const meter=setInterval(()=>{const m=$('#calm');if(m)m.style.width=Math.min(100,Math.sqrt(EAR.level/.25)*100)+'%'},60);
@@ -847,7 +880,7 @@ function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastCom
 function exitLesson(){micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;drawMap()}
 $('#lClose').onclick=()=>{if(!LS)return;sheet(`<h2>¿Salir de la lección?</h2><p>Perderás el avance de esta lección.</p><button class="cta" id="q1" type="button">Salir</button><button class="ghost" id="q2" type="button">Seguir aprendiendo</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet};
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
-function next(){if(!micGlobal)micOff();EAR.chordDown=[];LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
+function next(){if(!micGlobal)micOff();EAR.chordDown=[];EAR.cj=null;EAR.heard=null;LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
 function head(ph,q,sub){return `<span class="lphase">${esc(ph)}</span>${q?`<p class="lq">${esc(q)}</p>`:''}${sub?`<p class="ltext" style="font-size:15px;color:var(--muted)">${esc(sub)}</p>`:''}`}
 function renderStep(){const st=LS.L.steps[LS.i],box=$('#lStage');$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
  (STEP[st.type]||STEP.story)(st,box);$('.lbody').scrollTop=0}
@@ -1011,7 +1044,7 @@ const STEP={
   const lamps=()=>`<div class="lamps">${T.map((t,i)=>`<span class="lamp ${i<k?'on':i===k?'cur':''}"><svg viewBox="0 0 24 24" width="26" height="26" fill="${i<k?'#ffd56e':'none'}" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></span>`).join('')}</div>`;
   const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q)+plazaHTML()+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
    plazaLights();if(!t){return}chord=[];vels=[];trill=[];
-   const kbd=keyboard($('#kbh'),{lo:48,hi:72,labels:!!(t.chord&&k>0&&aidsOn()),dyn:true,onKey:(p,v)=>onKey(p,v,kbd),onRelease:(p,dur)=>onRel(p,dur)});kbd.wantChord=t.chord?PCS[t.chord]:null;
+   const kbd=keyboard($('#kbh'),{lo:48,hi:72,labels:!!(t.chord&&k>0&&aidsOn()),dyn:true,onKey:(p,v)=>onKey(p,v,kbd),onRelease:(p,dur)=>onRel(p,dur)});kbd.wantChord=t.chord?PCS[t.chord]:null;if(EAR.on&&LS.L.steps.some(x=>x.type==='lights'&&x.tasks.some(y=>y.chord)))bpLoad();
    const lh=$('#lhint');if(lh)lh.onclick=()=>{PCS[t.chord].forEach(pc=>{const p=[48,60].map(o=>o+pc).find(q=>q>=48&&q<=72);kbd.hint(p,true)})};foot(st.label||'Enciende las luces',()=>{},{disabled:true})};
   const done=(msg)=>{explain(msg);k++;LS.lightsDone=(LS.lightsDone||0)+1;plazaLights();const lp=box.querySelector('.lamps');if(lp)lp.outerHTML=lamps();if(k>=T.length){wake('lights',st.wakeMsg);foot('Continuar',next)}else foot('Siguiente luz',()=>draw())};
   const bad=(msg)=>{LS.miss+=.3;const fb=$('#fb');fb.className='fb on bad';fb.innerHTML=msg};
@@ -1023,7 +1056,7 @@ const STEP={
     if(trill.length>=10){const gaps=trill.slice(1).map((x,i)=>x.t-trill[i].t),avg=gaps.reduce((s,x)=>s+x,0)/gaps.length;if(avg<260)done('<b>¡Las notas bailan!</b>Eso es un <i>trino</i>: alternar rápidamente una nota con su vecina de arriba. Era uno de los adornos favoritos de los músicos del Renacimiento y el Barroco.');else{bad('<b>Más rápido</b>Alterna Mi y Fa cada vez más deprisa.');trill=[]}}return}
    if(t.chord){if(!chord.length)chordT=now();if(!chord.some(q=>q%12===p%12))chord.push(p);held[p]=true;if(chord.length>=3){const ok=chord.map(q=>q%12).sort((x,y)=>x-y).join()===[...PCS[t.chord]].sort((x,y)=>x-y).join();if(!ok){bad(`<b>No es ${CN[t.chord]}</b>Sus notas son ${PCS[t.chord].map(x=>NAMES[x]).join(', ')}. Usa “Ver las notas del acorde” si lo necesitas.`);chord=[];held={}}else chord.ok=true}}}
   function now(){return performance.now()}
-  function onRel(p,dur){const t=T[k];if(!t||!t.chord)return;delete held[p];if(!chord.ok||Object.keys(held).length)return;const total=(now()-chordT)/1000;
+  function onRel(p,dur){const t=T[k];if(!t||!t.chord)return;delete held[p];if(!chord.ok||Object.keys(held).length)return;const total=EAR.chordDur!=null?EAR.chordDur:(now()-chordT)/1000;
    const art=t.art;if(!art){done(`<b>¡${CN[t.chord]}!</b>${t.chord==='C'?'Do, Mi y Sol. Es una tercera mayor (Do–Mi) más una tercera menor (Mi–Sol): uno de los acordes fundamentales de la música occidental.':t.chord==='F'?'Fa, La y Do. En la tonalidad de Do mayor, Fa mayor puede funcionar como acorde IV, preparando el camino hacia otros acordes como Sol o Do.':'Sol, Si y Re. En Do mayor funciona como acorde V: crea tensión que pide volver a Do.'}`);chord=[];return}
    if(art==='s'){total<.45?done(`<b>¡Luz intermitente!</b>Tocaste ${CN[t.chord]} <i>staccato</i>: notas separadas y breves.`):bad(`<b>Demasiado largo</b>Para staccato toca el acorde y suéltalo enseguida (mantuviste ${total.toFixed(2)} s).`)}
    else{total>.8?done(`<b>¡Luz continua!</b>Ahora fue <i>legato</i>: el sonido se mantiene y se conecta, sin cortes.`):bad(`<b>Demasiado corto</b>Para legato mantén el acorde (lo mantuviste ${total.toFixed(2)} s; intenta más de 0,8 s).`)}chord=[]}
@@ -1151,6 +1184,7 @@ const cv=$('#dust'),cx=cv.getContext('2d');let DW,DH,parts=[];
 function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*devicePixelRatio;parts=Array.from({length:40},()=>({x:Math.random()*DW,y:Math.random()*DH,r:(Math.random()*1.6+.4)*devicePixelRatio,s:Math.random()*.25+.05,a:Math.random()*6}))}rs();addEventListener('resize',rs);
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
+if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB}};
 })();
 </script>
 </body></html>
