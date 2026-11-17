@@ -217,7 +217,7 @@ main{position:relative;z-index:2}
 .lscene.charsc .ls{filter:brightness(.55) blur(1.5px)}
 .chr{position:absolute;left:50%;bottom:0;height:56%;transform:translateX(-50%);z-index:4}
 .chr svg{height:100%;width:auto;filter:drop-shadow(0 16px 26px rgba(0,0,0,.7))}
-.gold{position:absolute;inset:0;z-index:4;pointer-events:none;background-image:radial-gradient(2px 2px at 20% 80%,#ffe7a8,transparent),radial-gradient(2px 2px at 70% 60%,#ffe7a8,transparent),radial-gradient(3px 3px at 40% 40%,#fff1c9,transparent),radial-gradient(2px 2px at 85% 30%,#ffe7a8,transparent),radial-gradient(2px 2px at 10% 35%,#ffe7a8,transparent),radial-gradient(3px 3px at 55% 75%,#fff1c9,transparent);background-size:100% 100%;animation:goldUp 7s linear infinite;opacity:.9}
+.goldfx{position:absolute;inset:0;z-index:4;pointer-events:none;background-image:radial-gradient(2px 2px at 20% 80%,#ffe7a8,transparent),radial-gradient(2px 2px at 70% 60%,#ffe7a8,transparent),radial-gradient(3px 3px at 40% 40%,#fff1c9,transparent),radial-gradient(2px 2px at 85% 30%,#ffe7a8,transparent),radial-gradient(2px 2px at 10% 35%,#ffe7a8,transparent),radial-gradient(3px 3px at 55% 75%,#fff1c9,transparent);background-size:100% 100%;animation:goldUp 7s linear infinite;opacity:.9}
 @keyframes goldUp{from{background-position:0 0,0 0,0 0,0 0,0 0,0 0}to{background-position:0 -300px,0 -420px,0 -260px,0 -380px,0 -330px,0 -460px}}
 .spirit{position:absolute;left:50%;top:14%;width:34%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,240,200,.95),rgba(255,214,140,.45) 40%,transparent 70%);z-index:4;animation:spirit 4s ease-in-out infinite;mix-blend-mode:screen}
 @keyframes spirit{50%{transform:translateX(-50%) scale(1.15);opacity:.8}}
@@ -260,6 +260,7 @@ main{position:relative;z-index:2}
 .luz.glow{width:9%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,240,200,1) 0,rgba(255,200,115,.85) 16%,rgba(255,170,80,.28) 42%,transparent 70%)}
 .luz.pool{aspect-ratio:3/1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(255,190,110,.5),transparent 70%)}
 .cut .chr{bottom:13%;height:52%}
+.lscene.charsc.dusk .ls{filter:brightness(.78) blur(1.2px) saturate(.9)}
 </style>
 
 <div id="sky"></div>
@@ -361,7 +362,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
    {type:'water',who:'matteo',ph:'Acto III · El agua que fluye',q:'Una antigua secuencia rítmica aparece en la fuente.',sub:'—Repítela de memoria. El agua recordará su movimiento.',n:4,hidden:true,win:'¡El ritmo ha regresado!',why:'Para recordar un ritmo, divídelo en grupos pequeños.'},
    {type:'scene',img:'fuente',fx:'water',who:'matteo',lines:['Una pequeña corriente empieza a recorrer la fuente.','Matteo contempla el agua.','—La ciudad empieza a recordar cómo latir.']},
    /* ACTO IV · LA PLAZA EN SILENCIO */
-   {type:'scene',act:['Acto IV','La plaza en silencio'],img:'plaza',who:'matteo',move:'zoom',lines:['Al caer la noche, Matteo te lleva de nuevo a la plaza.','—Las luces representan aquello que da vida a la música: su expresión.']},
+   {type:'scene',night:true,act:['Acto IV','La plaza en silencio'],img:'plaza',who:'matteo',move:'zoom',lines:['Al caer la noche, Matteo te lleva de nuevo a la plaza.','—Las luces representan aquello que da vida a la música: su expresión.']},
    {type:'lights',who:'matteo',ph:'Acto IV · La plaza en silencio',q:'—No basta con tocar las notas correctas. También hay que controlar su intensidad.',tasks:[{do:'soft',say:'Toca una nota suave (piano)'},{do:'strong',say:'Ahora una nota fuerte (forte)'}]},
    {type:'lights',who:'matteo',ph:'Acto IV · La plaza en silencio',q:'Matteo encuentra una antigua anotación musical.',sub:'—La ceremonia también necesita armonía. Empecemos con Do mayor.',tasks:[{chord:'C',say:'Construye Do mayor: Do, Mi y Sol a la vez'}]},
    {type:'lights',who:'violin',ph:'Acto IV · La plaza en silencio',q:'La violinista se prepara para tocar.',sub:'—Hay notas que deben sonar separadas y otras que necesitan permanecer conectadas.',tasks:[{chord:'C',art:'s',say:'Do mayor staccato: tócalo y suéltalo enseguida'},{chord:'C',art:'l',say:'Do mayor legato: mantenlo sonando'}]},
@@ -1054,6 +1055,7 @@ const SCN_AR={llegada:'896/1200',entrada:'895/1200',dormida:'941/1672',plaza:'94
 /* imágenes de cada escena: cuando lleguen las de Gemini (verticales) basta con poner {full:'ruta'} */
 const SCN={};
 function plazaOn(extra='',o={}){return plazaHTML(Object.assign({},o,{on:true,extra}))}
+function isNight(){if(!LS)return true;const n=LS.L.steps.findIndex(s=>s.night);return n<0||LS.i>=n}
 function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><div class="ls" style="background-image:url(${R.full})"></div></div>`;const img=f=>`<div class="lscene"><div class="ls" style="background-image:url(${V()}${f}.webp)"></div></div>`;
  switch(k){
   case 'llegada':return img('llegada');
@@ -1064,9 +1066,9 @@ function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><di
   case 'fuente':return layered({sky:V()+'cielo.webp',fg:V()+'fuente_fg.webp',clouds:4,top0:-2,top1:18,op:.7,extra:'<canvas class="water" data-cfg="full"></canvas>'});
   case 'plaza':return plazaHTML();
   case 'plaza_on':return plazaOn();
-  case 'escenario':return plazaOn('<div class="stagewood"></div>');
+  case 'escenario':return isNight()?plazaOn('<div class="stagewood"></div>'):`<div class="lscene"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="stagewood"></div></div>`;
   case 'final':return img('final');
-  case 'matteo':case 'violin':case 'flauta':case 'laud':return plazaOn('<div class="chr">'+charHTML(k)+'</div>',{cls:'charsc'});
+  case 'matteo':case 'violin':case 'flauta':case 'laud':return isNight()?plazaOn('<div class="chr">'+charHTML(k)+'</div>',{cls:'charsc'}):`<div class="lscene charsc dusk"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="chr">${charHTML(k)}</div></div>`;
   default:if(k&&k.startsWith('art:'))return `<div class="lscene solo"><div style="position:absolute;inset:14% 12% 34%;display:grid;place-items:center">${art(k.slice(4))}</div></div>`;
  }return `<div class="lscene solo"></div>`}
 /* máquina de escribir */
@@ -1088,7 +1090,7 @@ function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];c
 const STEP={
  scene(st,box){/* escena de historia a pantalla completa: imagen + narración letra a letra; tocar para avanzar */
   const lines=(st.lines||[]).filter(Boolean);let li=-1,tw=null,actOn=!!st.act,FWc=null;
-  box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in" style="aspect-ratio:${SCN_AR[st.img]||'1200/896'}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="gold"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
+  box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in" style="aspect-ratio:${SCN_AR[st.img]||'1200/896'}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="goldfx"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
    <div class="cut-say" id="csay"><div class="cs-who" hidden></div><p class="cs-line"></p><span class="cs-next" hidden>${st.accept?'':'Continuar ▸'}</span>${st.accept?`<button class="cta gold cs-acc" type="button" hidden>${esc(st.accept)}</button>`:''}</div>`;
   const say=$('#csay'),ln=say.querySelector('.cs-line'),wh=say.querySelector('.cs-who'),nx=say.querySelector('.cs-next'),acc=say.querySelector('.cs-acc');
   const cv=box.querySelector('canvas.water');if(cv){setTimeout(()=>{FWc=fountainWater(cv,FCFG[cv.dataset.cfg]);if(st.fx==='water'||st.img==='final'){FWc.fill(1);FWc.all(true)}else if(LS.scene&&LS.scene.water){FWc.fill(1);FWc.all(true)}},60)}
