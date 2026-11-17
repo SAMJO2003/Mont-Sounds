@@ -244,6 +244,22 @@ main{position:relative;z-index:2}
 .rrow .rg i{display:block;height:10px;border-radius:3px;background:var(--gold)}
 .rrow .rg i.s{width:12px}.rrow .rg i.l{width:34px}
 .rrow .rg.on{background:rgba(232,194,122,.18)}
+
+/* arte de Gemini (Módulo 01 Florencia) */
+.bellfield.v2{aspect-ratio:768/720}.bellfield.v2 .ls{background-size:cover;background-position:center top}
+.lscene.fuente{aspect-ratio:941/940}
+.chr .chw{position:relative;display:inline-block;height:100%}
+.chw img{height:100%;width:auto;display:block;transform-origin:50% 100%;animation:breathe 4.2s ease-in-out infinite;filter:drop-shadow(0 14px 22px rgba(0,0,0,.65))}
+@keyframes breathe{50%{transform:scaleY(1.012) translateY(-1px)}}
+.chw .lglow{position:absolute;left:26.5%;top:44.5%;width:34%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,220,150,.8),rgba(255,180,90,.28) 42%,transparent 70%);mix-blend-mode:screen;animation:lflick 1.6s ease-in-out infinite alternate;pointer-events:none}
+@keyframes lflick{0%{opacity:.75;transform:translate(-50%,-50%) scale(.96)}40%{opacity:1}100%{opacity:.85;transform:translate(-50%,-50%) scale(1.06)}}
+.mstage.playing .chw img{animation:sway .5s ease-in-out infinite alternate}
+.mstage{aspect-ratio:1/.92}.mstage .chr{height:88%;bottom:2%}.mstage.trio .chr{height:72%}
+.pt{width:34px;height:34px;border-radius:50%;background-size:250%;background-position:50% 5%;background-color:#1c1712;border:1px solid rgba(232,194,122,.5);flex:none;display:inline-block}
+.pt.laud{background-position:50% 2%}.pt.violin{background-position:58% 4%}
+.luz.glow{width:9%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,240,200,1) 0,rgba(255,200,115,.85) 16%,rgba(255,170,80,.28) 42%,transparent 70%)}
+.luz.pool{aspect-ratio:3/1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(ellipse,rgba(255,190,110,.5),transparent 70%)}
+.cut .chr{bottom:13%;height:52%}
 </style>
 
 <div id="sky"></div>
@@ -335,7 +351,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
    {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'—Cada campana tiene una altura diferente.',sub:'Escucha las dos campanas y encuentra la más grave.',mode:'low',n:2,gap:9,lo:48,hi:84,win:'¡Has reconocido el sonido más grave!'},
    {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'La primera campana responde. Matteo señala otras.',sub:'—Ahora debemos encontrar la voz más aguda.',mode:'high',n:3,gap:5,lo:52,hi:84,win:'¡La campana más aguda ha respondido!'},
    {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'Matteo descubre una antigua secuencia grabada en el mecanismo.',sub:'—Las campanas deben sonar de la más grave a la más aguda.',mode:'order',n:4,gap:3,lo:55,hi:79,win:'¡La secuencia está en orden!',why:'Ordenar sonidos por altura es la base de las escalas: de grave a agudo, como subir una escalera.'},
-   {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'Las campanas empiezan a responder, pero una nota interrumpe la secuencia.',sub:'—Hay algo que no pertenece aquí. Encuéntralo.',mode:'broken',n:5,step:2,win:'¡Has encontrado la campana equivocada!',why:'Escuchar patrones te permite notar cuando algo “no encaja”.'},
+   {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'Las campanas empiezan a responder, pero una nota interrumpe la secuencia.',sub:'—Hay algo que no pertenece aquí. Encuéntralo.',mode:'broken',n:4,step:2,win:'¡Has encontrado la campana equivocada!',why:'Escuchar patrones te permite notar cuando algo “no encaja”.'},
    {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'Una tenue luz aparece en el campanario.',sub:'—La primera llamada está casi lista. Repite la secuencia de las campanas en el mismo orden.',mode:'repeat',n:4,len:3,gap:4,lo:55,hi:81,win:'¡El campanario ha despertado!',why:'Recordar y repetir una secuencia de alturas es exactamente lo que haces al aprender una melodía.'},
    /* ACTO III · EL AGUA QUE FLUYE */
    {type:'scene',act:['Acto III','El agua que fluye'],img:'fuente',who:'matteo',move:'zoom',lines:['Matteo te conduce hasta la fuente.','—Las campanas han despertado, pero todavía falta recuperar el pulso de la ciudad.']},
@@ -986,19 +1002,20 @@ function cloudsHTML(n,top0,top1,op){let h='';const r=rng(n*31+7);for(let i=0;i<n
 function layered({sky,fg,clouds=4,top0=2,top1=30,op=.85,cls='',extra=''}){return `<div class="lscene ${cls}"><div class="ls ls-sky" style="background-image:url(${sky})"></div><div class="ls ls-clouds">${cloudsHTML(clouds,top0,top1,op)}</div><div class="ls ls-fg" style="background-image:url(${fg})"></div>${extra}</div>`}
 /* agua animada de la fuente (coordenadas de la imagen 1200×896) */
 const SPOUTS=[{x:602,y:420,vx:0,vy:40,tx:602},{x:338,y:466,vx:-70,vy:30},{x:866,y:466,vx:70,vy:30}];
-function fountainWater(canvas){const ctx=canvas.getContext('2d');const st={level:0,target:0,flow:[0,0,0],want:[0,0,0],drops:[],rip:[],alive:true,t:0};
+const FCFG={old:{W:1200,H:896,sp:SPOUTS,cx:602,cy:752,rx:338,ry:40,s0:785,s1:44},top:{W:941,H:940,sp:[{x:470,y:372,vx:0,vy:30},{x:298,y:385,vx:-85,vy:15},{x:643,y:385,vx:85,vy:15}],cx:470,cy:678,rx:392,ry:30,s0:708,s1:30},full:{W:941,H:1672,sp:[{x:470,y:892,vx:0,vy:30},{x:298,y:905,vx:-85,vy:15},{x:643,y:905,vx:85,vy:15}],cx:470,cy:1198,rx:392,ry:30,s0:1228,s1:30}};
+function fountainWater(canvas,C){C=C||FCFG.old;const ctx=canvas.getContext('2d');const st={level:0,target:0,flow:[0,0,0],want:[0,0,0],drops:[],rip:[],alive:true,t:0};
  const fit=()=>{const r=canvas.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);canvas.width=Math.max(1,r.width*d);canvas.height=Math.max(1,r.height*d)};fit();
- const S=()=>canvas.width/1200;let last=performance.now();
- function frame(t){if(!st.alive||!canvas.isConnected){st.alive=false;return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;st.t+=dt;const k=S();ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,1200,896);
+ const S=()=>canvas.width/C.W;let last=performance.now();
+ function frame(t){if(!st.alive||!canvas.isConnected){st.alive=false;return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;st.t+=dt;const k=S();ctx.setTransform(k,0,0,k,0,0);ctx.clearRect(0,0,C.W,C.H);
   st.level+=(st.target-st.level)*Math.min(1,dt*.8);for(let i=0;i<3;i++)st.flow[i]+=(st.want[i]-st.flow[i])*Math.min(1,dt*10);
-  const surf=785-44*st.level;
+  const surf=C.s0-C.s1*st.level;
   // superficie del estanque (recortada al interior de la pila)
-  if(st.level>.02){ctx.save();ctx.beginPath();ctx.ellipse(602,752,338,40,0,0,Math.PI*2);ctx.clip();
-   const g=ctx.createLinearGradient(0,surf-30,0,surf+40);g.addColorStop(0,`rgba(150,205,225,${.55*st.level})`);g.addColorStop(1,`rgba(40,95,120,${.7*st.level})`);ctx.fillStyle=g;ctx.fillRect(250,surf-6,710,120);
-   ctx.strokeStyle=`rgba(255,240,215,${.35*st.level})`;ctx.lineWidth=2;for(let i=0;i<7;i++){const yy=surf+4+i*6,ph=st.t*1.6+i;ctx.beginPath();for(let x=270;x<=935;x+=10){const y=yy+Math.sin(x*.035+ph)*1.6;x===270?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()}
+  if(st.level>.02){ctx.save();ctx.beginPath();ctx.ellipse(C.cx,C.cy,C.rx,C.ry,0,0,Math.PI*2);ctx.clip();
+   const g=ctx.createLinearGradient(0,surf-30,0,surf+40);g.addColorStop(0,`rgba(150,205,225,${.55*st.level})`);g.addColorStop(1,`rgba(40,95,120,${.7*st.level})`);ctx.fillStyle=g;ctx.fillRect(C.cx-C.rx-10,surf-6,C.rx*2+20,160);
+   ctx.strokeStyle=`rgba(255,240,215,${.35*st.level})`;ctx.lineWidth=2;for(let i=0;i<7;i++){const yy=surf+4+i*6,ph=st.t*1.6+i;ctx.beginPath();for(let x=C.cx-C.rx;x<=C.cx+C.rx;x+=10){const y=yy+Math.sin(x*.035+ph)*1.6;x===C.cx-C.rx?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()}
    st.rip=st.rip.filter(r=>r.a>0);for(const r of st.rip){r.r+=60*dt;r.a-=dt*.9;ctx.strokeStyle=`rgba(230,245,255,${Math.max(0,r.a)*.6})`;ctx.lineWidth=1.6;ctx.beginPath();ctx.ellipse(r.x,surf+6,r.r,r.r*.18,0,0,Math.PI*2);ctx.stroke()}ctx.restore()}
   // chorros: gotas con gravedad
-  SPOUTS.forEach((s,i)=>{const f=st.flow[i];if(f<.03)return;const n=Math.ceil(f*7);for(let j=0;j<n;j++)st.drops.push({x:s.x+(Math.random()-.5)*4,y:s.y+Math.random()*3,vx:s.vx*(.85+Math.random()*.3)+(Math.random()-.5)*14,vy:s.vy+Math.random()*25,s:i,r:1.6+Math.random()*2.2});
+  C.sp.forEach((s,i)=>{const f=st.flow[i];if(f<.03)return;const n=Math.ceil(f*7);for(let j=0;j<n;j++)st.drops.push({x:s.x+(Math.random()-.5)*4,y:s.y+Math.random()*3,vx:s.vx*(.85+Math.random()*.3)+(Math.random()-.5)*14,vy:s.vy+Math.random()*25,s:i,r:1.6+Math.random()*2.2});
    ctx.strokeStyle=`rgba(210,235,250,${.55*f})`;ctx.lineWidth=6*f;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(s.x,s.y);const tx=s.x+s.vx*.62,ty=surf+2;ctx.quadraticCurveTo(s.x+s.vx*.25,s.y+(ty-s.y)*.35,tx,ty);ctx.stroke()});
   const gy=1150;st.drops=st.drops.filter(d=>{d.vy+=gy*dt;d.x+=d.vx*dt;d.y+=d.vy*dt;if(d.y>=surf){if(Math.random()<.08)st.rip.push({x:d.x,r:4,a:.9});return false}ctx.fillStyle='rgba(225,242,255,.75)';ctx.beginPath();ctx.ellipse(d.x,d.y,d.r*.7,d.r*1.6,0,0,Math.PI*2);ctx.fill();return true});
   if(st.drops.length>900)st.drops.splice(0,st.drops.length-900)}
@@ -1006,7 +1023,8 @@ function fountainWater(canvas){const ctx=canvas.getContext('2d');const st={level
  return {flow(i,on){st.want[i]=on?1:0},all(on){st.want=[on?1:0,on?1:0,on?1:0]},fill(v){st.target=v},stop(){st.alive=false},state:st}}
 /* plaza de noche: faroles por grupos */
 const LIGHTS=[[0,16.75,48.21,26.25,51.45],[1,54.17,51.45,28.17,48.55],[2,0,28.79,20.67,68.97],[3,79.25,32.7,20.75,65.85],[4,19.08,31.03,32.83,59.15],[5,51.42,38.17,27.83,46.09]];
-function plazaHTML(){return `<div class="lscene plaza"><div class="ls" style="background-image:url(${M1()}plaza_noche.webp)"></div>${LIGHTS.map(([i,l,t,w,h])=>`<img class="luz" data-luz="${i}" src="${M1()}luz${i}.webp" alt="" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%">`).join('')}</div>`}
+function plazaHTML(o={}){const y0=o.top?560:0,h=o.top?940:1672,pc=(x,y)=>`left:${(x/941*100).toFixed(2)}%;top:${((y-y0)/h*100).toFixed(2)}%`,on=o.on?' on':'';
+ return `<div class="lscene plaza${o.cls?' '+o.cls:''}" style="aspect-ratio:941/${h}"><div class="ls" style="background-image:url(${V()}${o.top?'noche_top':'noche'}.webp)"></div>${PLZ.map((g,i)=>g.s.map(([x,y])=>`<i class="luz glow${on}" data-luz="${i}" style="${pc(x,y)}"></i>`).join('')+(g.p?`<i class="luz pool${on}" data-luz="${i}" style="${pc(g.p[0],g.p[1])};width:${(g.p[2]*2/941*100).toFixed(1)}%"></i>`:'')).join('')}${o.extra||''}</div>`}
 function plazaLights(){const total=LS.lightsTotal||9,done=LS.lightsDone||0,n=Math.min(6,Math.round(done/total*6));const order=[2,3,4,5,0,1];document.querySelectorAll('#lStage .luz').forEach(el=>{const i=+el.dataset.luz;el.classList.toggle('on',order.indexOf(i)<n)})}
 
 /* ===================== MOTOR DE LECCIONES ===================== */
@@ -1028,24 +1046,28 @@ function charSvg(who,vb){const sk='#e0b18c',V=vb||'0 0 200 380';let body='',ins=
  else if(who==='flauta'){body='<path d="M64 150 Q100 132 136 150 L146 286 L54 286 Z" fill="#7d5f3f"/><rect x="62" y="286" width="32" height="86" fill="#4b3a2a"/><rect x="106" y="286" width="32" height="86" fill="#4b3a2a"/>';hair='<path d="M68 96 Q70 56 100 54 Q132 56 134 94 Q124 70 100 72 Q78 74 68 96Z" fill="#6b4524"/><ellipse cx="100" cy="58" rx="36" ry="12" fill="#5c3b2a"/>';ins='<rect x="88" y="112" width="104" height="7" rx="3" fill="#c79a5a" stroke="#7a5626" stroke-width="1.5"/><circle cx="140" cy="115" r="2" fill="#5a3a16"/><circle cx="152" cy="115" r="2" fill="#5a3a16"/><circle cx="164" cy="115" r="2" fill="#5a3a16"/>'}
  else if(who==='laud'){body='<path d="M64 150 Q100 132 136 150 L142 262 L58 262 Z" fill="#2f6b3e"/><path d="M58 262 L40 300 L70 304 L82 266 Z M142 262 L160 300 L130 304 L118 266 Z" fill="#b8892e"/><rect x="40" y="300" width="30" height="72" fill="#b8892e"/><rect x="130" y="300" width="30" height="72" fill="#b8892e"/><rect x="50" y="296" width="100" height="10" fill="#5a3a1e"/><path d="M56 306 L50 372 M144 306 L150 372" stroke="#5a3a1e" stroke-width="6"/>';hair='<path d="M68 96 Q70 56 100 54 Q132 56 134 94 Q124 70 100 72 Q78 74 68 96Z" fill="#3b2514"/><path d="M64 64 Q100 38 138 64 L132 70 Q100 56 70 70 Z" fill="#7a2230"/><path d="M128 56 q26 -26 40 -24 q-16 10 -30 30" fill="#e8d9b0"/>';ins='<g transform="translate(108 236) rotate(-32)"><ellipse rx="42" ry="34" fill="#a8692a" stroke="#5a3210" stroke-width="2"/><circle cx="-6" r="10" fill="#3a2210"/><rect x="30" y="-6" width="74" height="12" fill="#5a3210"/><rect x="100" y="-8" width="16" height="16" fill="#3a2210" transform="rotate(30 100 0)"/></g>'}
  return `<svg viewBox="${V}" xmlns="http://www.w3.org/2000/svg" aria-label="${WHO[who]||''}"><ellipse cx="100" cy="374" rx="70" ry="8" fill="rgba(0,0,0,.35)"/>${body}<rect x="88" y="124" width="24" height="28" fill="${sk}"/><circle cx="100" cy="100" r="31" fill="${sk}"/>${hair}<circle cx="89" cy="100" r="3" fill="#2a1a12"/><circle cx="111" cy="100" r="3" fill="#2a1a12"/><path d="M92 116 Q100 121 108 116" stroke="#8a4a3a" stroke-width="2" fill="none"/>${ins}${extra}</svg>`}
-const portrait=who=>charSvg(who,'55 48 90 90');
+const V=()=>BASE+'m1v/';const CHARIMG={matteo:'matteo',violin:'violinista',flauta:'flautista',laud:'laudista'};
+function charHTML(who){return CHARIMG[who]?`<span class="chw ${who}"><img src="${V()}${CHARIMG[who]}.webp" alt="${WHO[who]}" draggable="false">${who==='matteo'?'<i class="lglow"></i>':''}</span>`:charSvg(who)}
+const portrait=who=>CHARIMG[who]?`<span class="pt ${who}" style="background-image:url(${V()}${CHARIMG[who]}.webp)"></span>`:charSvg(who,'55 48 90 90');
+const PLZ=[{s:[[45,790],[97,765],[150,800]],p:[95,1300,150]},{s:[[805,790],[860,765],[915,800]],p:[860,1300,150]},{s:[[240,935],[265,925],[290,940]],p:[265,1150,90]},{s:[[690,935],[712,925],[738,940]],p:[712,1150,90]},{s:[[180,985]],p:[185,1150,60]},{s:[[15,1050],[108,560]],p:null}];
+const SCN_AR={llegada:'896/1200',entrada:'895/1200',dormida:'941/1672',plaza:'941/1672',plaza_on:'941/1672',escenario:'941/1672',final:'941/1671',campanario:'768/1376',fuente:'941/1672',matteo:'941/1672',violin:'941/1672',flauta:'941/1672',laud:'941/1672',campana:'1/1'};
 /* imágenes de cada escena: cuando lleguen las de Gemini (verticales) basta con poner {full:'ruta'} */
 const SCN={};
-function plazaOn(extra=''){return plazaHTML().replace(/class="luz"/g,'class="luz on"').replace(/<\/div>$/,extra+'</div>')}
-function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><div class="ls" style="background-image:url(${R.full})"></div></div>`;
+function plazaOn(extra='',o={}){return plazaHTML(Object.assign({},o,{on:true,extra}))}
+function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><div class="ls" style="background-image:url(${R.full})"></div></div>`;const img=f=>`<div class="lscene"><div class="ls" style="background-image:url(${V()}${f}.webp)"></div></div>`;
  switch(k){
-  case 'llegada':return `<div class="lscene"><div class="ls" style="background-image:url(${BASE}w1.jpg);filter:saturate(.9) brightness(.85)"></div></div>`;
-  case 'entrada':return layered({sky:M1()+'portada.webp',fg:M1()+'portada_fg.webp',clouds:4,top0:0,top1:22,op:.5,cls:'portada'});
-  case 'dormida':return plazaHTML().replace('lscene plaza','lscene plaza dusk');
-  case 'campanario':return layered({sky:BASE+'campanario.webp',fg:M1()+'campanario_fg.webp',clouds:5,top0:-2,top1:26,op:.9});
-  case 'campana':return `<div class="lscene solo"><img class="solo-img" src="${BASE}bell.webp" alt=""></div>`;
-  case 'fuente':return layered({sky:M1()+'fuente.webp',fg:M1()+'fuente_fg.webp',clouds:3,top0:-4,top1:12,op:.8,cls:'fuente',extra:'<canvas class="water"></canvas>'});
+  case 'llegada':return img('llegada');
+  case 'entrada':return layered({sky:V()+'cielo.webp',fg:V()+'entrada_fg.webp',clouds:4,top0:0,top1:22,op:.55});
+  case 'dormida':return img('dormida');
+  case 'campanario':return layered({sky:V()+'cielo.webp',fg:V()+'campanario_fg.webp',clouds:5,top0:-2,top1:20,op:.8});
+  case 'campana':return `<div class="lscene solo"><img class="solo-img" src="${V()}campana.webp" alt=""></div>`;
+  case 'fuente':return layered({sky:V()+'cielo.webp',fg:V()+'fuente_fg.webp',clouds:4,top0:-2,top1:18,op:.7,extra:'<canvas class="water" data-cfg="full"></canvas>'});
   case 'plaza':return plazaHTML();
-  default:if(k&&k.startsWith('art:'))return `<div class="lscene solo"><div style="position:absolute;inset:14% 12% 34%;display:grid;place-items:center">${art(k.slice(4))}</div></div>`;
   case 'plaza_on':return plazaOn();
   case 'escenario':return plazaOn('<div class="stagewood"></div>');
-  case 'final':return plazaOn('<div class="stagewood"></div><div class="spirit"></div>');
-  case 'matteo':case 'violin':case 'flauta':case 'laud':return plazaOn('<div class="chr">'+charSvg(k)+'</div>').replace('lscene plaza','lscene plaza charsc');
+  case 'final':return img('final');
+  case 'matteo':case 'violin':case 'flauta':case 'laud':return plazaOn('<div class="chr">'+charHTML(k)+'</div>',{cls:'charsc'});
+  default:if(k&&k.startsWith('art:'))return `<div class="lscene solo"><div style="position:absolute;inset:14% 12% 34%;display:grid;place-items:center">${art(k.slice(4))}</div></div>`;
  }return `<div class="lscene solo"></div>`}
 /* máquina de escribir */
 function typeIn(el,cb,opts={}){const nodes=[];const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode()))if(!(n.parentElement&&n.parentElement.closest('.g-who')))nodes.push(n);
@@ -1060,17 +1082,17 @@ function gameInit(){const v=$('#vLesson');if(!v||v.classList.contains('game'))re
  new MutationObserver(gameScan).observe($('#lStage'),{childList:true,subtree:true})}
 function gameFS(on){try{const d=document,iOS=/iPad|iPhone|iPod/.test(navigator.userAgent);if(on){if(!iOS&&d.documentElement.requestFullscreen&&matchMedia('(pointer:coarse)').matches&&!d.fullscreenElement)d.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})}else if(d.fullscreenElement)d.exitFullscreen().catch(()=>{})}catch(e){}}
 function msPlaying(ms){const s=document.querySelector('#lStage .mstage');if(!s)return;s.classList.add('playing');clearTimeout(s._t);s._t=setTimeout(()=>s.classList.remove('playing'),ms||500)}
-function mstageHTML(whos){const arr=Array.isArray(whos)?whos:[whos];return `<div class="mstage ${arr.length>1?'trio':''}"><div class="ls" style="background-image:url(${M1()}plaza_noche.webp)"></div>${arr.map(w=>`<div class="chr">${charSvg(w)}</div>`).join('')}</div>`}
+function mstageHTML(whos){const arr=Array.isArray(whos)?whos:[whos];return `<div class="mstage ${arr.length>1?'trio':''}"><div class="ls" style="background-image:url(${V()}noche_top.webp)"></div>${arr.map(w=>`<div class="chr">${charHTML(w)}</div>`).join('')}</div>`}
 function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];const out=[];let cur='';s.forEach(x=>{if((cur+x).length>150&&cur){out.push(cur.trim());cur=''}cur+=x});if(cur.trim())out.push(cur.trim());return out}
 
 const STEP={
  scene(st,box){/* escena de historia a pantalla completa: imagen + narración letra a letra; tocar para avanzar */
   const lines=(st.lines||[]).filter(Boolean);let li=-1,tw=null,actOn=!!st.act,FWc=null;
-  box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in${SCN[st.img]&&SCN[st.img].full?' full':''}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="gold"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
+  box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in" style="aspect-ratio:${SCN_AR[st.img]||'1200/896'}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="gold"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
    <div class="cut-say" id="csay"><div class="cs-who" hidden></div><p class="cs-line"></p><span class="cs-next" hidden>${st.accept?'':'Continuar ▸'}</span>${st.accept?`<button class="cta gold cs-acc" type="button" hidden>${esc(st.accept)}</button>`:''}</div>`;
   const say=$('#csay'),ln=say.querySelector('.cs-line'),wh=say.querySelector('.cs-who'),nx=say.querySelector('.cs-next'),acc=say.querySelector('.cs-acc');
-  const cv=box.querySelector('canvas.water');if(cv){setTimeout(()=>{FWc=fountainWater(cv);if(st.fx==='water'||st.img==='final'){FWc.fill(1);FWc.all(true)}else if(LS.scene&&LS.scene.water){FWc.fill(1);FWc.all(true)}},60)}
-  if(st.fx==='lights'){const order=[2,3,4,5,0,1];box.querySelectorAll('.luz').forEach(e=>e.classList.remove('on'));order.forEach((i,j)=>setTimeout(()=>{const e=box.querySelector(`.luz[data-luz="${i}"]`);if(e)e.classList.add('on')},900+j*650))}
+  const cv=box.querySelector('canvas.water');if(cv){setTimeout(()=>{FWc=fountainWater(cv,FCFG[cv.dataset.cfg]);if(st.fx==='water'||st.img==='final'){FWc.fill(1);FWc.all(true)}else if(LS.scene&&LS.scene.water){FWc.fill(1);FWc.all(true)}},60)}
+  if(st.fx==='lights'){const order=[2,3,4,5,0,1];box.querySelectorAll('.luz').forEach(e=>e.classList.remove('on'));order.forEach((i,j)=>setTimeout(()=>{box.querySelectorAll(`.luz[data-luz="${i}"]`).forEach(e=>e.classList.add('on'))},900+j*650))}
   if(st.fx==='bells'){const t=ac().currentTime+.4;[60,64,67,72].forEach((p,i)=>bell(p,.6,t+i*.45))}
   if(st.playKeep&&LS.keep[st.playKeep]){setTimeout(()=>{const a=ac();let t=a.currentTime+.1;LS.keep[st.playKeep].forEach(n=>{tone(n.p,n.v,n.d*.5*.95,'strings',t);tone(n.p-12,n.v*.6,n.d*.5*.95,'lute',t);t+=n.d*.5})},1200)}
   const show=()=>{li++;if(li>=lines.length){if(st.accept){acc.hidden=false;nx.hidden=true;return}if(FWc)FWc.stop();next();return}
@@ -1234,18 +1256,18 @@ const STEP={
   keyboard($('#kbh'),{lo:60,hi:77,labels:true,onKey:p=>{if(sel<0){toast('Toca primero la nota que quieres cambiar.');return}src[sel].p=p;draw()}});draw()},
  bells(st,box){/* campanas escondidas: más grave, más aguda, ordenar, patrón roto */
   const lv=st.mode;let P,order=[],sel=-1,heard=new Set(),tries=0,seqR=[],got=[];
-  const HOOKS=[[8.3,55.3],[24.6,54.6],[41.8,54.2],[58.2,55.3],[75,54.8],[91.4,54.6]];
-  const gen=()=>{if(lv==='broken'){const start=55+Math.floor(Math.random()*6),n=Math.min(6,st.n||5),steps=Array.from({length:n},(_,i)=>start+i*(st.step||2)),bad=1+Math.floor(Math.random()*(n-2));steps[bad]=steps[bad]-(st.step||2)*2-1;const off=n<6?Math.floor(Math.random()*(7-n)):0;P=steps.map((p,i)=>({p,i,x:HOOKS[i+off][0],y:HOOKS[i+off][1]}));P.bad=bad}
+  const HOOKS=[[22.4,52.2],[40.4,52.2],[59.2,52.2],[76.8,52.2]];
+  const gen=()=>{if(lv==='broken'){const start=55+Math.floor(Math.random()*6),n=Math.min(HOOKS.length,st.n||5),steps=Array.from({length:n},(_,i)=>start+i*(st.step||2)),bad=1+Math.floor(Math.random()*(n-2));steps[bad]=steps[bad]-(st.step||2)*2-1;const off=Math.floor(Math.random()*(HOOKS.length-n+1));P=steps.map((p,i)=>({p,i,x:HOOKS[i+off][0],y:HOOKS[i+off][1]}));P.bad=bad}
    else{const ps=pickPitches(st.n,st.lo||48,st.hi||84,st.gap||7),slots=shuffle(HOOKS.slice()).slice(0,st.n);P=ps.map((p,i)=>({p,i,x:slots[i][0],y:slots[i][1]}))}order=[];sel=-1;heard=new Set();if(lv==='repeat'){seqR=shuffle(P.map(b=>b.i)).slice(0,st.len||3);got=[];if(DEV)box.dataset.seq=seqR.join(',')}};gen();
   const target=()=>lv==='low'?P.reduce((a,b)=>b.p<a.p?b:a).i:lv==='high'?P.reduce((a,b)=>b.p>a.p?b:a).i:lv==='broken'?P.bad:-1;
-  const bellHTML=b=>`<button type="button" class="bellb" data-b="${b.i}" style="left:${b.x}%;top:${b.y}%"><img class="bimg" src="${BASE}bell.webp" alt="Campana" width="40" height="47" draggable="false"><b class="bn" hidden></b><span class="bw" hidden></span></button>`;
+  const bellHTML=b=>`<button type="button" class="bellb" data-b="${b.i}" style="left:${b.x}%;top:${b.y}%"><img class="bimg" src="${V()}campana.webp" alt="Campana" width="40" height="54" draggable="false"><b class="bn" hidden></b><span class="bw" hidden></span></button>`;
   const renderBells=()=>{if(DEV){box.dataset.p=P.map(b=>b.p).join(',');box.dataset.bad=P.bad??''}const f=box.querySelector('.bf-bells');f.innerHTML=P.map(bellHTML).join('');
    f.querySelectorAll('[data-b]').forEach(el=>el.onclick=()=>{const b=P[+el.dataset.b];bell(b.p);heard.add(b.i);if(lv==='repeat'){got.push(b.i);sel=-1}else if(lv==='order'){if(sel===b.i&&!order.includes(b.i))order.push(b.i);sel=b.i}else sel=b.i;el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring');refresh()});refresh()};
   const refresh=()=>{const aids=aidsOn();box.querySelectorAll('[data-b]').forEach(el=>{const i=+el.dataset.b,b=P[i];el.classList.toggle('sel',sel===i);el.classList.toggle('ord',order.includes(i));const bn=el.querySelector('.bn');bn.hidden=!order.includes(i);if(!bn.hidden)bn.textContent=order.indexOf(i)+1;const bw=el.querySelector('.bw');const show=aids&&heard.has(i);if(show&&bw.hidden)bw.innerHTML=waveSvg(b.p,{w:50,h:20});bw.hidden=!show});
    const c=$('#bcount');if(c)c.textContent=`${order.length}/${P.length}`;
    if(lv==='repeat'){foot(`Repite la secuencia · ${got.length}/${seqR.length}`,()=>{},{disabled:true});if(got.length>=seqR.length)setTimeout(check,250);return}
    if(lv==='order')foot(order.length===P.length?'Comprobar el orden':`Ordena las ${P.length} campanas`,check,{disabled:order.length!==P.length});else foot('Esta es',check,{disabled:sel<0})};
-  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`<div class="bellfield">${layered({sky:BASE+"campanario.webp",fg:M1()+"campanario_fg.webp",clouds:5,top0:-2,top1:26,op:.9})}<div class="bf-bells"></div></div>
+  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`<div class="bellfield v2">${layered({sky:V()+"cielo.webp",fg:V()+"campanario_top.webp",clouds:4,top0:-2,top1:30,op:.8})}<div class="bf-bells"></div></div>
    ${lv==='order'?`<p class="small" style="color:var(--muted)">Toca una campana para oírla. Para ponerla en tu orden, tócala otra vez. <b id="bcount">0/${P.length}</b></p>`:lv==='repeat'?'<p class="small" style="color:var(--muted)">Mira y escucha qué campanas suenan, y tócalas en el mismo orden.</p>':lv==='broken'?'<p class="small" style="color:var(--muted)">Las campanas deberían subir paso a paso, de izquierda a derecha. Escúchalas en orden y toca la que rompe la subida.</p>':'<p class="small" style="color:var(--muted)">Toca cada campana para oírla. Cuando estés seguro, elige.</p>'}
    <div class="row">${lv==='broken'||lv==='repeat'?'<button class="chipb" type="button" id="bplay">▶ Escuchar la secuencia</button>':''}${lv==='order'?'<button class="chipb" type="button" id="breset">Empezar el orden de nuevo</button>':''}</div><div class="fb" id="fb"></div>`;
    const bp=$('#bplay');if(bp)bp.onclick=()=>{const t=ac().currentTime+.05;if(lv==='repeat'){got=[];refresh()}(lv==='repeat'?seqR.map(i=>P[i]):P).forEach((b,i)=>{bell(b.p,.8,t+i*.55);heard.add(b.i);setTimeout(()=>{const el=box.querySelector(`[data-b="${b.i}"]`);if(el){el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring')}refresh()},i*550+60)})};
@@ -1262,11 +1284,11 @@ const STEP={
   const gen=()=>{if(st.pattern)return st.pattern.slice();const n=st.n||4,a=[];for(let i=0;i<n;i++)a.push(Math.random()<.5?'s':'l');if(!a.includes('s'))a[0]='s';if(!a.includes('l'))a[n-1]='l';if(st.rests){a.splice(1+Math.floor(Math.random()*(n-1)),0,'r')}return a};pat=gen();
   let rec=[],downAt=0,lastUp=0,playing=false,shown=!st.hidden;if(DEV)box.dataset.pat=pat.join(',');
   const bars=(arr,cls)=>`<div class="wbars ${cls||''}">${arr.map(x=>`<i class="wb ${x}"></i>`).join('')}</div>`;
-  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`${layered({sky:M1()+"fuente.webp",fg:M1()+"fuente_fg.webp",clouds:3,top0:-4,top1:12,op:.8,cls:"fuente",extra:'<canvas class="water"></canvas>'})}
+  const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`${layered({sky:V()+"cielo.webp",fg:V()+"fuente_top.webp",clouds:3,top0:-4,top1:16,op:.7,cls:"fuente",extra:'<canvas class="water"></canvas>'})}
    <p class="small" style="color:var(--muted);margin:0">Patrón del agua:</p>${shown?bars(pat):`<div class="wbars"><i class="wb q"></i><span class="small" style="color:var(--muted)">Escúchalo y repítelo de memoria${aidsOn()?' (el agua lo dibuja mientras suena)':''}</span></div>`}
    <p class="small" style="color:var(--muted);margin:0">Tu interpretación:</p>${bars(rec.map(r=>r.k),'mine')}
    <div id="kbh"></div><div class="row"><button class="chipb" type="button" id="wplay">▶ Escuchar el agua</button><button class="chipb" type="button" id="wclr">Borrar mi intento</button></div><div class="fb" id="fb"></div>`;
-   if(FW)FW.stop();FW=fountainWater(box.querySelector('canvas.water'));if(LS.scene&&LS.scene.water){FW.fill(1);FW.all(true)}
+   if(FW)FW.stop();FW=fountainWater(box.querySelector('canvas.water'),FCFG.top);if(LS.scene&&LS.scene.water){FW.fill(1);FW.all(true)}
    keyboard($('#kbh'),{lo:60,hi:72,labels:false,onKey:(p)=>{FW&&FW.flow(0,true);const now=performance.now();if(st.rests&&rec.length&&lastUp&&now-lastUp>600)rec.push({k:'r'});downAt=now},onRelease:(p,dur)=>{FW&&FW.flow(0,false);lastUp=performance.now();rec.push({k:dur<.5?'s':'l',dur});draw2();evaluate()}});
    $('#wplay').onclick=playPat;$('#wclr').onclick=()=>{rec=[];draw2()};foot('Toca el patrón',()=>{},{disabled:true})};
   const draw2=()=>{const m=box.querySelector('.wbars.mine');if(m)m.outerHTML=bars(rec.map(r=>r.k),'mine')};
@@ -1280,7 +1302,7 @@ const STEP={
   let k=0,held={},chord=[],chordT=0,vels=[],trill=[];const T=st.tasks;
   const PCS={C:[0,4,7],F:[5,9,0],G:[7,11,2]},CN={C:'Do mayor',F:'Fa mayor',G:'Sol mayor'};
   const lamps=()=>`<div class="lamps">${T.map((t,i)=>`<span class="lamp ${i<k?'on':i===k?'cur':''}"><svg viewBox="0 0 24 24" width="26" height="26" fill="${i<k?'#ffd56e':'none'}" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></span>`).join('')}</div>`;
-  const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+plazaHTML()+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
+  const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+plazaHTML({top:true})+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
    plazaLights();if(!t){return}chord=[];vels=[];trill=[];
    const kbd=keyboard($('#kbh'),{lo:48,hi:72,labels:!!(t.chord&&k>0&&aidsOn()),dyn:true,onKey:(p,v)=>onKey(p,v,kbd),onRelease:(p,dur)=>onRel(p,dur)});kbd.wantChord=t.chord?PCS[t.chord]:null;kbd.wantTrill=t.do==='trill'?[64,65]:null;if(EAR.on&&LS.L.steps.some(x=>x.type==='lights'&&x.tasks.some(y=>y.chord)))bpLoad();
    const lh=$('#lhint');if(lh)lh.onclick=()=>{PCS[t.chord].forEach(pc=>{const p=[48,60].map(o=>o+pc).find(q=>q>=48&&q<=72);kbd.hint(p,true)})};foot(st.label||'Enciende las luces',()=>{},{disabled:true})};
