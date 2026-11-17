@@ -1003,7 +1003,7 @@ function cloudsHTML(n,top0,top1,op){let h='';const r=rng(n*31+7);for(let i=0;i<n
 function layered({sky,fg,clouds=4,top0=2,top1=30,op=.85,cls='',extra=''}){return `<div class="lscene ${cls}"><div class="ls ls-sky" style="background-image:url(${sky})"></div><div class="ls ls-clouds">${cloudsHTML(clouds,top0,top1,op)}</div><div class="ls ls-fg" style="background-image:url(${fg})"></div>${extra}</div>`}
 /* agua animada de la fuente (coordenadas de la imagen 1200×896) */
 const SPOUTS=[{x:602,y:420,vx:0,vy:40,tx:602},{x:338,y:466,vx:-70,vy:30},{x:866,y:466,vx:70,vy:30}];
-const FCFG={old:{W:1200,H:896,sp:SPOUTS,cx:602,cy:752,rx:338,ry:40,s0:785,s1:44},top:{W:941,H:940,sp:[{x:470,y:372,vx:0,vy:30},{x:298,y:385,vx:-85,vy:15},{x:643,y:385,vx:85,vy:15}],cx:470,cy:678,rx:392,ry:30,s0:708,s1:30},full:{W:941,H:1672,sp:[{x:470,y:892,vx:0,vy:30},{x:298,y:905,vx:-85,vy:15},{x:643,y:905,vx:85,vy:15}],cx:470,cy:1198,rx:392,ry:30,s0:1228,s1:30}};
+const FCFG={old:{W:1200,H:896,sp:SPOUTS,cx:602,cy:752,rx:338,ry:40,s0:785,s1:44},top:{W:941,H:940,sp:[{x:470,y:372,vx:0,vy:30},{x:298,y:385,vx:-85,vy:15},{x:643,y:385,vx:85,vy:15}],cx:470,cy:678,rx:392,ry:30,s0:708,s1:30},night:{W:941,H:1672,sp:[{x:478,y:973,vx:0,vy:22},{x:358,y:984,vx:-55,vy:12},{x:588,y:988,vx:55,vy:12}],cx:470,cy:1188,rx:238,ry:14,s0:1197,s1:9},nighttop:{W:941,H:940,sp:[{x:478,y:413,vx:0,vy:22},{x:358,y:424,vx:-55,vy:12},{x:588,y:428,vx:55,vy:12}],cx:470,cy:628,rx:238,ry:14,s0:637,s1:9},full:{W:941,H:1672,sp:[{x:470,y:892,vx:0,vy:30},{x:298,y:905,vx:-85,vy:15},{x:643,y:905,vx:85,vy:15}],cx:470,cy:1198,rx:392,ry:30,s0:1228,s1:30}};
 function fountainWater(canvas,C){C=C||FCFG.old;const ctx=canvas.getContext('2d');const st={level:0,target:0,flow:[0,0,0],want:[0,0,0],drops:[],rip:[],alive:true,t:0};
  const fit=()=>{const r=canvas.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);canvas.width=Math.max(1,r.width*d);canvas.height=Math.max(1,r.height*d)};fit();
  const S=()=>canvas.width/C.W;let last=performance.now();
@@ -1025,7 +1025,7 @@ function fountainWater(canvas,C){C=C||FCFG.old;const ctx=canvas.getContext('2d')
 /* plaza de noche: faroles por grupos */
 const LIGHTS=[[0,16.75,48.21,26.25,51.45],[1,54.17,51.45,28.17,48.55],[2,0,28.79,20.67,68.97],[3,79.25,32.7,20.75,65.85],[4,19.08,31.03,32.83,59.15],[5,51.42,38.17,27.83,46.09]];
 function plazaHTML(o={}){const y0=o.top?560:0,h=o.top?940:1672,pc=(x,y)=>`left:${(x/941*100).toFixed(2)}%;top:${((y-y0)/h*100).toFixed(2)}%`,on=o.on?' on':'';
- return `<div class="lscene plaza${o.cls?' '+o.cls:''}" style="aspect-ratio:941/${h}"><div class="ls" style="background-image:url(${V()}${o.top?'noche_top':'noche'}.webp)"></div>${PLZ.map((g,i)=>g.s.map(([x,y])=>`<i class="luz glow${on}" data-luz="${i}" style="${pc(x,y)}"></i>`).join('')+(g.p?`<i class="luz pool${on}" data-luz="${i}" style="${pc(g.p[0],g.p[1])};width:${(g.p[2]*2/941*100).toFixed(1)}%"></i>`:'')).join('')}${o.extra||''}</div>`}
+ return `<div class="lscene plaza${o.cls?' '+o.cls:''}" style="aspect-ratio:941/${h}"><div class="ls" style="background-image:url(${V()}${o.top?'noche_top':'noche'}.webp)"></div>${PLZ.map((g,i)=>g.s.map(([x,y])=>`<i class="luz glow${on}" data-luz="${i}" style="${pc(x,y)}"></i>`).join('')+(g.p?`<i class="luz pool${on}" data-luz="${i}" style="${pc(g.p[0],g.p[1])};width:${(g.p[2]*2/941*100).toFixed(1)}%"></i>`:'')).join('')}${waterAwake()?`<canvas class="water" data-auto="${o.top?'nighttop':'night'}"></canvas>`:''}${o.extra||''}</div>`}
 function plazaLights(){const total=LS.lightsTotal||9,done=LS.lightsDone||0,n=Math.min(6,Math.round(done/total*6));const order=[2,3,4,5,0,1];document.querySelectorAll('#lStage .luz').forEach(el=>{const i=+el.dataset.luz;el.classList.toggle('on',order.indexOf(i)<n)})}
 
 /* ===================== MOTOR DE LECCIONES ===================== */
@@ -1055,6 +1055,7 @@ const SCN_AR={llegada:'896/1200',entrada:'895/1200',dormida:'941/1672',plaza:'94
 /* imágenes de cada escena: cuando lleguen las de Gemini (verticales) basta con poner {full:'ruta'} */
 const SCN={};
 function plazaOn(extra='',o={}){return plazaHTML(Object.assign({},o,{on:true,extra}))}
+function waterAwake(){if(!LS)return false;if(LS.scene&&LS.scene.water)return true;const n=LS.L.steps.findIndex(s=>s.fx==='water');return n>=0&&LS.i>=n}
 function isNight(){if(!LS)return true;const n=LS.L.steps.findIndex(s=>s.night);return n<0||LS.i>=n}
 function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><div class="ls" style="background-image:url(${R.full})"></div></div>`;const img=f=>`<div class="lscene"><div class="ls" style="background-image:url(${V()}${f}.webp)"></div></div>`;
  switch(k){
@@ -1078,7 +1079,7 @@ function typeIn(el,cb,opts={}){const nodes=[];const w=document.createTreeWalker(
  const tick=()=>{if(done)return;if(!el.isConnected){done=true;return}while(ni<nodes.length&&ci>=full[ni].length){ni++;ci=0}if(ni>=nodes.length){finish();return}ci++;nodes[ni].nodeValue=full[ni].slice(0,ci);setTimeout(tick,/[.,;:!?—]/.test(full[ni][ci-1])?110:24)};
  if(!opts.noClick)el.addEventListener('click',finish);if(matchMedia('(prefers-reduced-motion: reduce)').matches)finish();else tick();return {finish,get done(){return done}}}
 let TW_LAST='';
-function gameScan(){const st=$('#lStage');if(!st)return;st.querySelectorAll('.g-say:not(.tw-seen)').forEach(el=>{el.classList.add('tw-seen');const t=el.textContent.trim();if(t===TW_LAST)return;TW_LAST=t;typeIn(el)});
+function gameScan(){const st=$('#lStage');if(!st)return;st.querySelectorAll('canvas.water[data-auto]:not(.started)').forEach(c=>{c.classList.add('started');setTimeout(()=>{if(!c.isConnected)return;const f=fountainWater(c,FCFG[c.dataset.auto]);f.fill(1);f.all(true);f.state.level=1},40)});st.querySelectorAll('.g-say:not(.tw-seen)').forEach(el=>{el.classList.add('tw-seen');const t=el.textContent.trim();if(t===TW_LAST)return;TW_LAST=t;typeIn(el)});
  const src=st.querySelector('.cut .ls,.lscene .ls-sky,.lscene .ls,.mstage .ls');const g=$('#gBack');if(g&&src){const bg=src.style.backgroundImage;if(bg&&g.style.backgroundImage!==bg)g.style.backgroundImage=bg}}
 function gameInit(){const v=$('#vLesson');if(!v||v.classList.contains('game'))return;v.classList.add('game');const b=document.createElement('div');b.id='gBack';v.prepend(b);
  new MutationObserver(gameScan).observe($('#lStage'),{childList:true,subtree:true})}
@@ -1093,7 +1094,7 @@ const STEP={
   box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in" style="aspect-ratio:${SCN_AR[st.img]||'1200/896'}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="goldfx"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
    <div class="cut-say" id="csay"><div class="cs-who" hidden></div><p class="cs-line"></p><span class="cs-next" hidden>${st.accept?'':'Continuar ▸'}</span>${st.accept?`<button class="cta gold cs-acc" type="button" hidden>${esc(st.accept)}</button>`:''}</div>`;
   const say=$('#csay'),ln=say.querySelector('.cs-line'),wh=say.querySelector('.cs-who'),nx=say.querySelector('.cs-next'),acc=say.querySelector('.cs-acc');
-  const cv=box.querySelector('canvas.water');if(cv){setTimeout(()=>{FWc=fountainWater(cv,FCFG[cv.dataset.cfg]);if(st.fx==='water'||st.img==='final'){FWc.fill(1);FWc.all(true)}else if(LS.scene&&LS.scene.water){FWc.fill(1);FWc.all(true)}},60)}
+  const cv=box.querySelector('canvas.water:not([data-auto])');if(cv){setTimeout(()=>{FWc=fountainWater(cv,FCFG[cv.dataset.cfg]);if(st.fx==='water'||st.img==='final'){FWc.fill(1);FWc.all(true)}else if(LS.scene&&LS.scene.water){FWc.fill(1);FWc.all(true)}},60)}
   if(st.fx==='lights'){const order=[2,3,4,5,0,1];box.querySelectorAll('.luz').forEach(e=>e.classList.remove('on'));order.forEach((i,j)=>setTimeout(()=>{box.querySelectorAll(`.luz[data-luz="${i}"]`).forEach(e=>e.classList.add('on'))},900+j*650))}
   if(st.fx==='bells'){const t=ac().currentTime+.4;[60,64,67,72].forEach((p,i)=>bell(p,.6,t+i*.45))}
   if(st.playKeep&&LS.keep[st.playKeep]){setTimeout(()=>{const a=ac();let t=a.currentTime+.1;LS.keep[st.playKeep].forEach(n=>{tone(n.p,n.v,n.d*.5*.95,'strings',t);tone(n.p-12,n.v*.6,n.d*.5*.95,'lute',t);t+=n.d*.5})},1200)}
