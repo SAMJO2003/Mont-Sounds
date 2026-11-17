@@ -1,6 +1,6 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1226"><style>:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0}[hidden]{display:none!important}</style></head><body><title>Mont Keys Aprender</title>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07080d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Mont Keys"><style>:root{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}body{margin:0}[hidden]{display:none!important}</style></head><body><title>Mont Keys Aprender</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Special+Elite&family=Alegreya+Sans:wght@400;500;700;800&display=swap">
 <style>
 /* Layout: app de una sola pantalla con tres vistas (Mapa, Lección, Pasaporte). Tema nocturno único; cada mundo cambia el acento. */
 :root{
@@ -149,6 +149,101 @@ main{position:relative;z-index:2}
 .lscene.plaza{aspect-ratio:1200/896}.luz{position:absolute;opacity:0;transition:opacity 1.4s ease;pointer-events:none;mix-blend-mode:screen}.luz.on{opacity:1;animation:flame 3.2s ease-in-out infinite alternate}
 @keyframes flame{0%{filter:brightness(1)}50%{filter:brightness(1.12)}100%{filter:brightness(.94)}}
 @media (prefers-reduced-motion:reduce){.ls-clouds .cl,.luz.on{animation:none}.pulse,.float,.flick{animation:none}#sheet,#scrim,.lbar i{transition:none}}
+/* ===== MODO JUEGO: pantalla completa vertical, escenas y narración (estilo novela ilustrada) ===== */
+#vLesson.game{inset:0 auto 0 50%;width:min(100%,520px);transform:translateX(-50%);background:#07080d;box-shadow:0 0 0 100vmax #05060b;overflow:hidden}
+#vLesson.game #gBack{position:absolute;inset:-40px;background-size:cover;background-position:center;filter:blur(26px) brightness(.42) saturate(1.1);transform:scale(1.1);z-index:0;transition:background-image .6s}
+#vLesson.game #gBack::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 30%,transparent,rgba(5,6,11,.75))}
+#vLesson.game>*{position:relative;z-index:1}
+#vLesson.game .gut{padding-inline:0}
+#vLesson.game .wrap{max-width:none}
+#vLesson.game .lhead{padding:10px 12px;z-index:6;position:relative}
+#vLesson.game .lbar{background:rgba(255,255,255,.12)}
+#vLesson.game .earhud{padding:2px 14px}
+#vLesson.game .lbody{padding:0 0 10px;gap:0}
+#vLesson.game #lStage{gap:12px;padding:0 14px}
+#vLesson.game #lStage>.scene{display:none}
+#vLesson.game #lStage>.lphase{order:-2;text-align:center;font-size:10px;letter-spacing:.24em;opacity:.85;margin-top:2px}
+#vLesson.game #lStage>.lscene,#vLesson.game #lStage>.bellfield,#vLesson.game #lStage>.mstage{order:-1;margin-inline:-14px;width:calc(100% + 28px);border-radius:0;border:0;-webkit-mask-image:linear-gradient(180deg,#000 82%,transparent);mask-image:linear-gradient(180deg,#000 82%,transparent)}
+#vLesson.game #lStage>.lamps{order:-1}
+#vLesson.game #lStage>.g-say,#vLesson.game #lStage>.fb{order:0}
+#vLesson.game #lStage>*{order:1}
+#vLesson.game #lStage:has(>.fb.on)>.g-say{display:none}
+#vLesson.game .big{font-size:22px}
+.g-say,#vLesson.game .fb,.cut-say{font:400 16.5px/1.55 'Special Elite','Courier New',monospace;color:#f3e9d6;background:linear-gradient(180deg,rgba(16,13,10,.9),rgba(10,8,7,.94));border:1px solid rgba(232,194,122,.28);border-radius:6px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.45);margin:0}
+.g-say b.g-q{font-weight:400;color:#f7e7c4}
+.g-say .g-sub{display:block;margin-top:6px;color:#d9ccb2}
+#vLesson.game .fb.on.ok{border-color:rgba(95,208,164,.55);border-left:4px solid var(--ok)}
+#vLesson.game .fb.on.bad{border-color:rgba(239,107,107,.5);border-left:4px solid var(--bad)}
+#vLesson.game .fb b{display:block;font-weight:400;color:#fff;margin-bottom:3px}
+.g-who,.cs-who{display:flex;align-items:center;gap:8px;margin:-2px 0 6px;font:700 12px var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.g-who svg,.cs-who svg{width:34px;height:34px;border-radius:50%;background:#1c1712;border:1px solid rgba(232,194,122,.5);flex:none}
+#vLesson.game .lfoot{padding:8px 14px 12px}
+#vLesson.game .lfoot:has(#lFoot:empty){display:none}
+#vLesson.game .cta{font:400 16px 'Special Elite','Courier New',monospace;letter-spacing:.04em;background:rgba(18,14,10,.88);border:1px solid rgba(232,194,122,.55);color:#f6e6c3;border-radius:6px}
+#vLesson.game .cta.gold{background:linear-gradient(180deg,#b88a3e,#8a6226);color:#fff6e4;border-color:#e8c27a}
+#vLesson.game .cta:disabled{opacity:.55}
+.g-say.typing::after,.cs-line.typing::after{content:"▍";animation:blink .8s steps(1) infinite;color:var(--gold)}
+@keyframes blink{50%{opacity:0}}
+/* escenas cinematográficas */
+.cut{position:absolute;inset:0;z-index:2;overflow:hidden;background:#07080d;container-type:size;cursor:pointer}
+.cut-in{position:absolute;top:0;bottom:0;height:100%;aspect-ratio:1200/896;left:50%;transform:translateX(-50%)}
+.cut-in.full{inset:0;aspect-ratio:auto;width:100%;left:0;transform:none}
+.cut-in .lscene{position:absolute;inset:0;aspect-ratio:auto;border:0;border-radius:0;width:100%;height:100%}
+.cut-in.full .ls{background-size:cover}
+.mv-zoom .cut-in{animation:cutZoom 16s ease-out forwards}
+.mv-pan .cut-in{left:0;animation:cutPan 18s ease-in-out forwards}
+.mv-panr .cut-in{left:0;animation:cutPanR 18s ease-in-out forwards}
+.mv-zoom .cut-in.full{animation:cutZoomF 16s ease-out forwards}
+@keyframes cutZoom{from{transform:translateX(-50%) scale(1)}to{transform:translateX(-50%) scale(1.14)}}
+@keyframes cutZoomF{from{transform:scale(1)}to{transform:scale(1.12)}}
+@keyframes cutPan{from{transform:translateX(0)}to{transform:translateX(calc(-100% + 100cqw))}}
+@keyframes cutPanR{from{transform:translateX(calc(-100% + 100cqw))}to{transform:translateX(0)}}
+.cut::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent 18%,transparent 52%,rgba(0,0,0,.82));z-index:3}
+.cut-say{position:absolute;left:12px;right:12px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:5;cursor:pointer;min-height:96px}
+.cs-line{margin:0;font-style:italic;color:#e7dcc6}
+.cs-line.dlg{font-style:normal;color:#fff3dc}
+.cs-next{display:block;text-align:right;margin-top:6px;color:var(--gold);font-size:14px;animation:nudge 1.2s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateX(4px)}}
+.cs-acc{margin-top:10px}
+.cut-act{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(5,6,11,.62);text-align:center;transition:opacity .5s;padding:24px}
+.cut-act small{font:500 12px var(--display);letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+.cut-act b{font:700 30px/1.15 var(--display);color:#fbf1dc;text-shadow:0 4px 24px rgba(0,0,0,.6)}
+.cut-act.out{opacity:0;pointer-events:none}
+.lscene.dusk .ls{filter:saturate(.45) brightness(.8) hue-rotate(-8deg)}
+.lscene .solo-img{position:absolute;left:50%;top:50%;height:62%;transform:translate(-50%,-50%);filter:drop-shadow(0 18px 30px rgba(0,0,0,.6))}
+.lscene.solo{background:radial-gradient(60% 60% at 50% 45%,#3a2c1c,#0c0a08)}
+.stagewood{position:absolute;left:8%;right:8%;bottom:4%;height:16%;background:linear-gradient(180deg,#6b4a2b,#3a2717);border-top:3px solid #8a6238;border-radius:3px;box-shadow:0 14px 30px rgba(0,0,0,.6)}
+.stagewood::after{content:"";position:absolute;right:10%;bottom:100%;width:10%;height:55%;border:3px solid #6b4a2b;border-bottom:0}
+.lscene.charsc .ls{filter:brightness(.55) blur(1.5px)}
+.chr{position:absolute;left:50%;bottom:0;height:56%;transform:translateX(-50%);z-index:4}
+.chr svg{height:100%;width:auto;filter:drop-shadow(0 16px 26px rgba(0,0,0,.7))}
+.gold{position:absolute;inset:0;z-index:4;pointer-events:none;background-image:radial-gradient(2px 2px at 20% 80%,#ffe7a8,transparent),radial-gradient(2px 2px at 70% 60%,#ffe7a8,transparent),radial-gradient(3px 3px at 40% 40%,#fff1c9,transparent),radial-gradient(2px 2px at 85% 30%,#ffe7a8,transparent),radial-gradient(2px 2px at 10% 35%,#ffe7a8,transparent),radial-gradient(3px 3px at 55% 75%,#fff1c9,transparent);background-size:100% 100%;animation:goldUp 7s linear infinite;opacity:.9}
+@keyframes goldUp{from{background-position:0 0,0 0,0 0,0 0,0 0,0 0}to{background-position:0 -300px,0 -420px,0 -260px,0 -380px,0 -330px,0 -460px}}
+.spirit{position:absolute;left:50%;top:14%;width:34%;aspect-ratio:1;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,240,200,.95),rgba(255,214,140,.45) 40%,transparent 70%);z-index:4;animation:spirit 4s ease-in-out infinite;mix-blend-mode:screen}
+@keyframes spirit{50%{transform:translateX(-50%) scale(1.15);opacity:.8}}
+/* escenario del músico en los retos */
+.mstage{position:relative;aspect-ratio:1200/896;overflow:hidden;background:#120e0a}
+.mstage .ls{position:absolute;inset:0;background-size:cover;background-position:center;filter:brightness(.5) blur(1.5px)}
+.mstage .chr{height:86%}
+.mstage.trio .chr{height:70%}
+.mstage.trio .chr:nth-of-type(2){left:22%}.mstage.trio .chr:nth-of-type(3){left:50%}.mstage.trio .chr:nth-of-type(4){left:78%}
+.mstage.playing .chr svg{animation:sway .5s ease-in-out infinite alternate}
+.mstage.playing::after{content:"♪ ♫ ♪";position:absolute;left:58%;top:16%;z-index:5;color:#ffe2a0;font-size:26px;letter-spacing:8px;animation:notesUp 1.2s ease-out infinite;text-shadow:0 0 12px rgba(255,210,120,.8)}
+@keyframes sway{from{transform:rotate(-1.6deg)}to{transform:rotate(1.6deg) translateY(-2px)}}
+@keyframes notesUp{from{transform:translateY(10px);opacity:0}30%{opacity:1}to{transform:translateY(-40px);opacity:0}}
+.mcards2{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mcards2 button{min-width:52px;padding:10px 8px;border-radius:8px;background:rgba(18,14,10,.85);border:1px solid rgba(232,194,122,.35);color:var(--parch);font:400 15px 'Special Elite',monospace;cursor:pointer}
+.mcards2 button.sel{border-color:var(--gold);box-shadow:0 0 0 2px rgba(232,194,122,.35)}
+.mcards2 button.lit{background:rgba(232,194,122,.3)}
+.tuner{position:relative;background:rgba(10,8,7,.9);border:1px solid rgba(232,194,122,.28);border-radius:8px;padding:10px}
+.tuner canvas{width:100%;height:120px;display:block}
+.tuner .tlab{display:flex;justify-content:space-between;font:400 13px 'Special Elite',monospace;color:var(--muted);margin-top:6px}
+.peg{width:100%;accent-color:var(--gold);height:34px}
+.rrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rrow .rg{display:flex;gap:3px;padding:6px;border:1px dashed rgba(232,194,122,.35);border-radius:6px;min-height:22px;align-items:center}
+.rrow .rg i{display:block;height:10px;border-radius:3px;background:var(--gold)}
+.rrow .rg i.s{width:12px}.rrow .rg i.l{width:34px}
+.rrow .rg.on{background:rgba(232,194,122,.18)}
 </style>
 
 <div id="sky"></div>
@@ -223,28 +318,60 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
  chapters:[[0,'Capítulo I · La ciudad de la música'],[3,'Capítulo II · El nacimiento del piano'],[6,'Capítulo III · Entender la música'],[9,'Capítulo IV · Expresarte']],
  lessons:[
  /* ---------------- 01 ---------------- */
- {id:'w1m01',t:'La ciudad de la música',d:'La plaza de Florencia se quedó en silencio. Despierta sus campanas, su fuente y sus luces descubriendo la altura, la duración y la intensidad del sonido.',scene:true,
-  disc:{id:'a-florencia',name:'La vida musical en Florencia',per:'Renacimiento · siglos XV y XVI',text:'En la Florencia de los Médici la música sonaba en iglesias, en la corte, en fiestas públicas y en las casas de las familias ricas. Las campanas marcaban las horas y las celebraciones de la ciudad, y la música se conservaba en la memoria y en manuscritos copiados a mano.',sig:'Sin grabaciones, cada interpretación era única: la música solo existía mientras alguien la tocaba.'},
+ {id:'w1m01',t:'La ciudad de la música',d:'Florencia sigue en pie, pero ha perdido su alma. Ayuda a Matteo y a tres jóvenes músicos a recuperar el antiguo ritual del Espíritu Guardián.',scene:true,game:true,
+  disc:{id:'a-florencia',name:'La vida musical en Florencia',per:'Renacimiento · siglos XV y XVI',text:'Durante el Renacimiento, la música formaba parte de la vida cotidiana y ceremonial de Florencia: sonaba en iglesias, cortes, hogares y celebraciones públicas. Las campanas organizaban los momentos importantes de la comunidad, los músicos tocaban en vivo y los manuscritos se copiaban a mano. (La historia de Matteo y el Espíritu Guardián es ficción inspirada en esa época.)',sig:'Sin grabaciones, cada interpretación era única: la música era expresión, celebración y convivencia.'},
   steps:[
-   {type:'story',ph:'La plaza dormida',art:'city',scene:'portada',title:'Florencia se quedó en silencio',text:'Llegas a una antigua plaza de Florencia. Sus campanas, su fuente y sus luces funcionaban con música, pero se detuvieron. Para despertarlas tendrás que descubrir los tres secretos del sonido: la altura, la duración y la intensidad.',fact:'Arriba verás la plaza: cada parte se ilumina cuando la despiertas. Con 👁 activas o quitas las ayudas visuales y con 🎹 eliges teclado, micrófono o MIDI.'},
-   {type:'bells',ph:'Desafío I · Las campanas escondidas',q:'La primera campana',sub:'El mecanismo de la torre empieza con la campana más grave. Encuéntrala.',mode:'low',n:3,gap:9,lo:48,hi:84,win:'¡La primera campana suena!'},
-   {type:'bells',ph:'Desafío I · Las campanas escondidas',q:'La campana más aguda',sub:'Ahora la torre pide la campana más aguda.',mode:'high',n:4,gap:5,lo:52,hi:84,win:'¡La campana más aguda responde!'},
-   {type:'bells',ph:'Desafío I · Las campanas escondidas',q:'La secuencia de las campanas',sub:'Ordénalas de la más grave a la más aguda para que el mecanismo gire.',mode:'order',n:4,gap:3,lo:55,hi:79,win:'¡El mecanismo gira!',why:'Ordenar sonidos por altura es la base de las escalas: de grave a agudo, como subir una escalera.'},
-   {type:'bells',ph:'Desafío I · Las campanas escondidas',q:'El patrón roto',sub:'Una campana rompe la subida. Encuéntrala para que la torre vuelva a tocar.',mode:'broken',n:5,step:2,win:'¡Las campanas de la plaza despiertan!',why:'Detectaste un error en un patrón ascendente: escuchar patrones te permite notar cuando algo “no encaja”.'},
-   {type:'water',ph:'Desafío II · El agua que fluye',q:'Corto y largo',sub:'La fuente solo se abre con el patrón correcto. Escúchalo y tócalo en cualquier tecla: corto = toca y suelta · largo = mantén.',pattern:['s','l']},
-   {type:'water',ph:'Desafío II · El agua que fluye',q:'El patrón del agua',sub:'Ahora cuatro sonidos. Respeta cuáles son cortos y cuáles largos.',n:4},
-   {type:'water',ph:'Desafío II · El agua que fluye',q:'Mantén el flujo',sub:'Este patrón tiene un silencio: suelta y espera antes de seguir. El silencio también es música.',n:3,rests:true,win:'¡El agua respeta tus silencios!',why:'Un silencio dura un tiempo, igual que un sonido. En la partitura los silencios tienen sus propios símbolos.'},
-   {type:'water',ph:'Desafío II · El agua que fluye',q:'El ritmo escondido',sub:'Esta vez no ves el patrón: escúchalo y repítelo de memoria.',n:4,hidden:true,win:'¡La fuente vuelve a funcionar!',why:'En la notación musical, las figuras indican cuánto dura cada sonido. Por ejemplo, la negra dura un pulso y la blanca dos: una blanca es un sonido “largo” comparado con una negra.'},
-   {type:'lights',ph:'Desafío III · La plaza en silencio',q:'Suave y fuerte',tasks:[{do:'soft',say:'Toca una nota suave (piano)'},{do:'strong',say:'Ahora la misma idea, fuerte (forte)'}]},
-   {type:'lights',ph:'Desafío III · La plaza en silencio',q:'El primer acorde',tasks:[{chord:'C',say:'Construye Do mayor: Do, Mi y Sol a la vez'}]},
-   {type:'lights',ph:'Desafío III · La plaza en silencio',q:'Separado y conectado',tasks:[{chord:'C',art:'s',say:'Do mayor staccato: tócalo y suéltalo enseguida'},{chord:'C',art:'l',say:'Do mayor legato: mantenlo sonando'},{chord:'F',say:'Fa mayor: Fa, La y Do'}]},
-   {type:'lights',ph:'Desafío III · La plaza en silencio',q:'Las notas que bailan',tasks:[{do:'trill',say:'Trino: alterna Mi y Fa, cada vez más rápido'}]},
-   {type:'lights',ph:'Desafío III · La plaza en silencio',q:'La luz que crece',tasks:[{do:'cresc',say:'Crescendo: 5 notas, cada una más fuerte'},{do:'dim',say:'Diminuendo: 5 notas, cada una más suave'}],wakeMsg:'¡Las luces de la plaza se encienden!'},
-   {type:'seqperf',ph:'Desafío IV · La fuente musical',q:'Dirige la fuente',sub:'Mira y escucha la demostración. Luego interprétala: cada nota debe cumplir lo que dice su tarjeta.',seq:[{reg:'low'},{reg:'high',dur:'long'},{dyn:'soft'},{dyn:'strong'}],win:'¡La fuente baila!'},
-   {type:'seqperf',ph:'Desafío IV · La fuente musical',q:'La fuente de memoria',sub:'Una secuencia nueva. Mira la demostración: después las instrucciones se ocultan.',n:3,memory:true,win:'¡La fuente musical queda restaurada!'},
-   {type:'discover',ph:'Desafío V · El primer descubrimiento',q:'Escuchar relaciones',items:[{kind:'dir',q:'¿Hacia dónde va esta melodía?'},{kind:'same',q:'¿Estas dos notas son iguales o diferentes?'},{kind:'same',q:'¿Y estas?'},{kind:'odd',q:'Tres músicos tocan la misma melodía… pero uno se equivoca. ¿Cuál?',base:[60,62,64,62,60]}]},
-   {type:'create',ph:'Desafío VI · La primera creación',q:'Devuelve la música a la plaza',sub:'Crea entre 6 y 8 notas. Usa al menos una grave y una aguda, mezcla negras (cortas) y blancas (largas) e incluye al menos una nota piano y una forte.',len:8,minLen:6,lo:48,hi:79,durations:true,dyn:true,require:{dur:true,dyn:true,range:true},keep:'plaza'},
-   {type:'melody',ph:'Desafío VI · La primera creación',q:'Interprétala',sub:'Toca tu creación con el instrumento que elegiste.',notes:'plaza',show:'keys',lo:48,hi:79,saveFrom:'plaza',title:'Mi primera pieza (Florencia)'}
+   /* ACTO I · EL VIAJERO */
+   {type:'scene',act:['Acto I','El viajero'],img:'llegada',move:'zoom',lines:['Después de un largo viaje, llegas a una ciudad rodeada de colinas y antiguos caminos.','Desde lejos, Florencia parece hermosa. Sin embargo, algo en ella resulta extraño.']},
+   {type:'scene',img:'entrada',move:'zoom',lines:['Cruzas una antigua entrada de piedra y llegas a una plaza.','No hay música, ni vendedores, ni celebraciones. Apenas se escucha el movimiento de la ciudad.']},
+   {type:'scene',img:'dormida',move:'pan',lines:['Una fuente permanece seca y los faroles no tienen luz.','Los habitantes siguen con sus tareas, pero parecen haber olvidado cómo disfrutarlas.']},
+   {type:'scene',img:'matteo',who:'matteo',move:'zoom',lines:['Un anciano se acerca. Lleva una pequeña lámpara y observa la plaza con nostalgia.','—Me llamo Matteo. Soy el custodio del campanario.']},
+   {type:'scene',img:'matteo',who:'matteo',lines:['—Hace quince años, nuestro Espíritu Guardián dejó de responder a la llamada.','—Desde entonces, la gente sigue viviendo, pero ha olvidado aquello que hace especial a la vida.']},
+   {type:'scene',img:'campanario',who:'matteo',move:'zoom',lines:['—El antiguo Músico Maestro dirigía una ceremonia capaz de invocar al Guardián.','—Pero desapareció. Y el ritual nunca volvió a celebrarse.']},
+   {type:'scene',img:'escenario',who:'matteo',move:'pan',lines:['—Tres jóvenes llevan años preparándose para ocupar su lugar en la ceremonia.','—Son buenos músicos, pero nunca han realizado el ritual.']},
+   {type:'scene',img:'matteo',who:'matteo',move:'zoom',lines:['—La ciudad necesita recuperar su alma. Quiero darles la oportunidad de intentarlo.','—Pero necesitarán ayuda. ¿Podrías acompañarlos?'],accept:'Acepto ayudarlos',reward:'Matteo te entrega una pequeña insignia ceremonial.',badge:'insignia-florencia'},
+   /* ACTO II · LAS CAMPANAS ESCONDIDAS */
+   {type:'scene',act:['Acto II','Las campanas escondidas'],img:'campanario',who:'matteo',move:'zoom',lines:['Matteo te conduce hasta el campanario.','—Las campanas hacen la primera llamada. Pero debemos recuperar su antigua secuencia.']},
+   {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'—Cada campana tiene una altura diferente.',sub:'Escucha las dos campanas y encuentra la más grave.',mode:'low',n:2,gap:9,lo:48,hi:84,win:'¡Has reconocido el sonido más grave!'},
+   {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'La primera campana responde. Matteo señala otras.',sub:'—Ahora debemos encontrar la voz más aguda.',mode:'high',n:3,gap:5,lo:52,hi:84,win:'¡La campana más aguda ha respondido!'},
+   {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'Matteo descubre una antigua secuencia grabada en el mecanismo.',sub:'—Las campanas deben sonar de la más grave a la más aguda.',mode:'order',n:4,gap:3,lo:55,hi:79,win:'¡La secuencia está en orden!',why:'Ordenar sonidos por altura es la base de las escalas: de grave a agudo, como subir una escalera.'},
+   {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'Las campanas empiezan a responder, pero una nota interrumpe la secuencia.',sub:'—Hay algo que no pertenece aquí. Encuéntralo.',mode:'broken',n:5,step:2,win:'¡Has encontrado la campana equivocada!',why:'Escuchar patrones te permite notar cuando algo “no encaja”.'},
+   {type:'bells',who:'matteo',ph:'Acto II · Las campanas escondidas',q:'Una tenue luz aparece en el campanario.',sub:'—La primera llamada está casi lista. Repite la secuencia de las campanas en el mismo orden.',mode:'repeat',n:4,len:3,gap:4,lo:55,hi:81,win:'¡El campanario ha despertado!',why:'Recordar y repetir una secuencia de alturas es exactamente lo que haces al aprender una melodía.'},
+   /* ACTO III · EL AGUA QUE FLUYE */
+   {type:'scene',act:['Acto III','El agua que fluye'],img:'fuente',who:'matteo',move:'zoom',lines:['Matteo te conduce hasta la fuente.','—Las campanas han despertado, pero todavía falta recuperar el pulso de la ciudad.']},
+   {type:'water',who:'matteo',ph:'Acto III · El agua que fluye',q:'—El agua no fluye de cualquier manera. Sigue un ritmo.',sub:'Escucha y tócalo en cualquier tecla: corto = toca y suelta · largo = mantén.',pattern:['s','l'],win:'¡Has reconocido la duración!'},
+   {type:'water',who:'matteo',ph:'Acto III · El agua que fluye',q:'Matteo señala unas marcas antiguas en la piedra.',sub:'—Algunos sonidos ocupan más tiempo que otros. Repite el patrón de cortos y largos.',n:4,win:'¡Ahora comprendes cómo se reparte el tiempo!',why:'En la partitura, la negra dura un pulso y la blanca dos: una blanca dura el doble que una negra.'},
+   {type:'water',who:'matteo',ph:'Acto III · El agua que fluye',q:'—Pero no todo en la música es sonido. También hay que respetar los silencios.',sub:'Cuando llegue el silencio, suelta y espera antes de seguir.',n:3,rests:true,win:'¡Has encontrado el silencio!',why:'Un silencio dura un tiempo, igual que un sonido. En la partitura tiene sus propios símbolos.'},
+   {type:'water',who:'matteo',ph:'Acto III · El agua que fluye',q:'Una antigua secuencia rítmica aparece en la fuente.',sub:'—Repítela de memoria. El agua recordará su movimiento.',n:4,hidden:true,win:'¡El ritmo ha regresado!',why:'Para recordar un ritmo, divídelo en grupos pequeños.'},
+   {type:'scene',img:'fuente',fx:'water',who:'matteo',lines:['Una pequeña corriente empieza a recorrer la fuente.','Matteo contempla el agua.','—La ciudad empieza a recordar cómo latir.']},
+   /* ACTO IV · LA PLAZA EN SILENCIO */
+   {type:'scene',act:['Acto IV','La plaza en silencio'],img:'plaza',who:'matteo',move:'zoom',lines:['Al caer la noche, Matteo te lleva de nuevo a la plaza.','—Las luces representan aquello que da vida a la música: su expresión.']},
+   {type:'lights',who:'matteo',ph:'Acto IV · La plaza en silencio',q:'—No basta con tocar las notas correctas. También hay que controlar su intensidad.',tasks:[{do:'soft',say:'Toca una nota suave (piano)'},{do:'strong',say:'Ahora una nota fuerte (forte)'}]},
+   {type:'lights',who:'matteo',ph:'Acto IV · La plaza en silencio',q:'Matteo encuentra una antigua anotación musical.',sub:'—La ceremonia también necesita armonía. Empecemos con Do mayor.',tasks:[{chord:'C',say:'Construye Do mayor: Do, Mi y Sol a la vez'}]},
+   {type:'lights',who:'violin',ph:'Acto IV · La plaza en silencio',q:'La violinista se prepara para tocar.',sub:'—Hay notas que deben sonar separadas y otras que necesitan permanecer conectadas.',tasks:[{chord:'C',art:'s',say:'Do mayor staccato: tócalo y suéltalo enseguida'},{chord:'C',art:'l',say:'Do mayor legato: mantenlo sonando'}]},
+   {type:'lights',who:'violin',ph:'Acto IV · La plaza en silencio',q:'La violinista descubre otra parte de la anotación.',sub:'—Ahora necesitamos un acorde de Fa mayor.',tasks:[{chord:'F',say:'Fa mayor: Fa, La y Do'}]},
+   {type:'lights',who:'violin',ph:'Acto IV · La plaza en silencio',q:'—La música también se adorna con movimientos rápidos entre notas.',sub:'—Intentemos recuperar este pequeño trino.',tasks:[{do:'trill',say:'Trino: alterna Mi y Fa, cada vez más rápido'}]},
+   {type:'lights',who:'matteo',ph:'Acto IV · La plaza en silencio',q:'La plaza empieza a recuperar su luz.',sub:'—Ahora aprendamos a aumentar y disminuir la intensidad.',tasks:[{do:'cresc',say:'Crescendo: 5 notas, cada una más fuerte'},{do:'dim',say:'Diminuendo: 5 notas, cada una más suave'}],wakeMsg:'¡La luz ha respondido a tu interpretación!'},
+   /* ACTO V · LA FUENTE MUSICAL */
+   {type:'scene',act:['Acto V','La fuente musical'],img:'plaza_on',who:'matteo',move:'zoom',lines:['Las campanas, el agua y las luces han empezado a responder.','—Pero el ritual exige algo más que dominar cada elemento por separado.']},
+   {type:'seqperf',who:'matteo',ph:'Acto V · La fuente musical',q:'—Una nota puede ser grave, larga y suave al mismo tiempo.',sub:'Mira y escucha la demostración. Luego toca cada nota cumpliendo su tarjeta.',seq:[{reg:'low',dur:'long'},{reg:'high',dur:'short'},{reg:'low',dyn:'soft'}],win:'¡Has combinado correctamente las características!'},
+   {type:'seqperf',who:'matteo',ph:'Acto V · La fuente musical',q:'Una secuencia aparece sobre el agua.',sub:'—Es uno de los patrones de la ceremonia. Tras la demostración, las tarjetas se ocultan.',n:3,memory:true,win:'¡La fuente reconoce el patrón ceremonial!'},
+   {type:'scene',img:'plaza_on',fx:'gold',who:'matteo',lines:['El agua empieza a reflejar una luz dorada.','Matteo parece emocionado.','—Ya casi estamos preparados. Solo falta reunir a los músicos.']},
+   /* ACTO VI · LOS TRES MÚSICOS */
+   {type:'scene',act:['Acto VI','Los tres músicos'],img:'escenario',who:'matteo',move:'pan',lines:['Matteo te conduce hasta el escenario de la plaza.','—Llevan años preparándose. Hoy deberán demostrar lo que han aprendido.']},
+   {type:'musico',mode:'odd',who:'violin',ref:69,n:5,ph:'Acto VI · Los tres músicos',q:'La violinista se prepara, pero parece preocupada.',sub:'—No quiero equivocarme en la ceremonia. Una de mis notas de afinación suena distinta… ¿cuál?',win:'¡Has encontrado la nota equivocada!'},
+   {type:'musico',mode:'tune',who:'violin',ph:'Acto VI · Los tres músicos',q:'La violinista descubre que una cuerda necesita ajustarse.',sub:'—Ayúdame: gira la clavija hasta que mi cuerda suene igual que la referencia.',win:'¡La cuerda está afinada!'},
+   {type:'musico',mode:'contour',who:'flauta',ph:'Acto VI · Los tres músicos',q:'El flautista se une al grupo.',sub:'—Puedo tocar la melodía, pero me pierdo cuando los demás empiezan. ¿Mis notas suben, bajan o se repiten?',win:'¡Has reconocido el movimiento de la melodía!'},
+   {type:'musico',mode:'odd',who:'flauta',base:[67,69,71,72,74],ph:'Acto VI · Los tres músicos',q:'El flautista empieza a tocar, pero una nota no encaja con la melodía.',sub:'—Algo ha cambiado. ¿Puedes encontrarlo?',win:'¡La melodía vuelve a estar completa!'},
+   {type:'musico',mode:'rhythm',who:'laud',ph:'Acto VI · Los tres músicos',q:'El laudista se incorpora al escenario.',sub:'—Tengo la melodía, pero necesito ayuda con el ritmo. Una de mis partes no suena como el modelo.',win:'¡Has encontrado el cambio de ritmo!'},
+   {type:'melody',stage:['flauta','violin','laud'],ph:'Acto VI · Los tres músicos',q:'Los tres músicos se colocan en sus posiciones.',sub:'—Intentemos tocar juntos. No importa si todavía no somos perfectos. Sigue las teclas iluminadas.',notes:[60,64,67,65,64,62,60],show:'keys',lo:55,hi:72},
+   /* ACTO VII · EL RITUAL */
+   {type:'scene',act:['Acto VII','El ritual'],img:'plaza_on',who:'matteo',move:'pan',lines:['La plaza está preparada. Las campanas, la fuente y los faroles han recuperado su luz.','—Ha llegado el momento —dice Matteo.']},
+   {type:'scene',img:'escenario',who:'matteo',move:'zoom',lines:['Matteo observa a los tres músicos.','—El ritual no consiste en copiar una melodía antigua.','—La última parte siempre ha pertenecido a quienes celebran la ceremonia.','—El antiguo Músico Maestro dejó una página en blanco. Ahora es tu turno de escribir algo que represente a esta ciudad.']},
+   {type:'create',who:'matteo',ph:'Acto VII · El ritual',q:'—Escribe tu melodía para el ritual.',sub:'Entre 6 y 8 notas: al menos una grave y una aguda, negras (cortas) y blancas (largas), y una nota piano y una forte.',len:8,minLen:6,lo:48,hi:79,durations:true,dyn:true,require:{dur:true,dyn:true,range:true},keep:'plaza'},
+   {type:'melody',stage:['flauta','violin','laud'],ph:'Acto VII · El ritual',q:'Los músicos esperan tu señal.',sub:'Toca tu creación completa con tu instrumento.',notes:'plaza',show:'keys',lo:48,hi:79,saveFrom:'plaza',title:'Mi primera pieza (Florencia)'},
+   {type:'scene',img:'final',fx:'gold',playKeep:'plaza',who:'matteo',lines:['Los tres músicos empiezan a interpretar el ritual… con tu melodía.','Las campanas responden. La fuente se ilumina y los faroles despiertan.','Una presencia luminosa aparece sobre la plaza.','El Espíritu Guardián ha regresado.','Durante un instante, todo queda en silencio.','Entonces, algo cambia.','Los habitantes recuperan sus sueños, sus deseos y su inspiración.','Un artesano vuelve a crear. Una niña empieza a dibujar. Los músicos sonríen y la plaza se llena de vida.','—La ciudad ha recordado quién es.']},
+   {type:'scene',img:'llegada',who:'matteo',move:'zoom',lines:['Matteo se despide en la puerta de la ciudad.','—Has hecho mucho por esta ciudad. Pero tu viaje no termina aquí.','Observas el camino que sale de Florencia. Una nueva aventura te espera.']}
   ]},
  /* ---------------- 02 ---------------- */
  {id:'w1m02',t:'El origen de los instrumentos',d:'Cómo producen sonido los instrumentos y cómo se agrupan en familias: cuerda, viento, percusión y teclado.',
@@ -529,7 +656,7 @@ function keyboard(host,{lo,hi,labels,onKey,dyn,kind,onRelease}){
   const whites=[];for(let p=lo;p<=hi;p++)if(!isBlack(p))whites.push(p);const ww=100/whites.length,els={};
   whites.forEach((p,i)=>{const k=document.createElement('div');k.className='kw';k.style.left=(i*ww)+'%';k.style.width=ww+'%';k.dataset.p=p;if(labels)k.textContent=nm(p);kb.appendChild(k);els[p]=k});
   for(let p=lo;p<=hi;p++)if(isBlack(p)){const i=whites.indexOf(p-1);if(i<0)continue;const k=document.createElement('div');k.className='kbk';k.style.left=((i+1)*ww-ww*.3)+'%';k.style.width=(ww*.6)+'%';k.dataset.p=p;kb.appendChild(k);els[p]=k}
-  const press=(p,vel,o={})=>{const k=els[p];if(k){k.classList.add('hit');setTimeout(()=>k.classList.remove('hit'),180)}if(!o.silent){tone._user=true;tone(p,vel,.7,kind?kind():'piano');tone._user=false}onKey&&onKey(p,vel)},release=(p,dur)=>{onRelease&&onRelease(p,dur)};
+  const press=(p,vel,o={})=>{msPlaying(450);const k=els[p];if(k){k.classList.add('hit');setTimeout(()=>k.classList.remove('hit'),180)}if(!o.silent){tone._user=true;tone(p,vel,.7,kind?kind():'piano');tone._user=false}onKey&&onKey(p,vel)},release=(p,dur)=>{onRelease&&onRelease(p,dur)};
   kb.addEventListener('pointerdown',e=>{const k=e.target.closest('[data-p]');if(!k)return;e.preventDefault();const p=+k.dataset.p,r=k.getBoundingClientRect(),vel=dyn?Math.max(.05,Math.min(1,(e.clientY-r.top)/r.height)):.7;downs[e.pointerId]={p,t:performance.now()};press(p,vel)});
   const downs={},up=e=>{const d=downs[e.pointerId];if(!d)return;delete downs[e.pointerId];release(d.p,(performance.now()-d.t)/1000)};kb.addEventListener('pointerup',up);kb.addEventListener('pointercancel',up);kb.addEventListener('pointerleave',up);
   const api={lo,hi,press:(p,v,o)=>press(foldInto(p,lo,hi),v,o),release:(p,d)=>release(foldInto(p,lo,hi),d),
@@ -884,16 +1011,117 @@ function plazaLights(){const total=LS.lightsTotal||9,done=LS.lightsDone||0,n=Mat
 
 /* ===================== MOTOR DE LECCIONES ===================== */
 let LS=null;
-function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();renderStep()}
-function exitLesson(){micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;drawMap()}
+function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';gameInit();gameFS(true);TW_LAST='';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();renderStep()}
+function exitLesson(){gameFS(false);micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;drawMap()}
 $('#lClose').onclick=()=>{if(!LS)return;sheet(`<h2>¿Salir de la lección?</h2><p>Perderás el avance de esta lección.</p><button class="cta" id="q1" type="button">Salir</button><button class="ghost" id="q2" type="button">Seguir aprendiendo</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet};
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
 function next(){if(!micGlobal)micOff();EAR.chordDown=[];EAR.cj=null;EAR.heard=null;LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
-function head(ph,q,sub){return `<span class="lphase">${esc(ph)}</span>${q?`<p class="lq">${esc(q)}</p>`:''}${sub?`<p class="ltext" style="font-size:15px;color:var(--muted)">${esc(sub)}</p>`:''}`}
+function head(ph,q,sub){const cur=LS&&LS.L.steps[LS.i],who=cur&&cur.who;if(!q&&!sub)return `<span class="lphase">${esc(ph||'')}</span>`;return `<span class="lphase">${esc(ph||'')}</span><div class="g-say">${who&&WHO[who]?`<span class="g-who">${portrait(who)}<span>${esc(WHO[who])}</span></span>`:''}${q?`<b class="g-q">${esc(q)}</b>`:''}${sub?`<span class="g-sub">${esc(sub)}</span>`:''}</div>`}
 function renderStep(){const st=LS.L.steps[LS.i],box=$('#lStage');$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
- (STEP[st.type]||STEP.story)(st,box);$('.lbody').scrollTop=0}
+ (STEP[st.type]||STEP.story)(st,box);if(st.stage&&!box.querySelector('.mstage'))box.insertAdjacentHTML('afterbegin',mstageHTML(st.stage));$('.lbody').scrollTop=0}
+/* ===================== MODO JUEGO: narración, escenas y personajes ===================== */
+const WHO={matteo:'Matteo',violin:'La violinista',flauta:'El flautista',laud:'El laudista'};
+/* personajes provisionales (bocetos) hasta tener las imágenes de Gemini */
+function charSvg(who,vb){const sk='#e0b18c',V=vb||'0 0 200 380';let body='',ins='',hair='',extra='';
+ if(who==='matteo'){body='<path d="M58 150 Q100 128 142 150 L160 372 L40 372 Z" fill="#2b3d6b"/><path d="M84 150 L100 372 L116 150" fill="#22325a"/><rect x="62" y="226" width="76" height="9" fill="#5a4026"/>';hair='<path d="M70 92 Q100 40 130 92 Q128 70 100 64 Q72 70 70 92Z" fill="#d8d4cc"/><path d="M76 108 Q100 168 124 108 Q118 140 100 146 Q82 140 76 108Z" fill="#ece8e0"/>';ins='<g transform="translate(150 230)"><circle r="34" fill="rgba(255,200,110,.25)"/><rect x="-11" y="-16" width="22" height="30" rx="4" fill="#b88a3e" stroke="#6b4a1e" stroke-width="2"/><circle r="6" fill="#ffd27a"/><path d="M-6 -16 Q0 -30 6 -16" fill="none" stroke="#6b4a1e" stroke-width="2"/></g><path d="M138 170 Q156 200 150 214" stroke="#2b3d6b" stroke-width="16" fill="none" stroke-linecap="round"/>'}
+ else if(who==='violin'){body='<path d="M62 152 Q100 132 138 152 L166 372 L34 372 Z" fill="#8f1d2c"/><path d="M80 152 Q100 200 120 152" fill="#f1e6cf"/>';hair='<path d="M68 96 Q66 50 100 48 Q134 50 132 96 Q128 74 100 70 Q72 74 68 96Z" fill="#2a1a12"/><circle cx="100" cy="46" r="15" fill="#2a1a12"/>';ins='<g transform="translate(62 160) rotate(-28)"><path d="M0 0 q-14 -4 -16 10 q-2 8 6 12 q-8 6 -4 16 q4 12 18 8 q14 4 18 -8 q4 -10 -4 -16 q8 -4 6 -12 q-2 -14 -16 -10 Z" fill="#9a5a24" stroke="#5a3210" stroke-width="2" transform="translate(6 0)"/><rect x="3" y="-46" width="6" height="48" fill="#3a2210"/></g><path d="M40 140 L170 230" stroke="#d8c39a" stroke-width="3"/>'}
+ else if(who==='flauta'){body='<path d="M64 150 Q100 132 136 150 L146 286 L54 286 Z" fill="#7d5f3f"/><rect x="62" y="286" width="32" height="86" fill="#4b3a2a"/><rect x="106" y="286" width="32" height="86" fill="#4b3a2a"/>';hair='<path d="M68 96 Q70 56 100 54 Q132 56 134 94 Q124 70 100 72 Q78 74 68 96Z" fill="#6b4524"/><ellipse cx="100" cy="58" rx="36" ry="12" fill="#5c3b2a"/>';ins='<rect x="88" y="112" width="104" height="7" rx="3" fill="#c79a5a" stroke="#7a5626" stroke-width="1.5"/><circle cx="140" cy="115" r="2" fill="#5a3a16"/><circle cx="152" cy="115" r="2" fill="#5a3a16"/><circle cx="164" cy="115" r="2" fill="#5a3a16"/>'}
+ else if(who==='laud'){body='<path d="M64 150 Q100 132 136 150 L142 262 L58 262 Z" fill="#2f6b3e"/><path d="M58 262 L40 300 L70 304 L82 266 Z M142 262 L160 300 L130 304 L118 266 Z" fill="#b8892e"/><rect x="40" y="300" width="30" height="72" fill="#b8892e"/><rect x="130" y="300" width="30" height="72" fill="#b8892e"/><rect x="50" y="296" width="100" height="10" fill="#5a3a1e"/><path d="M56 306 L50 372 M144 306 L150 372" stroke="#5a3a1e" stroke-width="6"/>';hair='<path d="M68 96 Q70 56 100 54 Q132 56 134 94 Q124 70 100 72 Q78 74 68 96Z" fill="#3b2514"/><path d="M64 64 Q100 38 138 64 L132 70 Q100 56 70 70 Z" fill="#7a2230"/><path d="M128 56 q26 -26 40 -24 q-16 10 -30 30" fill="#e8d9b0"/>';ins='<g transform="translate(108 236) rotate(-32)"><ellipse rx="42" ry="34" fill="#a8692a" stroke="#5a3210" stroke-width="2"/><circle cx="-6" r="10" fill="#3a2210"/><rect x="30" y="-6" width="74" height="12" fill="#5a3210"/><rect x="100" y="-8" width="16" height="16" fill="#3a2210" transform="rotate(30 100 0)"/></g>'}
+ return `<svg viewBox="${V}" xmlns="http://www.w3.org/2000/svg" aria-label="${WHO[who]||''}"><ellipse cx="100" cy="374" rx="70" ry="8" fill="rgba(0,0,0,.35)"/>${body}<rect x="88" y="124" width="24" height="28" fill="${sk}"/><circle cx="100" cy="100" r="31" fill="${sk}"/>${hair}<circle cx="89" cy="100" r="3" fill="#2a1a12"/><circle cx="111" cy="100" r="3" fill="#2a1a12"/><path d="M92 116 Q100 121 108 116" stroke="#8a4a3a" stroke-width="2" fill="none"/>${ins}${extra}</svg>`}
+const portrait=who=>charSvg(who,'55 48 90 90');
+/* imágenes de cada escena: cuando lleguen las de Gemini (verticales) basta con poner {full:'ruta'} */
+const SCN={};
+function plazaOn(extra=''){return plazaHTML().replace(/class="luz"/g,'class="luz on"').replace(/<\/div>$/,extra+'</div>')}
+function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><div class="ls" style="background-image:url(${R.full})"></div></div>`;
+ switch(k){
+  case 'llegada':return `<div class="lscene"><div class="ls" style="background-image:url(${BASE}w1.jpg);filter:saturate(.9) brightness(.85)"></div></div>`;
+  case 'entrada':return layered({sky:M1()+'portada.webp',fg:M1()+'portada_fg.webp',clouds:4,top0:0,top1:22,op:.5,cls:'portada'});
+  case 'dormida':return plazaHTML().replace('lscene plaza','lscene plaza dusk');
+  case 'campanario':return layered({sky:BASE+'campanario.webp',fg:M1()+'campanario_fg.webp',clouds:5,top0:-2,top1:26,op:.9});
+  case 'campana':return `<div class="lscene solo"><img class="solo-img" src="${BASE}bell.webp" alt=""></div>`;
+  case 'fuente':return layered({sky:M1()+'fuente.webp',fg:M1()+'fuente_fg.webp',clouds:3,top0:-4,top1:12,op:.8,cls:'fuente',extra:'<canvas class="water"></canvas>'});
+  case 'plaza':return plazaHTML();
+  default:if(k&&k.startsWith('art:'))return `<div class="lscene solo"><div style="position:absolute;inset:14% 12% 34%;display:grid;place-items:center">${art(k.slice(4))}</div></div>`;
+  case 'plaza_on':return plazaOn();
+  case 'escenario':return plazaOn('<div class="stagewood"></div>');
+  case 'final':return plazaOn('<div class="stagewood"></div><div class="spirit"></div>');
+  case 'matteo':case 'violin':case 'flauta':case 'laud':return plazaOn('<div class="chr">'+charSvg(k)+'</div>').replace('lscene plaza','lscene plaza charsc');
+ }return `<div class="lscene solo"></div>`}
+/* máquina de escribir */
+function typeIn(el,cb,opts={}){const nodes=[];const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode()))if(!(n.parentElement&&n.parentElement.closest('.g-who')))nodes.push(n);
+ const full=nodes.map(x=>x.nodeValue);nodes.forEach(x=>x.nodeValue='');let ni=0,ci=0,done=false;el.classList.add('typing');
+ const finish=()=>{if(done)return;done=true;nodes.forEach((x,i)=>x.nodeValue=full[i]);el.classList.remove('typing');cb&&cb()};
+ const tick=()=>{if(done)return;if(!el.isConnected){done=true;return}while(ni<nodes.length&&ci>=full[ni].length){ni++;ci=0}if(ni>=nodes.length){finish();return}ci++;nodes[ni].nodeValue=full[ni].slice(0,ci);setTimeout(tick,/[.,;:!?—]/.test(full[ni][ci-1])?110:24)};
+ if(!opts.noClick)el.addEventListener('click',finish);if(matchMedia('(prefers-reduced-motion: reduce)').matches)finish();else tick();return {finish,get done(){return done}}}
+let TW_LAST='';
+function gameScan(){const st=$('#lStage');if(!st)return;st.querySelectorAll('.g-say:not(.tw-seen)').forEach(el=>{el.classList.add('tw-seen');const t=el.textContent.trim();if(t===TW_LAST)return;TW_LAST=t;typeIn(el)});
+ const src=st.querySelector('.cut .ls,.lscene .ls-sky,.lscene .ls,.mstage .ls');const g=$('#gBack');if(g&&src){const bg=src.style.backgroundImage;if(bg&&g.style.backgroundImage!==bg)g.style.backgroundImage=bg}}
+function gameInit(){const v=$('#vLesson');if(!v||v.classList.contains('game'))return;v.classList.add('game');const b=document.createElement('div');b.id='gBack';v.prepend(b);
+ new MutationObserver(gameScan).observe($('#lStage'),{childList:true,subtree:true})}
+function gameFS(on){try{const d=document,iOS=/iPad|iPhone|iPod/.test(navigator.userAgent);if(on){if(!iOS&&d.documentElement.requestFullscreen&&matchMedia('(pointer:coarse)').matches&&!d.fullscreenElement)d.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{})}else if(d.fullscreenElement)d.exitFullscreen().catch(()=>{})}catch(e){}}
+function msPlaying(ms){const s=document.querySelector('#lStage .mstage');if(!s)return;s.classList.add('playing');clearTimeout(s._t);s._t=setTimeout(()=>s.classList.remove('playing'),ms||500)}
+function mstageHTML(whos){const arr=Array.isArray(whos)?whos:[whos];return `<div class="mstage ${arr.length>1?'trio':''}"><div class="ls" style="background-image:url(${M1()}plaza_noche.webp)"></div>${arr.map(w=>`<div class="chr">${charSvg(w)}</div>`).join('')}</div>`}
+function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];const out=[];let cur='';s.forEach(x=>{if((cur+x).length>150&&cur){out.push(cur.trim());cur=''}cur+=x});if(cur.trim())out.push(cur.trim());return out}
+
 const STEP={
- story(st,box){box.innerHTML=head(st.ph)+(st.scene==='portada'?layered({sky:M1()+'portada.webp',fg:M1()+'portada_fg.webp',clouds:4,top0:0,top1:22,op:.5,cls:'portada'}):`<div class="art">${art(st.art)}</div>`)+`<p class="lq">${esc(st.title)}</p><p class="ltext">${esc(st.text)}</p>${st.fact?`<p class="fact">${esc(st.fact)}</p>`:''}`;foot('Continuar',next)},
+ scene(st,box){/* escena de historia a pantalla completa: imagen + narración letra a letra; tocar para avanzar */
+  const lines=(st.lines||[]).filter(Boolean);let li=-1,tw=null,actOn=!!st.act,FWc=null;
+  box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in${SCN[st.img]&&SCN[st.img].full?' full':''}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="gold"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
+   <div class="cut-say" id="csay"><div class="cs-who" hidden></div><p class="cs-line"></p><span class="cs-next" hidden>${st.accept?'':'Continuar ▸'}</span>${st.accept?`<button class="cta gold cs-acc" type="button" hidden>${esc(st.accept)}</button>`:''}</div>`;
+  const say=$('#csay'),ln=say.querySelector('.cs-line'),wh=say.querySelector('.cs-who'),nx=say.querySelector('.cs-next'),acc=say.querySelector('.cs-acc');
+  const cv=box.querySelector('canvas.water');if(cv){setTimeout(()=>{FWc=fountainWater(cv);if(st.fx==='water'||st.img==='final'){FWc.fill(1);FWc.all(true)}else if(LS.scene&&LS.scene.water){FWc.fill(1);FWc.all(true)}},60)}
+  if(st.fx==='lights'){const order=[2,3,4,5,0,1];box.querySelectorAll('.luz').forEach(e=>e.classList.remove('on'));order.forEach((i,j)=>setTimeout(()=>{const e=box.querySelector(`.luz[data-luz="${i}"]`);if(e)e.classList.add('on')},900+j*650))}
+  if(st.fx==='bells'){const t=ac().currentTime+.4;[60,64,67,72].forEach((p,i)=>bell(p,.6,t+i*.45))}
+  if(st.playKeep&&LS.keep[st.playKeep]){setTimeout(()=>{const a=ac();let t=a.currentTime+.1;LS.keep[st.playKeep].forEach(n=>{tone(n.p,n.v,n.d*.5*.95,'strings',t);tone(n.p-12,n.v*.6,n.d*.5*.95,'lute',t);t+=n.d*.5})},1200)}
+  const show=()=>{li++;if(li>=lines.length){if(st.accept){acc.hidden=false;nx.hidden=true;return}if(FWc)FWc.stop();next();return}
+   const L=lines[li],dlg=L.startsWith('—');const tag=dlg&&st.who;wh.hidden=!tag;if(tag)wh.innerHTML=portrait(st.who)+'<span>'+esc(WHO[st.who])+'</span>';
+   ln.className='cs-line'+(dlg?' dlg':'');ln.textContent=L;nx.hidden=true;say.hidden=false;
+   tw=typeIn(ln,()=>{if(li<lines.length-1||!st.accept)nx.hidden=false;else{acc.hidden=false}},{noClick:true})};
+  const startLines=()=>{const a=box.querySelector('.cut-act');if(a)a.classList.add('out');setTimeout(show,450)};
+  const tap=e=>{if(e.target.closest('.cs-acc'))return;if(actOn){actOn=false;startLines();return}if(tw&&!tw.done){tw.finish();return}if(st.accept&&li>=lines.length-1)return;show()};
+  box.querySelector('#cut').onclick=tap;say.onclick=tap;
+  if(acc)acc.onclick=e=>{e.stopPropagation();if(st.reward){S.badges=S.badges||[];if(!S.badges.includes(st.badge||LS.L.id))S.badges.push(st.badge||LS.L.id);save();toast(st.reward)}if(FWc)FWc.stop();next()};
+  if(actOn){say.hidden=true;setTimeout(()=>{if(actOn){actOn=false;startLines()}},2300)}else show()},
+ musico(st,box){/* los músicos de la plaza: encontrar el error, afinar, contorno, ritmo — y luego tocarlo bien */
+  const who=st.who,kind={violin:'strings',flauta:'flute',laud:'lute'}[who]||'piano';let phase=1;
+  const fb=()=>$('#fb');const bad=(h)=>{LS.miss+=.4;const f=fb();f.className='fb on bad';f.innerHTML=h};
+  const winMsg=(extra)=>{explain(`<b>${st.win||'¡Bien hecho!'}</b>${st.why||extra||''}`);foot('Continuar',next)};
+  const playSeq=(ns,ds,onNote)=>{const a=ac();let t=a.currentTime+.08,off=80;ns.forEach((p,j)=>{const d=(ds&&ds[j])||.42;tone(p,.72,d,kind,t);const o=off;setTimeout(()=>{msPlaying(d*1000+120);onNote&&onNote(j)},o);t+=d+.1;off+=(d+.1)*1000});return off};
+  const dots=(ns)=>`<svg viewBox="0 0 ${ns.length*34+10} 64" width="${ns.length*34+10}" height="64" style="display:block;margin:0 auto">${ns.map((p,j)=>`<circle cx="${22+j*34}" cy="${56-(p-ns.reduce((a,b)=>Math.min(a,b)))*3.4}" r="8" fill="#e8c27a"/>`).join('')}</svg>`;
+  if(st.mode==='odd'){const base=st.base?st.base.slice():Array(st.n||5).fill(st.ref||69);const n=base.length,pos=1+Math.floor(Math.random()*(n-1));const ns=base.slice();ns[pos]+=st.base?(Math.random()<.5?2:-2):(Math.random()<.5?1:-1);if(DEV)box.dataset.pos=pos;let pick=-1;
+   const draw=()=>{box.innerHTML=mstageHTML(who)+head(st.ph,st.q,st.sub)+`${aidsOn()?dots(ns):''}<div class="mcards2">${ns.map((p,j)=>`<button type="button" data-j="${j}">${j+1}</button>`).join('')}</div><div class="row"><button class="chipb" type="button" id="mplay">▶ Escuchar a ${esc(WHO[who].toLowerCase())}</button></div><div id="kbh"></div><div class="fb" id="fb"></div>`;
+    const cards=[...box.querySelectorAll('[data-j]')];const lit=j=>{cards.forEach((c,i)=>c.classList.toggle('lit',i===j));setTimeout(()=>cards[j]&&cards[j].classList.remove('lit'),400)};
+    $('#mplay').onclick=()=>playSeq(ns,null,lit);cards.forEach(c=>c.onclick=()=>{const j=+c.dataset.j;playSeq([ns[j]],[.6]);pick=j;cards.forEach(x=>x.classList.toggle('sel',x===c));foot('Esta nota es la que falla',check)});foot('Toca la nota que falla',()=>{},{disabled:true});setTimeout(()=>$('#mplay')&&$('#mplay').click(),700)};
+   const check=()=>{if(pick!==pos){bad('<b>Esa nota está bien</b>Compárala con sus vecinas: busca la que se sale de la línea.');return}
+    const right=base[pos],f=fb();f.className='fb on ok';f.innerHTML=`<b>¡La encontraste! Es la nota ${pos+1}.</b>Ahora tócala bien en el teclado para mostrarle cómo debe sonar.`;foot('Toca la nota correcta',()=>{},{disabled:true});
+    const kb=keyboard($('#kbh'),{lo:60,hi:76,labels:aidsOn(),onKey:p=>{if(p%12===right%12){kb.flash(p,'good');const fixed=ns.slice();fixed[pos]=right;setTimeout(()=>playSeq(fixed),350);winMsg(`La nota correcta era ${nm(right)}. Escucha cómo suena ahora la secuencia completa.`)}else{kb.flash(p,'wrong');bad(`<b>Todavía no</b>Busca ${aidsOn()?nm(right):'la nota que encaje con las demás'}.`)}}});if(aidsOn())kb.hint(right>76?right-12:right,true)};
+   draw();return}
+  if(st.mode==='contour'){const dir=['up','down','same'][Math.floor(Math.random()*3)],s=dir==='down'?72:dir==='up'?62:67,ns=[0,1,2,3].map(i=>dir==='same'?s:s+(dir==='up'?1:-1)*[0,2,4,5][i]);if(DEV)box.dataset.dir=dir;
+   const NAM={up:'suben',down:'bajan',same:'repiten la misma nota'};
+   box.innerHTML=mstageHTML(who)+head(st.ph,st.q,st.sub)+`${aidsOn()?dots(ns):''}<div class="row"><button class="chipb" type="button" id="mplay">▶ Escuchar al flautista</button></div><div class="row" id="ops">${[['up','↗','Sube'],['down','↘','Baja'],['same','→','Repite']].map(o=>`<button class="ghost" type="button" data-o="${o[0]}" style="flex:1;font-size:22px">${o[1]}<br><small style="font-size:13px">${o[2]}</small></button>`).join('')}</div><div id="kbh"></div><div class="fb" id="fb"></div>`;
+   $('#mplay').onclick=()=>playSeq(ns);setTimeout(()=>playSeq(ns),700);foot('Elige el movimiento',()=>{},{disabled:true});
+   box.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{if(b.dataset.o!==dir){bad('<b>Escucha otra vez</b>Fíjate si cada nota va más arriba, más abajo o se queda igual.');return}
+    $('#ops').remove();const f=fb();f.className='fb on ok';f.innerHTML=`<b>¡Exacto!</b>Ahora tú: toca 4 notas que ${NAM[dir]}.`;const got=[];
+    const kb=keyboard($('#kbh'),{lo:55,hi:79,labels:false,onKey:p=>{got.push(p);kb.flash(p,'good');if(got.length<4)return;const ok=got.every((q,i)=>i===0||(dir==='up'?q>got[i-1]:dir==='down'?q<got[i-1]:q===got[i-1]));if(ok){winMsg('El movimiento de una melodía (su contorno) es lo que más recordamos de ella.');}else{bad(`<b>Casi</b>Las 4 notas deben ${NAM[dir]}. Empieza de nuevo.`);got.length=0}}});foot('Toca tus 4 notas',()=>{},{disabled:true})});return}
+  if(st.mode==='rhythm'){const POOL=[['s','s','l'],['l','s'],['s','s','s'],['l','l'],['s','l','s']];const ref=shuffle(POOL.slice()).slice(0,3).map(g=>g.slice()),g=Math.floor(Math.random()*3),varr=ref.map(x=>x.slice());const k=Math.floor(Math.random()*varr[g].length);varr[g][k]=varr[g][k]==='s'?'l':'s';if(DEV)box.dataset.g=g;
+   const D={s:.25,l:.8};const play=(pat,rowId)=>{const a=ac();let t=a.currentTime+.1,off=100;pat.forEach((grp,gi)=>{setTimeout(()=>{box.querySelectorAll(`#${rowId} .rg`).forEach((e,i)=>e.classList.toggle('on',i===gi))},off);grp.forEach(x=>{tone(55,.75,D[x],kind,t);tone(62,.5,D[x],kind,t);setTimeout(()=>msPlaying(D[x]*1000+80),off);t+=D[x]+.12;off+=(D[x]+.12)*1000});t+=.45;off+=450});setTimeout(()=>box.querySelectorAll(`#${rowId} .rg`).forEach(e=>e.classList.remove('on')),off)};
+   const row=(pat,id,show)=>`<div class="rrow" id="${id}">${pat.map((grp,i)=>`<div class="rg">${show?grp.map(x=>`<i class="${x}"></i>`).join(''):'<small style="color:var(--muted)">parte '+(i+1)+'</small>'}</div>`).join('')}</div>`;
+   box.innerHTML=mstageHTML(who)+head(st.ph,st.q,st.sub)+`<div class="row"><button class="chipb" type="button" id="rref">▶ Así debe sonar</button><button class="chipb" type="button" id="rvar">▶ Así lo toca el laudista</button></div>${row(ref,'r1',true)}${row(varr,'r2',aidsOn())}<div class="row" id="ops">${[0,1,2].map(i=>`<button class="ghost" type="button" data-o="${i}" style="flex:1">Parte ${i+1}</button>`).join('')}</div><div id="kbh"></div><div class="fb" id="fb"></div>`;
+   $('#rref').onclick=()=>play(ref,'r1');$('#rvar').onclick=()=>play(varr,'r2');setTimeout(()=>play(ref,'r1'),600);foot('¿Qué parte cambió?',()=>{},{disabled:true});
+   box.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{if(+b.dataset.o!==g){bad('<b>Esa parte está igual</b>Compara parte por parte: dónde hay una nota más larga o más corta.');return}
+    $('#ops').remove();const f=fb();f.className='fb on ok';f.innerHTML=`<b>¡Esa es! La parte ${g+1}.</b>Tócala bien en cualquier tecla: corto = toca y suelta · largo = mantén.`;const got=[];
+    keyboard($('#kbh'),{lo:60,hi:72,labels:false,onKey:()=>{},onRelease:(p,dur)=>{got.push(dur<.5?'s':'l');if(got.length<ref[g].length)return;if(got.join()===ref[g].join())winMsg('El ritmo organiza el tiempo: la misma melodía con otro ritmo se siente distinta.');else{bad('<b>Casi</b>Mira las barras del modelo: corto = barra pequeña, largo = barra grande.');got.length=0}}});foot('Toca la parte correcta',()=>{},{disabled:true})});return}
+  if(st.mode==='tune'){let off0=(Math.random()<.5?-1:1)*(28+Math.floor(Math.random()*30)),adj=0;if(DEV)box.dataset.off=off0;const cur=()=>off0+adj;
+   box.innerHTML=mstageHTML(who)+head(st.ph,st.q,st.sub)+`<div class="tuner"><canvas id="tcv"></canvas><div class="tlab"><span>◀ más grave</span><span id="tst">desafinada</span><span>más aguda ▶</span></div></div><input class="peg" id="peg" type="range" min="-80" max="80" step="1" value="0" aria-label="Clavija de afinación"><div class="row"><button class="chipb" type="button" id="tcmp">▶ Comparar con la referencia</button></div><div class="fb" id="fb"></div>`;
+   const cv=$('#tcv'),ctx=cv.getContext('2d');let ph=0,last=performance.now();
+   const drawT=t=>{if(!cv.isConnected)return;requestAnimationFrame(drawT);const dpr=Math.min(2,devicePixelRatio||1),W=cv.clientWidth,H=cv.clientHeight;if(cv.width!==W*dpr){cv.width=W*dpr;cv.height=H*dpr}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);const dt=(t-last)/1000;last=t;const c=cur();if(Math.abs(c)<=6){ph=Math.atan2(Math.sin(ph),Math.cos(ph))*Math.pow(.02,dt)}else ph+=dt*c*.09;
+    const wave=(col,shift,k,lw)=>{ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.beginPath();for(let x=0;x<=W;x+=2){const y=H/2+Math.sin(x/W*Math.PI*8*k+shift)*H*.3;x?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()};
+    wave('rgba(232,194,122,.95)',0,1,2.5);wave('rgba(140,200,255,.9)',ph,1+c/1200,2);const a=Math.abs(c);ctx.fillStyle=a<=6?'rgba(95,208,164,.9)':'rgba(239,107,107,.75)';const pulse=a<=6?1:(.5+.5*Math.sin(t/1000*Math.PI*2*Math.min(6,a/8)));ctx.globalAlpha=pulse;ctx.fillRect(W/2-30,H-8,60,5);ctx.globalAlpha=1;$('#tst').textContent=a<=6?'¡afinada!':a<20?'casi…':'desafinada'};requestAnimationFrame(drawT);
+   let tl=0;$('#peg').oninput=e=>{adj=+e.target.value;const now=performance.now();if(now-tl>220){tl=now;tone(69+cur()/100,.55,.35,kind)}};
+   $('#tcmp').onclick=()=>{const a=ac(),t=a.currentTime+.05;tone(69,.6,1.6,'piano',t);tone(69+cur()/100,.6,1.6,kind,t);msPlaying(1700)};
+   foot('La cuerda está afinada',()=>{const a=Math.abs(cur());if(a<=6){tone(69,.6,1.2,kind);winMsg('Cuando dos sonidos están afinados, sus ondas coinciden y dejan de “latir”. Así afinan los músicos de oído… y con los ojos.')}else bad(`<b>Todavía late</b>Mira las dos ondas: la azul debe quedarse quieta encima de la dorada. Gira la clavija hacia ${cur()>0?'la izquierda (más grave)':'la derecha (más aguda)'}.`)});return}
+ },
+ story(st,box){return STEP.scene(Object.assign({},st,{img:st.scene==='portada'?'entrada':'art:'+(st.art||''),act:[st.ph||'',st.title||''],move:'zoom',lines:[...chunkText(st.text),st.fact?'Dato: '+st.fact:null]}),box)},
  choice(st,box){box.innerHTML=head(st.ph,st.q)+`<div class="opts">${st.opts.map((o,i)=>`<button class="opt" type="button" data-i="${i}">${esc(o)}</button>`).join('')}</div><div class="fb" id="fb"></div>`;let pick=-1,answered=false;
   const b=foot('Comprobar',()=>{if(answered)return next();if(pick<0)return;answered=true;const ok=pick===st.a;if(!ok)LS.miss++;box.querySelectorAll('.opt').forEach(x=>{const i=+x.dataset.i;x.disabled=true;if(i===st.a)x.classList.add('ok');else if(i===pick)x.classList.add('bad')});const fb=$('#fb');fb.className='fb on '+(ok?'ok':'bad');fb.innerHTML=`<b>${ok?'¡Correcto!':'Casi'}</b>${esc(st.why||'')}`;b.textContent='Continuar'},{disabled:true});
   box.querySelectorAll('.opt').forEach(x=>x.onclick=()=>{if(answered)return;pick=+x.dataset.i;box.querySelectorAll('.opt').forEach(y=>y.classList.toggle('sel',y===x));b.disabled=false})},
@@ -1005,26 +1233,28 @@ const STEP={
   $('#rp').onclick=()=>{const a=ac();let t=a.currentTime+.1;src.forEach(n=>{tone(n.p,n.v,n.d*.5*.95,'piano',t);t+=n.d*.5})};
   keyboard($('#kbh'),{lo:60,hi:77,labels:true,onKey:p=>{if(sel<0){toast('Toca primero la nota que quieres cambiar.');return}src[sel].p=p;draw()}});draw()},
  bells(st,box){/* campanas escondidas: más grave, más aguda, ordenar, patrón roto */
-  const lv=st.mode;let P,order=[],sel=-1,heard=new Set(),tries=0;
+  const lv=st.mode;let P,order=[],sel=-1,heard=new Set(),tries=0,seqR=[],got=[];
   const HOOKS=[[8.3,55.3],[24.6,54.6],[41.8,54.2],[58.2,55.3],[75,54.8],[91.4,54.6]];
   const gen=()=>{if(lv==='broken'){const start=55+Math.floor(Math.random()*6),n=Math.min(6,st.n||5),steps=Array.from({length:n},(_,i)=>start+i*(st.step||2)),bad=1+Math.floor(Math.random()*(n-2));steps[bad]=steps[bad]-(st.step||2)*2-1;const off=n<6?Math.floor(Math.random()*(7-n)):0;P=steps.map((p,i)=>({p,i,x:HOOKS[i+off][0],y:HOOKS[i+off][1]}));P.bad=bad}
-   else{const ps=pickPitches(st.n,st.lo||48,st.hi||84,st.gap||7),slots=shuffle(HOOKS.slice()).slice(0,st.n);P=ps.map((p,i)=>({p,i,x:slots[i][0],y:slots[i][1]}))}order=[];sel=-1;heard=new Set()};gen();
+   else{const ps=pickPitches(st.n,st.lo||48,st.hi||84,st.gap||7),slots=shuffle(HOOKS.slice()).slice(0,st.n);P=ps.map((p,i)=>({p,i,x:slots[i][0],y:slots[i][1]}))}order=[];sel=-1;heard=new Set();if(lv==='repeat'){seqR=shuffle(P.map(b=>b.i)).slice(0,st.len||3);got=[];if(DEV)box.dataset.seq=seqR.join(',')}};gen();
   const target=()=>lv==='low'?P.reduce((a,b)=>b.p<a.p?b:a).i:lv==='high'?P.reduce((a,b)=>b.p>a.p?b:a).i:lv==='broken'?P.bad:-1;
   const bellHTML=b=>`<button type="button" class="bellb" data-b="${b.i}" style="left:${b.x}%;top:${b.y}%"><img class="bimg" src="${BASE}bell.webp" alt="Campana" width="40" height="47" draggable="false"><b class="bn" hidden></b><span class="bw" hidden></span></button>`;
   const renderBells=()=>{if(DEV){box.dataset.p=P.map(b=>b.p).join(',');box.dataset.bad=P.bad??''}const f=box.querySelector('.bf-bells');f.innerHTML=P.map(bellHTML).join('');
-   f.querySelectorAll('[data-b]').forEach(el=>el.onclick=()=>{const b=P[+el.dataset.b];bell(b.p);heard.add(b.i);if(lv==='order'){if(sel===b.i&&!order.includes(b.i))order.push(b.i);sel=b.i}else sel=b.i;el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring');refresh()});refresh()};
+   f.querySelectorAll('[data-b]').forEach(el=>el.onclick=()=>{const b=P[+el.dataset.b];bell(b.p);heard.add(b.i);if(lv==='repeat'){got.push(b.i);sel=-1}else if(lv==='order'){if(sel===b.i&&!order.includes(b.i))order.push(b.i);sel=b.i}else sel=b.i;el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring');refresh()});refresh()};
   const refresh=()=>{const aids=aidsOn();box.querySelectorAll('[data-b]').forEach(el=>{const i=+el.dataset.b,b=P[i];el.classList.toggle('sel',sel===i);el.classList.toggle('ord',order.includes(i));const bn=el.querySelector('.bn');bn.hidden=!order.includes(i);if(!bn.hidden)bn.textContent=order.indexOf(i)+1;const bw=el.querySelector('.bw');const show=aids&&heard.has(i);if(show&&bw.hidden)bw.innerHTML=waveSvg(b.p,{w:50,h:20});bw.hidden=!show});
    const c=$('#bcount');if(c)c.textContent=`${order.length}/${P.length}`;
+   if(lv==='repeat'){foot(`Repite la secuencia · ${got.length}/${seqR.length}`,()=>{},{disabled:true});if(got.length>=seqR.length)setTimeout(check,250);return}
    if(lv==='order')foot(order.length===P.length?'Comprobar el orden':`Ordena las ${P.length} campanas`,check,{disabled:order.length!==P.length});else foot('Esta es',check,{disabled:sel<0})};
   const draw=()=>{box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+`<div class="bellfield">${layered({sky:BASE+"campanario.webp",fg:M1()+"campanario_fg.webp",clouds:5,top0:-2,top1:26,op:.9})}<div class="bf-bells"></div></div>
-   ${lv==='order'?`<p class="small" style="color:var(--muted)">Toca una campana para oírla. Para ponerla en tu orden, tócala otra vez. <b id="bcount">0/${P.length}</b></p>`:lv==='broken'?'<p class="small" style="color:var(--muted)">Las campanas deberían subir paso a paso, de izquierda a derecha. Escúchalas en orden y toca la que rompe la subida.</p>':'<p class="small" style="color:var(--muted)">Toca cada campana para oírla. Cuando estés seguro, elige.</p>'}
-   <div class="row">${lv==='broken'?'<button class="chipb" type="button" id="bplay">▶ Escuchar la secuencia</button>':''}${lv==='order'?'<button class="chipb" type="button" id="breset">Empezar el orden de nuevo</button>':''}</div><div class="fb" id="fb"></div>`;
-   const bp=$('#bplay');if(bp)bp.onclick=()=>{const t=ac().currentTime+.05;P.forEach((b,i)=>{bell(b.p,.8,t+i*.55);heard.add(b.i);setTimeout(()=>{const el=box.querySelector(`[data-b="${b.i}"]`);if(el){el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring')}refresh()},i*550+60)})};
-   const br=$('#breset');if(br)br.onclick=()=>{order=[];refresh()};renderBells()};
+   ${lv==='order'?`<p class="small" style="color:var(--muted)">Toca una campana para oírla. Para ponerla en tu orden, tócala otra vez. <b id="bcount">0/${P.length}</b></p>`:lv==='repeat'?'<p class="small" style="color:var(--muted)">Mira y escucha qué campanas suenan, y tócalas en el mismo orden.</p>':lv==='broken'?'<p class="small" style="color:var(--muted)">Las campanas deberían subir paso a paso, de izquierda a derecha. Escúchalas en orden y toca la que rompe la subida.</p>':'<p class="small" style="color:var(--muted)">Toca cada campana para oírla. Cuando estés seguro, elige.</p>'}
+   <div class="row">${lv==='broken'||lv==='repeat'?'<button class="chipb" type="button" id="bplay">▶ Escuchar la secuencia</button>':''}${lv==='order'?'<button class="chipb" type="button" id="breset">Empezar el orden de nuevo</button>':''}</div><div class="fb" id="fb"></div>`;
+   const bp=$('#bplay');if(bp)bp.onclick=()=>{const t=ac().currentTime+.05;if(lv==='repeat'){got=[];refresh()}(lv==='repeat'?seqR.map(i=>P[i]):P).forEach((b,i)=>{bell(b.p,.8,t+i*.55);heard.add(b.i);setTimeout(()=>{const el=box.querySelector(`[data-b="${b.i}"]`);if(el){el.classList.remove('ring');void el.offsetWidth;el.classList.add('ring')}refresh()},i*550+60)})};
+   const br=$('#breset');if(br)br.onclick=()=>{order=[];refresh()};renderBells();if(lv==='repeat')setTimeout(()=>{const b=$('#bplay');if(b)b.click()},700)};
   const success=()=>{wake('bells');const low=P.reduce((a,b)=>b.p<a.p?b:a),high=P.reduce((a,b)=>b.p>a.p?b:a);
    explain(`<b>${st.win||'¡Las campanas responden!'}</b>${st.why||'Los sonidos graves vibran más despacio (menos ondas por segundo) y los agudos más rápido.'}<div class="cmpw"><span>grave</span>${waveSvg(low.p,{w:130,h:26,col:'#9fd3ff'})}<span>agudo</span>${waveSvg(high.p,{w:130,h:26})}</div>`);
    box.querySelectorAll('.bellb').forEach((e,i)=>{e.classList.add('lit')});const t=ac().currentTime+.05;[...P].sort((a,b)=>a.p-b.p).forEach((b,i)=>bell(b.p,.6,t+i*.18));foot('Continuar',next)};
-  const check=()=>{const fb=$('#fb');if(lv==='order'){const want=[...P].sort((a,b)=>a.p-b.p).map(b=>b.i);if(want.join()===order.join())return success();tries++;LS.miss+=.5;fb.className='fb on bad';fb.innerHTML=`<b>El mecanismo no gira</b>Hay campanas fuera de lugar. Escúchalas otra vez de dos en dos: ¿cuál de las dos suena más abajo?${aidsOn()?' Fíjate también en sus ondas: más juntas = más aguda.':''}`;order=[];setTimeout(refresh,1800);return}
+  const check=()=>{const fb=$('#fb');if(lv==='repeat'){if(got.join()===seqR.join())return success();LS.miss+=.5;fb.className='fb on bad';fb.innerHTML='<b>El orden no coincide</b>Vuelve a escuchar la secuencia y fíjate qué campana suena primero, cuál después…';got=[];setTimeout(refresh,300);return}
+   if(lv==='order'){const want=[...P].sort((a,b)=>a.p-b.p).map(b=>b.i);if(want.join()===order.join())return success();tries++;LS.miss+=.5;fb.className='fb on bad';fb.innerHTML=`<b>El mecanismo no gira</b>Hay campanas fuera de lugar. Escúchalas otra vez de dos en dos: ¿cuál de las dos suena más abajo?${aidsOn()?' Fíjate también en sus ondas: más juntas = más aguda.':''}`;order=[];setTimeout(refresh,1800);return}
    if(sel===target())return success();tries++;LS.miss+=.5;fb.className='fb on bad';fb.innerHTML=lv==='broken'?'<b>Esa sí sigue la subida</b>Escucha la secuencia otra vez: busca la campana que baja cuando todas suben.':`<b>Esa no es la ${lv==='low'?'más grave':'más aguda'}</b>Compárala con las demás, de dos en dos.`;if(tries>=3&&lv!=='broken'){tries=0;setTimeout(()=>{gen();renderBells();toast('Las campanas cambiaron de lugar. ¡Inténtalo de nuevo!')},1500)}};
   draw()},
  water(st,box){/* el agua que fluye: reproducir sonidos cortos, largos y silencios */
@@ -1050,7 +1280,7 @@ const STEP={
   let k=0,held={},chord=[],chordT=0,vels=[],trill=[];const T=st.tasks;
   const PCS={C:[0,4,7],F:[5,9,0],G:[7,11,2]},CN={C:'Do mayor',F:'Fa mayor',G:'Sol mayor'};
   const lamps=()=>`<div class="lamps">${T.map((t,i)=>`<span class="lamp ${i<k?'on':i===k?'cur':''}"><svg viewBox="0 0 24 24" width="26" height="26" fill="${i<k?'#ffd56e':'none'}" stroke="currentColor" stroke-width="1.6"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/></svg></span>`).join('')}</div>`;
-  const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q)+plazaHTML()+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
+  const draw=()=>{const t=T[k];box.innerHTML=sceneStrip()+head(st.ph,st.q,st.sub)+plazaHTML()+lamps()+`<p class="big" style="font-size:22px" id="ltask">${t?esc(t.say):''}</p>${t&&(t.do==='soft'||t.do==='strong'||t.do==='cresc'||t.do==='dim')?'<div class="meter"><i id="dm"></i></div>':''}${t&&t.do==='trill'?'<div class="meter"><i id="tm"></i></div>':''}<div id="kbh"></div><div class="row">${t&&t.chord?'<button class="chipb" type="button" id="lhint">Ver las notas del acorde</button>':''}</div><div class="fb" id="fb"></div>`;
    plazaLights();if(!t){return}chord=[];vels=[];trill=[];
    const kbd=keyboard($('#kbh'),{lo:48,hi:72,labels:!!(t.chord&&k>0&&aidsOn()),dyn:true,onKey:(p,v)=>onKey(p,v,kbd),onRelease:(p,dur)=>onRel(p,dur)});kbd.wantChord=t.chord?PCS[t.chord]:null;kbd.wantTrill=t.do==='trill'?[64,65]:null;if(EAR.on&&LS.L.steps.some(x=>x.type==='lights'&&x.tasks.some(y=>y.chord)))bpLoad();
    const lh=$('#lhint');if(lh)lh.onclick=()=>{PCS[t.chord].forEach(pc=>{const p=[48,60].map(o=>o+pc).find(q=>q>=48&&q<=72);kbd.hint(p,true)})};foot(st.label||'Enciende las luces',()=>{},{disabled:true})};
