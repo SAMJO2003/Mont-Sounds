@@ -338,6 +338,15 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .hearts.hit{animation:heartHit .5s}
 @keyframes heartHit{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
 .rushbar small{font-size:12px;color:#e8c27a}
+
+/* sin selección azul ni menú al tocar (iPhone) */
+.cmap,.cmap *,#vLesson img,.trv img{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+.trv img{pointer-events:none}
+.cm-world{cursor:pointer}
+.cm-ping{position:absolute;width:22px;height:22px;border-radius:50%;transform:translate(-50%,-50%);border:2px solid #ffd56e;z-index:3;pointer-events:none;animation:ping .7s ease-out forwards}
+.cm-ping.no{border-color:#ff6b5e}
+.cm-ping.no::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:#ff6b5e;font:700 12px var(--body)}
+@keyframes ping{from{opacity:1;transform:translate(-50%,-50%) scale(.4)}to{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
 </style>
 
 <div id="sky"></div>
@@ -1107,21 +1116,26 @@ function renderStep(){const st=LS.L.steps[LS.i],box=$('#lStage');$('#lBar').styl
  (STEP[st.type]||STEP.story)(st,box);if(st.stage&&!box.querySelector('.mstage'))box.insertAdjacentHTML('afterbegin',mstageHTML(st.stage));$('.lbody').scrollTop=0}
 /* ===================== MODO JUEGO: narración, escenas y personajes ===================== */
 /* ===================== MAPA DE LA CIUDAD: moverse por las calles y cumplir misiones ===================== */
-/* coordenadas en píxeles de la imagen del mapa (941×1672); cada lugar tiene su icono y su camino desde la plaza central (MAPHUB) */
-const MAPW=941,MAPH=1672,MAPHUB={x:450,y:1030};
+/* todo en píxeles de la imagen del mapa (941×1672). La red de calles es un grafo: el viajero solo camina por ella. */
+const MAPW=941,MAPH=1672;
+const RN={H:[450,1030],G1:[440,1180],G2:[432,1310],G3:[430,1520],L1:[300,950],L2:[285,865],L3:[305,805],K:[330,690],F:[455,975],M:[520,1110],F1:[565,1135],R1:[640,990],R2:[705,880],R3:[690,725],S1:[660,632],S2:[690,582],U1:[560,640],U2:[510,470]};
+const RE=[['H','G1'],['G1','G2'],['G2','G3'],['H','L1'],['L1','L2'],['L2','L3'],['L2','K'],['K','U1'],['H','F'],['H','M'],['M','F1'],['H','R1'],['R1','R2'],['R2','R3'],['R3','S1'],['S1','S2'],['R3','U1'],['U1','U2']];
 const MAPLOC={
- puerta:{ic:'🚪',n:'La puerta',at:[430,1300],path:[[440,1180],[432,1310],[430,1520]]},
- campanario:{ic:'🔔',n:'El campanario',at:[185,610],path:[[300,950],[285,865],[305,805]]},
- fuente:{ic:'⛲',n:'La fuente',at:[460,745],path:[[455,975]]},
- plaza:{ic:'🏮',n:'La plaza',at:[815,560],path:[[640,990],[705,880],[690,725]]},
- escenario:{ic:'🎭',n:'El escenario',at:[705,500],path:[[640,990],[705,880],[690,725],[660,632],[690,582]]}};
-const MAPFRAG=[{id:'f1',at:1,path:[[520,1110],[565,1135]]},{id:'f2',at:2,path:[[300,950],[290,820],[330,690]]},{id:'f3',at:3,path:[[640,990],[705,880],[690,725],[560,640],[510,470]]}];
+ puerta:{ic:'🚪',n:'La puerta',at:[430,1300],stop:'G3'},
+ campanario:{ic:'🔔',n:'El campanario',at:[185,610],stop:'L3'},
+ fuente:{ic:'⛲',n:'La fuente',at:[460,745],stop:'F'},
+ plaza:{ic:'🏮',n:'La plaza',at:[815,560],stop:'R3'},
+ escenario:{ic:'🎭',n:'El escenario',at:[705,500],stop:'S2'}};
+const MAPFRAG=[{id:'f1',at:1,stop:'F1'},{id:'f2',at:2,stop:'K'},{id:'f3',at:3,stop:'U2'}];
 const mp=([x,y])=>({x:x/MAPW*100,y:y/MAPH*100});
 function travelerSvg(){const f=n=>`<img class="${n}" src="${V()}viajero_${n==='t0'?'quieto':n.slice(1).toUpperCase()}.webp" alt="" draggable="false">`;return `<span class="trv" aria-label="Tu viajero">${f('t0')}${f('wa')}${f('wp')}${f('wb')}</span>`}
 function fragCount(){const n=(S.frags||[]).length;return `<em class="cm-frags">✦ Partitura perdida ${n}/3</em>`}
-function mapPathOf(k){const L=MAPLOC[k];if(L)return L.path;const f=MAPFRAG.find(x=>x.id===k);return f?f.path:[]}
-function mapRoute(from,to){const back=mapPathOf(from).slice(0,-1).reverse();return back.concat([[MAPHUB.x,MAPHUB.y]],mapPathOf(to)).map(mp)}
-function mapPosOf(k){const p=mapPathOf(k);return mp(p[p.length-1])}
+function roadProject(p){/* punto más cercano de la red de calles */let best=null;for(const [a,b] of RE){const A=RN[a],B=RN[b],dx=B[0]-A[0],dy=B[1]-A[1],L2=dx*dx+dy*dy;let t=L2?((p[0]-A[0])*dx+(p[1]-A[1])*dy)/L2:0;t=Math.max(0,Math.min(1,t));const q=[A[0]+dx*t,A[1]+dy*t],d=Math.hypot(p[0]-q[0],p[1]-q[1]);if(!best||d<best.d)best={d,q,a,b,t}}return best}
+function roadRoute(fromPx,toPx){/* camino más corto por las calles (Dijkstra con dos nodos temporales) */
+ const s=roadProject(fromPx),t=roadProject(toPx),N=Object.assign({},RN,{_S:s.q,_T:t.q}),adj={};const add=(u,v)=>{const w=Math.hypot(N[u][0]-N[v][0],N[u][1]-N[v][1]);(adj[u]=adj[u]||[]).push([v,w]);(adj[v]=adj[v]||[]).push([u,w])};
+ RE.forEach(([a,b])=>add(a,b));add('_S',s.a);add('_S',s.b);add('_T',t.a);add('_T',t.b);if((s.a===t.a&&s.b===t.b)||(s.a===t.b&&s.b===t.a))add('_S','_T');
+ const dist={_S:0},prev={},Q=new Set(Object.keys(N));while(Q.size){let u=null;for(const k of Q)if(dist[k]!=null&&(u===null||dist[k]<dist[u]))u=k;if(u===null)break;Q.delete(u);if(u==='_T')break;for(const [v,w] of adj[u]||[])if(Q.has(v)&&(dist[v]==null||dist[u]+w<dist[v])){dist[v]=dist[u]+w;prev[v]=u}}
+ const path=[];let u='_T';while(u&&u!=='_S'){path.unshift(N[u]);u=prev[u]}return path}
 
 const WHO={matteo:'Matteo',violin:'La violinista',flauta:'El flautista',laud:'El laudista'};
 /* personajes provisionales (bocetos) hasta tener las imágenes de Gemini */
@@ -1173,20 +1187,29 @@ function mstageHTML(whos){const arr=Array.isArray(whos)?whos:[whos];return `<div
 function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];const out=[];let cur='';s.forEach(x=>{if((cur+x).length>150&&cur){out.push(cur.trim());cur=''}cur+=x});if(cur.trim())out.push(cur.trim());return out}
 
 const STEP={
- citymap(st,box){/* mapa de la ciudad: el viajero camina por las calles hasta la misión marcada con ! */
+ citymap(st,box){/* mapa de la ciudad: el viajero camina por las calles a donde toques; la misión está marcada con ! */
   LS.mapDone=LS.mapDone||[];if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;LS.mapN=(LS.mapN||0)+1;
-  if(!LS.mapAt)LS.mapAt=st.from||'puerta';const start=mapPosOf(LS.mapAt),night=isNight();
-  box.innerHTML=`<div class="cmap${night?' night':''}" id="cmap"><div class="cm-world"><div class="cm-img" style="background-image:url(${V()}mapa.webp)"></div>
+  if(!LS.mapPx)LS.mapPx=RN[MAPLOC[st.from||'puerta'].stop].slice();const night=isNight(),goalPx=RN[MAPLOC[st.go].stop],start=mp(LS.mapPx);
+  const frags=()=>MAPFRAG.filter(f=>f.at<=LS.mapN&&!(S.frags||[]).includes(f.id));
+  box.innerHTML=`<div class="cmap${night?' night':''}" id="cmap"><div class="cm-world" id="cmw"><div class="cm-img" style="background-image:url(${V()}mapa.webp)"></div>
    ${Object.entries(MAPLOC).map(([k,l])=>{const goal=k===st.go,done=LS.mapDone.includes(k),p=mp(l.at);return `<button type="button" class="cm-loc${goal?' goal':''}${done?' done':''}" data-k="${k}" style="left:${p.x}%;top:${p.y}%"><span class="cm-ic">${l.ic}${goal?'<b class="cm-bang">!</b>':done?'<b class="cm-ok">✓</b>':''}</span><span class="cm-n">${l.n}</span></button>`}).join('')}
-   ${MAPFRAG.filter(f=>f.at<=LS.mapN&&!(S.frags||[]).includes(f.id)).map(f=>{const p=mapPosOf(f.id);return `<button type="button" class="cm-frag" data-f="${f.id}" style="left:${p.x}%;top:${p.y}%" aria-label="Fragmento de partitura">✦</button>`}).join('')}
+   ${frags().map(f=>{const p=mp(RN[f.stop]);return `<button type="button" class="cm-frag" data-f="${f.id}" style="left:${p.x}%;top:${p.y}%" aria-label="Fragmento de partitura">✦</button>`}).join('')}
    <div class="cm-me" id="cme" style="left:${start.x}%;top:${start.y}%">${travelerSvg()}</div></div>
    <div class="cm-quest"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b>${fragCount()}</div>
-   <div class="cm-hint">Toca el lugar marcado con <b>!</b> para ir. Los destellos ✦ esconden fragmentos de una partitura perdida.</div></div>`;
-  let busy=false;const me=$('#cme');
-  const walk=(pts,done)=>{busy=true;let i=0;const go=()=>{if(!me.isConnected)return;if(i>=pts.length){busy=false;me.classList.remove('walk');done&&done();return}const p=pts[i++],cx=parseFloat(me.style.left),cy=parseFloat(me.style.top),d=Math.hypot(p.x-cx,(p.y-cy)*1.78),ms=Math.max(160,d*42);me.classList.add('walk');if(Math.abs(p.x-cx)>.5)me.classList.toggle('flip',p.x<cx);me.style.transition=`left ${ms}ms linear,top ${ms}ms linear`;me.style.left=p.x+'%';me.style.top=p.y+'%';setTimeout(go,ms)};go()};
-  box.querySelectorAll('.cm-loc').forEach(b=>b.onclick=()=>{if(busy)return;const k=b.dataset.k;if(k!==st.go){toast(LS.mapDone.includes(k)?'Ya ayudaste aquí. Sigue tu misión.':'Todavía no. Primero cumple tu misión.');return}
-   walk(mapRoute(LS.mapAt,k),()=>{LS.mapAt=k;b.classList.add('arrive');setTimeout(next,450)})});
-  box.querySelectorAll('.cm-frag').forEach(b=>b.onclick=()=>{if(busy)return;const id=b.dataset.f;walk(mapRoute(LS.mapAt,id),()=>{LS.mapAt=id;S.frags=S.frags||[];if(!S.frags.includes(id)){S.frags.push(id);S.coins+=5;save()}b.classList.add('got');setTimeout(()=>b.remove(),600);const fc=box.querySelector('.cm-frags');if(fc)fc.outerHTML=fragCount();toast(S.frags.length>=3?'¡Completaste la partitura perdida! +5 florines':'Encontraste un fragmento de partitura perdida ('+S.frags.length+'/3) · +5 florines')})})},
+   <div class="cm-hint">Toca el camino para caminar. Ve al lugar marcado con <b>!</b> · Los destellos ✦ esconden una partitura perdida.</div></div>`;
+  const me=$('#cme'),world=$('#cmw');let walking=null,arrived=false;
+  const near=(a,b,r)=>Math.hypot(a[0]-b[0],a[1]-b[1])<r;
+  const pickFrags=pt=>{frags().forEach(f=>{if(near(pt,RN[f.stop],34)){S.frags=S.frags||[];S.frags.push(f.id);S.coins+=5;save();const b=box.querySelector(`[data-f="${f.id}"]`);if(b){b.classList.add('got');setTimeout(()=>b.remove(),600)}const fc=box.querySelector('.cm-frags');if(fc)fc.outerHTML=fragCount();toast(S.frags.length>=3?'¡Completaste la partitura perdida! +5 florines':'Encontraste un fragmento de partitura perdida ('+S.frags.length+'/3) · +5 florines')}})};
+  const arrive=()=>{if(arrived)return;arrived=true;const b=box.querySelector(`[data-k="${st.go}"]`);if(b)b.classList.add('arrive');setTimeout(next,450)};
+  const walk=(pts,onEnd)=>{const id={};walking=id;let i=0;const go=()=>{if(!me.isConnected||walking!==id)return;if(i>=pts.length){walking=null;me.classList.remove('walk');onEnd&&onEnd();return}
+    const p=pts[i++],cur=LS.mapPx,d=Math.hypot(p[0]-cur[0],p[1]-cur[1]),ms=Math.max(60,d*2.6);me.classList.add('walk');if(Math.abs(p[0]-cur[0])>4)me.classList.toggle('flip',p[0]<cur[0]);const q=mp(p);me.style.transition=`left ${ms}ms linear,top ${ms}ms linear`;me.style.left=q.x+'%';me.style.top=q.y+'%';
+    setTimeout(()=>{if(walking!==id)return;LS.mapPx=p.slice();pickFrags(p);if(near(p,goalPx,30))return arrive();go()},ms)};go()};
+  const goTo=(px,onEnd)=>walk(roadRoute(LS.mapPx,px),onEnd);
+  const ping=(px,ok)=>{const q=mp(px),d=document.createElement('i');d.className='cm-ping'+(ok?'':' no');d.style.left=q.x+'%';d.style.top=q.y+'%';world.appendChild(d);setTimeout(()=>d.remove(),700)};
+  world.addEventListener('click',e=>{if(e.target.closest('button'))return;const r=world.getBoundingClientRect(),px=[(e.clientX-r.left)/r.width*MAPW,(e.clientY-r.top)/r.height*MAPH],pr=roadProject(px);
+   if(pr.d>48){ping(px,false);return}ping(pr.q,true);goTo(pr.q)});
+  box.querySelectorAll('.cm-loc').forEach(b=>b.onclick=()=>{const k=b.dataset.k,stop=RN[MAPLOC[k].stop];goTo(stop,()=>{if(k!==st.go)toast(LS.mapDone.includes(k)?'Ya ayudaste aquí. Sigue tu misión.':'Aquí todavía no hay nada que hacer. Sigue tu misión.')})});
+  box.querySelectorAll('.cm-frag').forEach(b=>b.onclick=()=>{const f=MAPFRAG.find(x=>x.id===b.dataset.f);goTo(RN[f.stop])})},
  scene(st,box){/* escena de historia a pantalla completa: imagen + narración letra a letra; tocar para avanzar */
   const lines=(st.lines||[]).filter(Boolean);let li=-1,tw=null,actOn=!!st.act,FWc=null;
   box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in" style="aspect-ratio:${SCN_AR[st.img]||'1200/896'}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="goldfx"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
