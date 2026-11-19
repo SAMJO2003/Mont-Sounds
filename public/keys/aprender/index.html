@@ -312,11 +312,12 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .trv img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .trv .t1{opacity:0}
 .cm-me.flip .trv img{transform:scaleX(-1)}
-.cm-me.walk .trv{animation:trvBob .26s ease-in-out infinite alternate}
-.cm-me.walk .trv .t1{animation:trvA .52s steps(1) infinite}
-.cm-me.walk .trv .t0{animation:trvB .52s steps(1) infinite}
-@keyframes trvA{0%{opacity:1}50%{opacity:0}}
-@keyframes trvB{0%{opacity:0}50%{opacity:1}}
+.cm-me.walk .trv{animation:trvGait .62s ease-in-out infinite;transform-origin:50% 100%}
+.cm-me.walk .trv .t1{animation:trvA .62s ease-in-out infinite}
+.cm-me.walk .trv .t0{animation:trvB .62s ease-in-out infinite}
+@keyframes trvGait{0%{transform:translateY(0) rotate(-2.2deg) scaleY(.985)}25%{transform:translateY(-3px) rotate(0deg) scaleY(1.01)}50%{transform:translateY(0) rotate(2.2deg) scaleY(.985)}75%{transform:translateY(-3px) rotate(0deg) scaleY(1.01)}100%{transform:translateY(0) rotate(-2.2deg) scaleY(.985)}}
+@keyframes trvA{0%,18%{opacity:1}32%,68%{opacity:0}82%,100%{opacity:1}}
+@keyframes trvB{0%,18%{opacity:0}32%,68%{opacity:1}82%,100%{opacity:0}}
 @keyframes trvBob{to{transform:translateY(-2px)}}
 .cm-me{filter:drop-shadow(0 3px 4px rgba(0,0,0,.45))}
 
