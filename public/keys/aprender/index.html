@@ -307,18 +307,20 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .cmap.night .cm-world .cm-img{filter:brightness(.42) saturate(.75) sepia(.15) hue-rotate(185deg)}
 .cm-ic{width:40px;height:40px;font-size:21px}
 
-.trv{display:block;position:relative;width:30px;height:64px}
-.trv::after{content:"";position:absolute;left:50%;bottom:-2px;width:26px;height:7px;transform:translateX(-50%);border-radius:50%;background:rgba(0,0,0,.38);z-index:-1}
-.trv img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
-.trv .t1{opacity:0}
+.trv{display:block;position:relative;width:41px;height:64px}
+.trv::after{content:"";position:absolute;left:50%;bottom:2px;width:24px;height:6px;transform:translateX(-50%);border-radius:50%;background:rgba(0,0,0,.38);z-index:-1}
+.trv img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0}
+.trv .t0{opacity:1}
 .cm-me.flip .trv img{transform:scaleX(-1)}
-.cm-me.walk .trv{animation:trvGait .62s ease-in-out infinite;transform-origin:50% 100%}
-.cm-me.walk .trv .t1{animation:trvA .62s ease-in-out infinite}
-.cm-me.walk .trv .t0{animation:trvB .62s ease-in-out infinite}
-@keyframes trvGait{0%{transform:translateY(0) rotate(-2.2deg) scaleY(.985)}25%{transform:translateY(-3px) rotate(0deg) scaleY(1.01)}50%{transform:translateY(0) rotate(2.2deg) scaleY(.985)}75%{transform:translateY(-3px) rotate(0deg) scaleY(1.01)}100%{transform:translateY(0) rotate(-2.2deg) scaleY(.985)}}
-@keyframes trvA{0%,18%{opacity:1}32%,68%{opacity:0}82%,100%{opacity:1}}
-@keyframes trvB{0%,18%{opacity:0}32%,68%{opacity:1}82%,100%{opacity:0}}
-@keyframes trvBob{to{transform:translateY(-2px)}}
+.cm-me.walk .trv{animation:trvGait .72s linear infinite}
+.cm-me.walk .trv .t0{opacity:0}
+.cm-me.walk .trv .wa{animation:frA .72s steps(1) infinite}
+.cm-me.walk .trv .wp{animation:frP .72s steps(1) infinite}
+.cm-me.walk .trv .wb{animation:frB .72s steps(1) infinite}
+@keyframes frA{0%{opacity:1}25%,100%{opacity:0}}
+@keyframes frP{0%{opacity:0}25%{opacity:1}50%{opacity:0}75%{opacity:1}100%{opacity:0}}
+@keyframes frB{0%,50%{opacity:0}50.01%{opacity:1}75%,100%{opacity:0}}
+@keyframes trvGait{0%{transform:translateY(0)}25%{transform:translateY(-2px)}37%{transform:translateY(-2px)}50%{transform:translateY(0)}75%{transform:translateY(-2px)}87%{transform:translateY(-2px)}100%{transform:translateY(0)}}
 .cm-me{filter:drop-shadow(0 3px 4px rgba(0,0,0,.45))}
 
 .bclock{position:absolute;left:50%;top:69%;transform:translateX(-50%);width:62px;height:62px;z-index:6;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,rgba(20,14,8,.92) 58%,rgba(20,14,8,.0) 72%);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
@@ -1115,7 +1117,7 @@ const MAPLOC={
  escenario:{ic:'🎭',n:'El escenario',at:[705,500],path:[[640,990],[705,880],[690,725],[660,632],[690,582]]}};
 const MAPFRAG=[{id:'f1',at:1,path:[[520,1110],[565,1135]]},{id:'f2',at:2,path:[[300,950],[290,820],[330,690]]},{id:'f3',at:3,path:[[640,990],[705,880],[690,725],[560,640],[510,470]]}];
 const mp=([x,y])=>({x:x/MAPW*100,y:y/MAPH*100});
-function travelerSvg(){return `<span class="trv"><img class="t0" src="${V()}viajero_quieto.webp" alt="Tu viajero" draggable="false"><img class="t1" src="${V()}viajero_paso.webp" alt="" draggable="false"></span>`}
+function travelerSvg(){const f=n=>`<img class="${n}" src="${V()}viajero_${n==='t0'?'quieto':n.slice(1).toUpperCase()}.webp" alt="" draggable="false">`;return `<span class="trv" aria-label="Tu viajero">${f('t0')}${f('wa')}${f('wp')}${f('wb')}</span>`}
 function fragCount(){const n=(S.frags||[]).length;return `<em class="cm-frags">✦ Partitura perdida ${n}/3</em>`}
 function mapPathOf(k){const L=MAPLOC[k];if(L)return L.path;const f=MAPFRAG.find(x=>x.id===k);return f?f.path:[]}
 function mapRoute(from,to){const back=mapPathOf(from).slice(0,-1).reverse();return back.concat([[MAPHUB.x,MAPHUB.y]],mapPathOf(to)).map(mp)}
