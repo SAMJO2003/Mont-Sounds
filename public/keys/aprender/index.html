@@ -1235,10 +1235,10 @@ const TOWN_LOC={
  scriptorium:{n:'El scriptorium',ic:'✒️',at:[330,660],fog:[80,380,620,760],need:'plaza',msg:'la plaza recupere su luz'}};
 const TOWN_SPIRITS=[{id:'ruido-1',x:430,y:1830,need:'taller',name:'Espíritu del Ruido',reward:{coins:10,item:'resina',itemName:'resina de abeto'}}];
 const TIMG={},TOWN_USE_TEX=false;function timg(k,src){if(!TIMG[k]){const i=new Image();i.src=src;TIMG[k]=i}return TIMG[k]}
-function townAssets(){['duomo','campanario','fuente','escenario','puerta','farol','casa','cipres','maceta'].forEach(k=>timg(k,V()+'town/'+k+'.webp'));['quieto','A','P','B'].forEach(k=>timg('v'+k,V()+'viajero_'+k+'.webp'))}
+function townAssets(){['pasto','duomo','campanario','fuente','escenario','puerta','farol','casa','cipres','maceta'].forEach(k=>timg(k,V()+'town/'+k+'.webp'));['quieto','A','P','B'].forEach(k=>timg('v'+k,V()+'viajero_'+k+'.webp'))}
 function townRng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
 let TOWN_GROUND=null;
-function townGround(){if(TOWN_GROUND)return TOWN_GROUND;const tile=TIMG.suelo;if(tile&&tile.complete&&tile.width&&TOWN_USE_TEX){}const c=document.createElement('canvas');c.width=TW.W;c.height=TW.H;const g=c.getContext('2d'),r=townRng(7);
+let TOWN_GROUND_TMP=null;function townGround(){if(TOWN_GROUND)return TOWN_GROUND;const gt=TIMG.pasto,gReady=gt&&gt.complete&&gt.width;if(!gReady&&TOWN_GROUND_TMP)return TOWN_GROUND_TMP;const tile=TIMG.suelo;if(tile&&tile.complete&&tile.width&&TOWN_USE_TEX){}const c=document.createElement('canvas');c.width=TW.W;c.height=TW.H;const g=c.getContext('2d'),r=townRng(7);
  /* empedrado estilizado: piedras redondeadas con juntas oscuras y luz arriba a la izquierda */
  g.fillStyle='#6e5a42';g.fillRect(0,0,TW.W,TW.H);
  const SW=21,SH=16;for(let row=0,y=0;y<TW.H+SH;row++,y+=SH){const off=(row%2)*SW/2;for(let x=-SW+off;x<TW.W+SW;x+=SW){const w=SW-3-r()*3,h=SH-3-r()*2.5,cx=x+r()*2,cy=y+r()*2,l=r(),base=[196+l*30,170+l*26,128+l*22].map(v=>v|0);
@@ -1248,16 +1248,18 @@ function townGround(){if(TOWN_GROUND)return TOWN_GROUND;const tile=TIMG.suelo;if
  /* manchas suaves de luz y sombra para romper la repetición */
  for(let i=0;i<70;i++){const x=r()*TW.W,y=r()*TW.H,R=80+r()*220,gr=g.createRadialGradient(x,y,0,x,y,R),lt=r()<.5;gr.addColorStop(0,lt?'rgba(255,225,170,.16)':'rgba(70,45,20,.16)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-R,y-R,R*2,R*2)}
  /* jardines de pasto con borde irregular */
- const grass=(x,y,w,h)=>{g.save();g.beginPath();for(let k=0;k<=40;k++){const a=k/40*6.283,j=1+.12*Math.sin(a*5+x)+.08*Math.sin(a*9+y);const px=x+Math.cos(a)*w*j,py=y+Math.sin(a)*h*j;k?g.lineTo(px,py):g.moveTo(px,py)}g.closePath();g.fillStyle='#6d8a36';g.fill();g.clip();
-  for(let i=0;i<w*h/12;i++){const px=x-w*1.2+r()*w*2.4,py=y-h*1.2+r()*h*2.4,l=r();g.strokeStyle=l<.33?'#87a64b':l<.66?'#5c7a2b':'#9bb85a';g.lineWidth=1.3;g.beginPath();g.moveTo(px,py);g.lineTo(px+(r()-.5)*4,py-5-r()*5);g.stroke()}
-  for(let i=0;i<w*h/900;i++){g.fillStyle=['#f2d36b','#e98aa8','#fff2d0','#b78be0'][i%4];g.beginPath();g.arc(x-w+r()*w*2,y-h+r()*h*2,2.2,0,6.3);g.fill()}g.restore();
-  g.strokeStyle='rgba(60,45,20,.35)';g.lineWidth=3;g.stroke()};
- [[150,1450,120,90],[1370,1250,110,140],[180,2250,130,90],[1350,2350,120,60],[620,1250,90,60],[880,1250,90,60],[1380,400,110,90],[120,300,100,80],[750,2050,110,50],[1120,1650,80,50]].forEach(a=>grass(...a));
+ const grass=(x,y,w,h)=>{g.save();g.beginPath();for(let k=0;k<=48;k++){const a=k/48*6.283,j=1+.12*Math.sin(a*5+x)+.08*Math.sin(a*9+y)+.05*Math.sin(a*17+x*.3);const px=x+Math.cos(a)*w*j,py=y+Math.sin(a)*h*j;k?g.lineTo(px,py):g.moveTo(px,py)}g.closePath();
+  if(gReady){g.fillStyle=g.createPattern(gt,'repeat');g.save();g.translate((x*7)%448,(y*5)%600);g.fill();g.restore()}else{g.fillStyle='#6d8a36';g.fill()}
+  g.clip();const eg=g.createRadialGradient(x,y,Math.min(w,h)*.55,x,y,Math.max(w,h)*1.15);eg.addColorStop(0,'rgba(0,0,0,0)');eg.addColorStop(1,'rgba(60,40,15,.35)');g.fillStyle=eg;g.fillRect(x-w*1.3,y-h*1.3,w*2.6,h*2.6);g.restore();
+  g.save();g.strokeStyle='rgba(70,52,26,.45)';g.lineWidth=2.5;g.stroke();g.restore();
+  /* matas que se escapan sobre el empedrado */
+  for(let i=0;i<Math.round((w+h)/14);i++){const a=r()*6.283,px=x+Math.cos(a)*w*(1+r()*.12),py=y+Math.sin(a)*h*(1+r()*.12);for(let b=0;b<5;b++){g.strokeStyle=['#7f9a3c','#a59a3a','#5f7a2c'][b%3];g.lineWidth=1.6;g.beginPath();g.moveTo(px+b*1.5-3,py);g.lineTo(px+b*2-4+(r()-.5)*3,py-6-r()*6);g.stroke()}}};
+ [[150,1450,130,110],[1370,1250,120,170],[180,2250,150,110],[1350,2330,140,70],[620,1250,95,60],[880,1250,95,60],[1380,400,120,110],[130,320,120,100],[750,2040,120,55],[1120,1660,90,55],[750,760,170,70],[1390,820,90,120],[110,760,80,120],[460,1600,70,45]].forEach(a=>grass(...a));
  /* muralla alrededor */
  const wall=(x,y,w,h)=>{g.fillStyle='#8c7552';g.fillRect(x,y,w,h);for(let yy=y;yy<y+h;yy+=12)for(let xx=x+((yy/12)%2)*9;xx<x+w;xx+=18){g.fillStyle=`rgba(${r()<.5?'255,235,200':'50,35,15'},.12)`;g.fillRect(xx,yy,16,10)}};
  wall(0,0,TW.W,64);wall(0,0,54,TW.H);wall(TW.W-54,0,54,TW.H);wall(0,TW.H-44,TW.W,44);g.fillStyle='rgba(0,0,0,.22)';g.fillRect(54,64,TW.W-108,12);g.fillRect(54,64,12,TW.H-108);
  const vg=g.createRadialGradient(TW.W/2,TW.H/2,400,TW.W/2,TW.H/2,1500);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(40,20,0,.28)');g.fillStyle=vg;g.fillRect(0,0,TW.W,TW.H);
- TOWN_GROUND=c;return c}
+ if(gReady)TOWN_GROUND=c;else TOWN_GROUND_TMP=c;return c}
 /* cuadrícula de paso */
 function townGrid(open){const C=TW.CELL,gw=Math.ceil(TW.W/C),gh=Math.ceil(TW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
  block(0,0,TW.W,90);block(0,0,60,TW.H);block(TW.W-60,0,TW.W,TW.H);block(0,TW.H-90,TW.W,TW.H);
