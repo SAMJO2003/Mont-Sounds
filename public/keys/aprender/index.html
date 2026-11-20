@@ -347,6 +347,27 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .cm-ping.no{border-color:#ff6b5e}
 .cm-ping.no::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;color:#ff6b5e;font:700 12px var(--body)}
 @keyframes ping{from{opacity:1;transform:translate(-50%,-50%) scale(.4)}to{opacity:0;transform:translate(-50%,-50%) scale(1.6)}}
+
+/* mundo en mosaico */
+.tmap canvas#tcv{position:absolute;inset:0;touch-action:manipulation;cursor:pointer}
+.tmap .cm-quest{pointer-events:none}.tmap .cm-hint{pointer-events:none}
+/* encuentro musical */
+#vLesson.game>.enc,.enc{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;background:radial-gradient(120% 80% at 50% 10%,#2a2140,#0b0a14 70%);opacity:0;transition:opacity .35s}
+.enc.in{opacity:1}.enc.out{opacity:0}
+.enc-iris{position:absolute;inset:0;background:#000;clip-path:circle(150% at 50% 40%);animation:iris .7s ease-out forwards;pointer-events:none;z-index:2}
+@keyframes iris{from{clip-path:circle(0% at 50% 40%);background:#000}to{clip-path:circle(150% at 50% 40%);background:transparent}}
+.enc-box{position:relative;flex:1;display:flex;flex-direction:column;gap:10px;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(12px + env(safe-area-inset-bottom,0px));overflow:auto}
+.enc-top{display:flex;flex-direction:column;align-items:center;gap:4px}
+.enc-sp{width:160px;height:146px}
+.enc-name{font:700 16px var(--display);letter-spacing:.08em;color:#e8dcff}
+.enc-bar{width:70%;height:10px;border-radius:5px;background:rgba(255,255,255,.12);overflow:hidden;border:1px solid rgba(200,180,255,.3)}
+.enc-bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#7b5cff,#d36bff);transition:width .6s ease}
+.enc-top small{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#a99bd0}
+.enc-mid{display:flex;flex-direction:column;gap:8px}
+.enc-dots{display:flex;gap:8px;justify-content:center}.enc-dots i{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.15)}.enc-dots i.cur{background:#ffd56e;box-shadow:0 0 8px #ffd56e}.enc-dots i.ok{background:var(--ok)}
+.enc .fb{font:400 15px/1.45 'Special Elite',monospace}
+.enc-kb{margin-top:auto}
+.enc-kb .kw.zl{background:linear-gradient(#fff 55%,#cfe3ff)}.enc-kb .kw.zh{background:linear-gradient(#fff 55%,#ffe7b0)}.enc-kb .kbk.zl{background:linear-gradient(#111 60%,#2b4a7a)}.enc-kb .kbk.zh{background:linear-gradient(#111 60%,#7a5a1a)}
 </style>
 
 <div id="sky"></div>
@@ -1186,30 +1207,155 @@ function msPlaying(ms){const s=document.querySelector('#lStage .mstage');if(!s)r
 function mstageHTML(whos){const arr=Array.isArray(whos)?whos:[whos];return `<div class="mstage ${arr.length>1?'trio':''}"><div class="ls" style="background-image:url(${V()}noche_top.webp)"></div>${arr.map(w=>`<div class="chr">${charHTML(w)}</div>`).join('')}</div>`}
 function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];const out=[];let cur='';s.forEach(x=>{if((cur+x).length>150&&cur){out.push(cur.trim());cur=''}cur+=x});if(cur.trim())out.push(cur.trim());return out}
 
+/* ===================== FLORENCIA EN MOSAICO: mundo cerrado, la cámara sigue al héroe ===================== */
+const TW={W:1500,H:2400,CELL:20};
+/* objetos: x,y = base (pie) del dibujo en coordenadas del mundo; s = escala de dibujo; fp = huella que bloquea [ancho,alto] */
+const TOWN_OBJ=[
+ {k:'duomo',x:750,y:470,s:1.9,fp:[300,120]},
+ {k:'campanario',x:330,y:1260,s:1,fp:[90,60],loc:'campanario'},
+ {k:'fuente',x:750,y:1560,s:1,fp:[180,70],loc:'fuente'},
+ {k:'escenario',x:1130,y:880,s:1.15,fp:[190,70],loc:'escenario'},
+ {k:'puerta',x:750,y:2370,s:1,fp:[0,0]},
+ {k:'farol',x:1030,y:1300,s:1},{k:'farol',x:1270,y:1300,s:1},{k:'farol',x:1030,y:1470,s:1},{k:'farol',x:1270,y:1470,s:1,loc0:'plaza'},
+ {k:'casa',x:180,y:900,s:1,fp:[120,60]},{k:'casa',x:520,y:820,s:1,fp:[120,60],flip:1},{k:'casa',x:980,y:1950,s:1,fp:[120,60],flip:1},
+ {k:'casa',x:180,y:1620,s:1,fp:[120,60]},{k:'casa',x:1330,y:1720,s:1,fp:[120,60],flip:1},{k:'casa',x:560,y:2120,s:1,fp:[120,60]},
+ {k:'casa',x:1330,y:2150,s:1,fp:[120,60],flip:1},{k:'casa',x:1350,y:620,s:1,fp:[120,60],flip:1},{k:'casa',x:150,y:560,s:1,fp:[120,60]},
+ {k:'casa',x:330,y:1950,s:1.1,fp:[130,64],loc:'taller'},{k:'casa',x:1170,y:1980,s:1.1,fp:[130,64],flip:1,loc:'gremio'},{k:'casa',x:330,y:600,s:1.1,fp:[130,64],loc:'scriptorium'},
+ ...[[470,1340],[200,1330],[620,1080],[880,1080],[600,1780],[900,1780],[1420,1100],[90,1180],[1420,1500],[90,2000],[1420,2300],[90,2300],[640,640],[860,640]].map(([x,y])=>({k:'cipres',x,y,s:1,fp:[24,18]})),
+ ...[[700,1730],[800,1730],[1150,1560],[470,1450],[1000,880],[1260,880]].map(([x,y])=>({k:'maceta',x,y,s:1,fp:[30,16]}))];
+/* lugares: punto de llegada (delante de la puerta) y etiqueta */
+const TOWN_LOC={
+ campanario:{n:'El campanario',ic:'🔔',at:[400,1300]},
+ fuente:{n:'La fuente',ic:'⛲',at:[750,1640]},
+ plaza:{n:'La plaza de los faroles',ic:'🏮',at:[1150,1385]},
+ escenario:{n:'El escenario',ic:'🎭',at:[1130,930]},
+ puerta:{n:'La puerta',ic:'🚪',at:[750,2110]},
+ taller:{n:'Taller del lutier',ic:'🪕',at:[330,2010],fog:[90,1700,600,2180],need:'campanario',msg:'el campanario despierte'},
+ gremio:{n:'El gremio',ic:'📜',at:[1170,2040],fog:[900,1760,1430,2200],need:'fuente',msg:'la fuente vuelva a fluir'},
+ scriptorium:{n:'El scriptorium',ic:'✒️',at:[330,660],fog:[80,380,620,760],need:'plaza',msg:'la plaza recupere su luz'}};
+const TOWN_SPIRITS=[{id:'ruido-1',x:430,y:1830,need:'taller',name:'Espíritu del Ruido',reward:{coins:10,item:'resina',itemName:'resina de abeto'}}];
+const TIMG={},TOWN_USE_TEX=false;function timg(k,src){if(!TIMG[k]){const i=new Image();i.src=src;TIMG[k]=i}return TIMG[k]}
+function townAssets(){['duomo','campanario','fuente','escenario','puerta','farol','casa','cipres','maceta'].forEach(k=>timg(k,V()+'town/'+k+'.webp'));['quieto','A','P','B'].forEach(k=>timg('v'+k,V()+'viajero_'+k+'.webp'))}
+function townRng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+let TOWN_GROUND=null;
+function townGround(){if(TOWN_GROUND)return TOWN_GROUND;const tile=TIMG.suelo;if(tile&&tile.complete&&tile.width&&TOWN_USE_TEX){}const c=document.createElement('canvas');c.width=TW.W;c.height=TW.H;const g=c.getContext('2d'),r=townRng(7);
+ /* empedrado estilizado: piedras redondeadas con juntas oscuras y luz arriba a la izquierda */
+ g.fillStyle='#6e5a42';g.fillRect(0,0,TW.W,TW.H);
+ const SW=21,SH=16;for(let row=0,y=0;y<TW.H+SH;row++,y+=SH){const off=(row%2)*SW/2;for(let x=-SW+off;x<TW.W+SW;x+=SW){const w=SW-3-r()*3,h=SH-3-r()*2.5,cx=x+r()*2,cy=y+r()*2,l=r(),base=[196+l*30,170+l*26,128+l*22].map(v=>v|0);
+   const rr=4.5;g.beginPath();g.roundRect(cx-w/2,cy-h/2,w,h,rr);g.fillStyle=`rgb(${base})`;g.fill();
+   g.fillStyle='rgba(255,246,222,.28)';g.beginPath();g.roundRect(cx-w/2+1,cy-h/2+1,w-4,3.2,2);g.fill();
+   g.fillStyle='rgba(60,40,20,.22)';g.beginPath();g.roundRect(cx-w/2+2,cy+h/2-3.2,w-3,2.6,1.5);g.fill()}}
+ /* manchas suaves de luz y sombra para romper la repetición */
+ for(let i=0;i<70;i++){const x=r()*TW.W,y=r()*TW.H,R=80+r()*220,gr=g.createRadialGradient(x,y,0,x,y,R),lt=r()<.5;gr.addColorStop(0,lt?'rgba(255,225,170,.16)':'rgba(70,45,20,.16)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-R,y-R,R*2,R*2)}
+ /* jardines de pasto con borde irregular */
+ const grass=(x,y,w,h)=>{g.save();g.beginPath();for(let k=0;k<=40;k++){const a=k/40*6.283,j=1+.12*Math.sin(a*5+x)+.08*Math.sin(a*9+y);const px=x+Math.cos(a)*w*j,py=y+Math.sin(a)*h*j;k?g.lineTo(px,py):g.moveTo(px,py)}g.closePath();g.fillStyle='#6d8a36';g.fill();g.clip();
+  for(let i=0;i<w*h/12;i++){const px=x-w*1.2+r()*w*2.4,py=y-h*1.2+r()*h*2.4,l=r();g.strokeStyle=l<.33?'#87a64b':l<.66?'#5c7a2b':'#9bb85a';g.lineWidth=1.3;g.beginPath();g.moveTo(px,py);g.lineTo(px+(r()-.5)*4,py-5-r()*5);g.stroke()}
+  for(let i=0;i<w*h/900;i++){g.fillStyle=['#f2d36b','#e98aa8','#fff2d0','#b78be0'][i%4];g.beginPath();g.arc(x-w+r()*w*2,y-h+r()*h*2,2.2,0,6.3);g.fill()}g.restore();
+  g.strokeStyle='rgba(60,45,20,.35)';g.lineWidth=3;g.stroke()};
+ [[150,1450,120,90],[1370,1250,110,140],[180,2250,130,90],[1350,2350,120,60],[620,1250,90,60],[880,1250,90,60],[1380,400,110,90],[120,300,100,80],[750,2050,110,50],[1120,1650,80,50]].forEach(a=>grass(...a));
+ /* muralla alrededor */
+ const wall=(x,y,w,h)=>{g.fillStyle='#8c7552';g.fillRect(x,y,w,h);for(let yy=y;yy<y+h;yy+=12)for(let xx=x+((yy/12)%2)*9;xx<x+w;xx+=18){g.fillStyle=`rgba(${r()<.5?'255,235,200':'50,35,15'},.12)`;g.fillRect(xx,yy,16,10)}};
+ wall(0,0,TW.W,64);wall(0,0,54,TW.H);wall(TW.W-54,0,54,TW.H);wall(0,TW.H-44,TW.W,44);g.fillStyle='rgba(0,0,0,.22)';g.fillRect(54,64,TW.W-108,12);g.fillRect(54,64,12,TW.H-108);
+ const vg=g.createRadialGradient(TW.W/2,TW.H/2,400,TW.W/2,TW.H/2,1500);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(40,20,0,.28)');g.fillStyle=vg;g.fillRect(0,0,TW.W,TW.H);
+ TOWN_GROUND=c;return c}
+/* cuadrícula de paso */
+function townGrid(open){const C=TW.CELL,gw=Math.ceil(TW.W/C),gh=Math.ceil(TW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
+ block(0,0,TW.W,90);block(0,0,60,TW.H);block(TW.W-60,0,TW.W,TW.H);block(0,TW.H-90,TW.W,TW.H);
+ TOWN_OBJ.forEach(o=>{if(!o.fp||!o.fp[0])return;block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});
+ Object.entries(TOWN_LOC).forEach(([k,l])=>{if(l.fog&&!open(k))block(...l.fog)});return {b,gw,gh}}
+function townPath(G,from,to){const C=TW.CELL,{b,gw,gh}=G,cell=p=>[Math.max(0,Math.min(gw-1,Math.floor(p[0]/C))),Math.max(0,Math.min(gh-1,Math.floor(p[1]/C)))];
+ let [sx,sy]=cell(from),[tx,ty]=cell(to);if(b[ty*gw+tx]){let best=null;for(let r=1;r<12&&!best;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const x=tx+dx,y=ty+dy;if(x>=0&&y>=0&&x<gw&&y<gh&&!b[y*gw+x]){const d=Math.hypot(dx,dy);if(!best||d<best.d)best={x,y,d}}}if(!best)return null;tx=best.x;ty=best.y}
+ const N=gw*gh,gs=new Float32Array(N).fill(1e9),prev=new Int32Array(N).fill(-1),open=[[0,sy*gw+sx]];gs[sy*gw+sx]=0;const h=i=>Math.hypot(i%gw-tx,(i/gw|0)-ty);
+ const D=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.414],[1,-1,1.414],[-1,1,1.414],[-1,-1,1.414]];let found=false,it=0;
+ while(open.length&&it++<40000){let bi=0;for(let i=1;i<open.length;i++)if(open[i][0]<open[bi][0])bi=i;const [,u]=open.splice(bi,1)[0];if(u===ty*gw+tx){found=true;break}const ux=u%gw,uy=u/gw|0;
+  for(const [dx,dy,c] of D){const x=ux+dx,y=uy+dy;if(x<0||y<0||x>=gw||y>=gh)continue;const v=y*gw+x;if(b[v])continue;if(dx&&dy&&(b[uy*gw+x]||b[y*gw+ux]))continue;const ng=gs[u]+c;if(ng<gs[v]){gs[v]=ng;prev[v]=u;open.push([ng+h(v),v])}}}
+ if(!found)return null;const cells=[];for(let u=ty*gw+tx;u!==-1;u=prev[u])cells.unshift([(u%gw+.5)*C,((u/gw|0)+.5)*C]);
+ /* suavizado: saltar puntos con línea de visión */
+ const los=(a,c)=>{const n=Math.ceil(Math.hypot(c[0]-a[0],c[1]-a[1])/(C/3));for(let i=1;i<n;i++){const x=a[0]+(c[0]-a[0])*i/n,y=a[1]+(c[1]-a[1])*i/n;if(b[Math.floor(y/C)*gw+Math.floor(x/C)])return false}return true};
+ const out=[from];let i=0;while(i<cells.length-1){let j=cells.length-1;while(j>i+1&&!los(out[out.length-1],cells[j]))j--;out.push(cells[j]);i=j}if(!b[cell(to)[1]*gw+cell(to)[0]])out[out.length-1]=to;return out.slice(1)}
+/* espíritu del ruido (dibujo en canvas) */
+function drawSpirit(g,x,y,t,calm){const r=26;for(let i=0;i<5;i++){const a=t*1.7+i*1.26,rr=r*(.7+.3*Math.sin(t*3+i));g.fillStyle=`rgba(${calm?'255,220,140':'90,70,140'},${.18+.05*i})`;g.beginPath();g.arc(x+Math.cos(a)*6,y-40+Math.sin(a*1.3)*6,rr,0,6.3);g.fill()}
+ g.strokeStyle=calm?'rgba(255,240,200,.8)':'rgba(200,190,255,.75)';g.lineWidth=2;g.beginPath();for(let k=0;k<26;k++){const a=k/26*6.3,j=calm?2:7*Math.sin(t*20+k*2.3);const px=x+Math.cos(a)*(r+j),py=y-40+Math.sin(a)*(r+j);k?g.lineTo(px,py):g.moveTo(px,py)}g.closePath();g.stroke();
+ g.fillStyle='rgba(255,255,255,.9)';g.beginPath();g.arc(x-8,y-44,3.2,0,6.3);g.arc(x+8,y-44,3.2,0,6.3);g.fill();g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(x,y,20,6,0,0,6.3);g.fill()}
+
+/* ===================== ENCUENTRO MUSICAL CON UN ESPÍRITU ===================== */
+function townEncounter(sp,onWin){const tasks=[{t:'high',say:'Toca una nota aguda',hint:'Las notas agudas están a la derecha del teclado.'},{t:'low',say:'Ahora toca una nota grave',hint:'Las notas graves están a la izquierda.'},{t:'alt',n:4,say:'Alterna: grave, aguda, grave, aguda',hint:'Salta de un lado al otro del teclado.'}];
+ let k=0,seq=[];const ov=document.createElement('div');ov.className='enc';ov.innerHTML=`<div class="enc-iris"></div><div class="enc-box">
+  <div class="enc-top"><canvas class="enc-sp" width="220" height="200"></canvas><b class="enc-name">${esc(sp.name)}</b><div class="enc-bar"><i></i></div><small>Desarmonía</small></div>
+  <div class="enc-mid"><div class="g-say" id="encsay"></div><div class="enc-dots"></div><div class="fb" id="encfb"></div></div>
+  <div class="enc-kb" id="enckb"></div></div>`;$('#vLesson').appendChild(ov);
+ const sc=ov.querySelector('.enc-sp'),sg=sc.getContext('2d');let calm=0,alive=true;const t0=performance.now();
+ const anim=t=>{if(!alive||!ov.isConnected)return;requestAnimationFrame(anim);sg.clearRect(0,0,220,200);sg.save();sg.translate(110,150);sg.scale(2,2);drawSpirit(sg,0,0,(t-t0)/1000*(1-calm*.7),calm>=1);sg.restore()};requestAnimationFrame(anim);
+ const bar=ov.querySelector('.enc-bar i'),dots=ov.querySelector('.enc-dots');
+ const show=()=>{const T=tasks[k];bar.style.width=(100-k/tasks.length*100)+'%';dots.innerHTML=tasks.map((x,i)=>`<i class="${i<k?'ok':i===k?'cur':''}"></i>`).join('');const say=$('#encsay');say.classList.remove('tw-seen');say.innerHTML=`<b class="g-q">${k+1}/${tasks.length} · ${esc(T.say)}</b>`;typeIn(say);seq=[];
+  const fb=$('#encfb');fb.className='fb'};
+ const zone=p=>p<=55?'low':p>=67?'high':'mid';
+ const kb=keyboard($('#enckb'),{lo:48,hi:79,labels:aidsOn(),onKey:(p)=>{if(k>=tasks.length)return;const T=tasks[k],z=zone(p),fb=$('#encfb');
+   if(T.t==='high'||T.t==='low'){if(z===T.t){kb.flash(p,'good');win()}else{kb.flash(p,'wrong');fb.className='fb on bad';fb.innerHTML=`<b>${z==='mid'?'Esa está en el medio':z==='low'?'Esa es grave':'Esa es aguda'}</b>${T.hint}`}return}
+   if(T.t==='alt'){if(z==='mid'){kb.flash(p,'wrong');fb.className='fb on bad';fb.innerHTML='<b>Esa está en el medio</b>Usa notas claramente graves o agudas.';return}const want=seq.length?(seq[seq.length-1]==='low'?'high':'low'):z;if(z!==want){kb.flash(p,'wrong');seq=[];fb.className='fb on bad';fb.innerHTML='<b>Se repitió el lado</b>Alterna: una grave, una aguda… Empieza otra vez.';return}kb.flash(p,'good');seq.push(z);fb.className='fb on ok';fb.innerHTML=`<b>${seq.length}/${T.n}</b>`;if(seq.length>=T.n)win()}}});
+ if(aidsOn())Object.entries(kb.els).forEach(([p,el])=>{el.classList.add(+p<=55?'zl':+p>=67?'zh':'zm')});
+ const win=()=>{k++;calm=k/tasks.length;if(navigator.vibrate)navigator.vibrate(40);if(k<tasks.length){setTimeout(show,500);return}
+  bar.style.width='0%';dots.innerHTML=tasks.map(()=>'<i class="ok"></i>').join('');const say=$('#encsay');say.innerHTML=`<b class="g-q">¡${esc(sp.name)} recupera su equilibrio!</b><span class="g-sub">El ruido se transforma en una nota clara. El camino queda libre.</span>`;
+  const t=ac().currentTime+.05;[60,64,67,72].forEach((p,i)=>tone(p,.6,.5,'flute',t+i*.14));
+  const btn=document.createElement('button');btn.className='cta gold';btn.type='button';btn.textContent='Recoger la recompensa y volver al mapa';btn.onclick=()=>{alive=false;ov.classList.add('out');setTimeout(()=>{ov.remove();onWin()},450)};ov.querySelector('.enc-mid').appendChild(btn)};
+ setTimeout(()=>{ov.classList.add('in');show()},60)}
+
 const STEP={
- citymap(st,box){/* mapa de la ciudad: el viajero camina por las calles a donde toques; la misión está marcada con ! */
-  LS.mapDone=LS.mapDone||[];if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;LS.mapN=(LS.mapN||0)+1;
-  if(!LS.mapPx)LS.mapPx=RN[MAPLOC[st.from||'puerta'].stop].slice();const night=isNight(),goalPx=RN[MAPLOC[st.go].stop],start=mp(LS.mapPx);
-  const frags=()=>MAPFRAG.filter(f=>f.at<=LS.mapN&&!(S.frags||[]).includes(f.id));
-  box.innerHTML=`<div class="cmap${night?' night':''}" id="cmap"><div class="cm-world" id="cmw"><div class="cm-img" style="background-image:url(${V()}mapa.webp)"></div>
-   ${Object.entries(MAPLOC).map(([k,l])=>{const goal=k===st.go,done=LS.mapDone.includes(k),p=mp(l.at);return `<button type="button" class="cm-loc${goal?' goal':''}${done?' done':''}" data-k="${k}" style="left:${p.x}%;top:${p.y}%"><span class="cm-ic">${l.ic}${goal?'<b class="cm-bang">!</b>':done?'<b class="cm-ok">✓</b>':''}</span><span class="cm-n">${l.n}</span></button>`}).join('')}
-   ${frags().map(f=>{const p=mp(RN[f.stop]);return `<button type="button" class="cm-frag" data-f="${f.id}" style="left:${p.x}%;top:${p.y}%" aria-label="Fragmento de partitura">✦</button>`}).join('')}
-   <div class="cm-me" id="cme" style="left:${start.x}%;top:${start.y}%">${travelerSvg()}</div></div>
-   <div class="cm-quest"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b>${fragCount()}</div>
-   <div class="cm-hint">Toca el camino para caminar. Ve al lugar marcado con <b>!</b> · Los destellos ✦ esconden una partitura perdida.</div></div>`;
-  const me=$('#cme'),world=$('#cmw');let walking=null,arrived=false;
-  const near=(a,b,r)=>Math.hypot(a[0]-b[0],a[1]-b[1])<r;
-  const pickFrags=pt=>{frags().forEach(f=>{if(near(pt,RN[f.stop],34)){S.frags=S.frags||[];S.frags.push(f.id);S.coins+=5;save();const b=box.querySelector(`[data-f="${f.id}"]`);if(b){b.classList.add('got');setTimeout(()=>b.remove(),600)}const fc=box.querySelector('.cm-frags');if(fc)fc.outerHTML=fragCount();toast(S.frags.length>=3?'¡Completaste la partitura perdida! +5 florines':'Encontraste un fragmento de partitura perdida ('+S.frags.length+'/3) · +5 florines')}})};
-  const arrive=()=>{if(arrived)return;arrived=true;const b=box.querySelector(`[data-k="${st.go}"]`);if(b)b.classList.add('arrive');setTimeout(next,450)};
-  const walk=(pts,onEnd)=>{const id={};walking=id;let i=0;const go=()=>{if(!me.isConnected||walking!==id)return;if(i>=pts.length){walking=null;me.classList.remove('walk');onEnd&&onEnd();return}
-    const p=pts[i++],cur=LS.mapPx,d=Math.hypot(p[0]-cur[0],p[1]-cur[1]),ms=Math.max(60,d*2.6);me.classList.add('walk');if(Math.abs(p[0]-cur[0])>4)me.classList.toggle('flip',p[0]<cur[0]);const q=mp(p);me.style.transition=`left ${ms}ms linear,top ${ms}ms linear`;me.style.left=q.x+'%';me.style.top=q.y+'%';
-    setTimeout(()=>{if(walking!==id)return;LS.mapPx=p.slice();pickFrags(p);if(near(p,goalPx,30))return arrive();go()},ms)};go()};
-  const goTo=(px,onEnd)=>walk(roadRoute(LS.mapPx,px),onEnd);
-  const ping=(px,ok)=>{const q=mp(px),d=document.createElement('i');d.className='cm-ping'+(ok?'':' no');d.style.left=q.x+'%';d.style.top=q.y+'%';world.appendChild(d);setTimeout(()=>d.remove(),700)};
-  world.addEventListener('click',e=>{if(e.target.closest('button'))return;const r=world.getBoundingClientRect(),px=[(e.clientX-r.left)/r.width*MAPW,(e.clientY-r.top)/r.height*MAPH],pr=roadProject(px);
-   if(pr.d>48){ping(px,false);return}ping(pr.q,true);goTo(pr.q)});
-  box.querySelectorAll('.cm-loc').forEach(b=>b.onclick=()=>{const k=b.dataset.k,stop=RN[MAPLOC[k].stop];goTo(stop,()=>{if(k!==st.go)toast(LS.mapDone.includes(k)?'Ya ayudaste aquí. Sigue tu misión.':'Aquí todavía no hay nada que hacer. Sigue tu misión.')})});
-  box.querySelectorAll('.cm-frag').forEach(b=>b.onclick=()=>{const f=MAPFRAG.find(x=>x.id===b.dataset.f);goTo(RN[f.stop])})},
+ citymap(st,box){/* Florencia en mosaico: el héroe camina libre (sin atravesar edificios); la cámara lo sigue */
+  townAssets();LS.mapDone=LS.mapDone||[];if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
+  S.mundo=S.mundo||{spirits:{},fog:{}};const W=S.mundo;const open=k=>{const l=TOWN_LOC[k];return !l||!l.fog||LS.mapDone.includes(l.need)||W.fog[k]==='open'};
+  const newly=Object.keys(TOWN_LOC).filter(k=>TOWN_LOC[k].fog&&open(k)&&W.fog[k]!=='open');
+  let G=townGrid(k=>open(k)&&!newly.includes(k)||W.fog[k]==='open');
+  if(!LS.hero)LS.hero=TOWN_LOC[st.from||'puerta'].at.slice();const night=isNight();
+  box.innerHTML=`<div class="cmap tmap" id="cmap"><canvas id="tcv"></canvas>
+   <div class="cm-quest"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b><em class="cm-frags">🪙 ${S.coins||0} florines${(S.inv&&Object.keys(S.inv).length)?' · 🎒 '+Object.values(S.inv).reduce((a,b)=>a+b,0):''}</em></div>
+   <div class="cm-hint">Toca el suelo para caminar. Ve al lugar marcado con <b>!</b></div></div>`;
+  const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
+  const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
+  const cam={x:LS.hero[0]-VW/2,y:LS.hero[1]-VH*.55};const clampCam=()=>{cam.x=Math.max(0,Math.min(TW.W-VW,cam.x));cam.y=Math.max(0,Math.min(TW.H-VH,cam.y))};clampCam();
+  let path=[],moving=false,facing=1,walkT=0,last=performance.now(),alive=true,busy=false,arriving=null,pingP=null,pingT=0,fogAnim={};
+  newly.forEach(k=>{fogAnim[k]=0});if(newly.length)setTimeout(()=>{newly.forEach(k=>{W.fog[k]='open'});save();G=townGrid(open);toast('¡La niebla se levanta! Descubriste: '+newly.map(k=>TOWN_LOC[k].n).join(', '))},900);
+  const spirits=()=>TOWN_SPIRITS.filter(s=>W.spirits[s.id]!=='calmado'&&open(s.need)&&W.fog[s.need]==='open');
+  const walkTo=(p,onArrive)=>{const pth=townPath(G,LS.hero,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=onArrive||null};
+  const goalAt=TOWN_LOC[st.go].at;
+  const hitLoc=(wx,wy)=>{for(const [k,l] of Object.entries(TOWN_LOC)){const o=TOWN_OBJ.find(o=>o.loc===k);if(o){const im=TIMG[o.k];if(im&&im.complete){const w=im.width*o.s,h=im.height*o.s;if(wx>o.x-w/2&&wx<o.x+w/2&&wy>o.y-h&&wy<o.y+10)return k}}if(Math.hypot(wx-l.at[0],wy-l.at[1])<70)return k}return null};
+  const arriveLoc=k=>{if(k===st.go){busy=true;alive=false;setTimeout(next,250);return}const l=TOWN_LOC[k];if(l.fog&&!open(k)){toast(`${l.n}: la niebla lo cubre. Se abrirá cuando ${l.msg}.`);return}
+   if(k==='taller')sheet(`<span class="eyebrow">Taller del lutier</span><h2>Maestro Bernardo</h2><p>«¡Un viajero músico! Aquí construimos instrumentos con madera, cuerdas y resinas. Pronto te enseñaré qué madera elegir para la tapa de un laúd.»</p><p class="small">Muy pronto: fabricación de instrumentos (Módulo 2).</p><button class="cta" type="button" onclick="closeSheet()">Volver</button>`);
+   else if(k==='gremio')toast('El gremio: aquí aparecerán encargos de composición. ¡Muy pronto!');else if(k==='scriptorium')toast('El scriptorium: tinta, pergamino y lectura de partituras. ¡Muy pronto!');
+   else toast(LS.mapDone.includes(k)?'Ya ayudaste aquí. Sigue tu misión.':'Aquí todavía no hay nada que hacer. Sigue tu misión.')};
+  cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),wx=e.clientX-r.left+cam.x,wy=e.clientY-r.top+cam.y;
+   const sp=spirits().find(s=>Math.hypot(wx-s.x,wy-(s.y-30))<50);if(sp){walkTo([sp.x+40,sp.y+10]);return}
+   const k=hitLoc(wx,wy);if(k){const l=TOWN_LOC[k];if(l.fog&&!open(k)){toast(`${l.n}: la niebla lo cubre. Se abrirá cuando ${l.msg}.`);return}walkTo(l.at,()=>arriveLoc(k));pingP=l.at;pingT=performance.now();return}
+   pingP=[wx,wy];pingT=performance.now();walkTo([wx,wy])});
+  const ro=new ResizeObserver(fit);ro.observe(wrap);
+  const encounter=sp=>{busy=true;moving=false;path=[];townEncounter(sp,()=>{W.spirits[sp.id]='calmado';S.coins=(S.coins||0)+sp.reward.coins;S.inv=S.inv||{};S.inv[sp.reward.item]=(S.inv[sp.reward.item]||0)+1;save();
+    const q=box.querySelector('.cm-frags');if(q)q.textContent=`🪙 ${S.coins} florines · 🎒 ${Object.values(S.inv).reduce((a,b)=>a+b,0)}`;toast(`El espíritu recuperó su equilibrio. +${sp.reward.coins} florines · +1 ${sp.reward.itemName}`);busy=false;last=performance.now()})};
+  const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
+   if(moving&&path.length&&!busy){const p=path[0],dx=p[0]-LS.hero[0],dy=p[1]-LS.hero[1],d=Math.hypot(dx,dy),sp=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;
+    if(d<=sp){LS.hero=p.slice();path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(Math.hypot(LS.hero[0]-goalAt[0],LS.hero[1]-goalAt[1])<40&&!a)arriveLoc(st.go);else if(a)a()}}else{LS.hero[0]+=dx/d*sp;LS.hero[1]+=dy/d*sp}walkT+=dt;
+    const s=spirits().find(s=>Math.hypot(LS.hero[0]-s.x,LS.hero[1]-s.y)<75);if(s){encounter(s)}}
+   cam.x+=(LS.hero[0]-VW/2-cam.x)*Math.min(1,dt*5);cam.y+=(LS.hero[1]-VH*.55-cam.y)*Math.min(1,dt*5);clampCam();
+   g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);{const gr=townGround();g.drawImage(gr,cam.x,cam.y,VW,VH,0,0,VW,VH)}g.translate(-cam.x,-cam.y);
+   /* objetos + héroe + espíritus ordenados por profundidad */
+   const list=TOWN_OBJ.map(o=>({y:o.y,d:()=>{const im=TIMG[o.k];if(!im||!im.complete||!im.width)return;const w=im.width*o.s,h=im.height*o.s;if(o.x+w/2<cam.x||o.x-w/2>cam.x+VW||o.y<cam.y||o.y-h>cam.y+VH)return;
+     g.fillStyle='rgba(0,0,0,.22)';g.beginPath();g.ellipse(o.x+w*.08,o.y-2,w*.46,Math.max(6,w*.11),0,0,6.3);g.fill();g.save();if(o.flip){g.translate(o.x,0);g.scale(-1,1);g.translate(-o.x,0)}g.drawImage(im,o.x-w/2,o.y-h,w,h);g.restore()}}));
+   const fr=moving?['A','P','B','P'][Math.floor(walkT/.18)%4]:'quieto',hi=TIMG['v'+fr],bob=moving&&(fr==='P')?-2:0;
+   list.push({y:LS.hero[1],d:()=>{g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(LS.hero[0],LS.hero[1],13,4,0,0,6.3);g.fill();if(hi&&hi.complete){g.save();g.translate(LS.hero[0],LS.hero[1]+bob);g.scale(facing,1);g.drawImage(hi,-21,-64,41,64);g.restore()}}});
+   spirits().forEach(s=>list.push({y:s.y,d:()=>drawSpirit(g,s.x,s.y,t/1000,false)}));
+   list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
+   /* niebla */
+   Object.entries(TOWN_LOC).forEach(([k,l])=>{if(!l.fog)return;let a=1;if(W.fog[k]==='open'){if(k in fogAnim){fogAnim[k]=Math.min(1,fogAnim[k]+dt/2.2);a=1-fogAnim[k]}else a=0}if(a<=0)return;const [x0,y0,x1,y1]=l.fog;
+    g.save();g.globalAlpha=a;const cx=(x0+x1)/2,cy=(y0+y1)/2;for(let i=0;i<9;i++){const ox=Math.sin(t/2300+i*1.7)*40,oy=Math.cos(t/2900+i*2.3)*30,rx=(x1-x0)*(.38+.08*(i%3)),ry=(y1-y0)*(.34+.06*(i%4));const gr=g.createRadialGradient(cx+ox+(i-4)*22,cy+oy,10,cx+ox+(i-4)*22,cy+oy,Math.max(rx,ry));gr.addColorStop(0,'rgba(235,232,245,.85)');gr.addColorStop(.6,'rgba(220,220,235,.55)');gr.addColorStop(1,'rgba(220,220,235,0)');g.fillStyle=gr;g.fillRect(x0-80,y0-80,x1-x0+160,y1-y0+160)}
+    g.fillStyle='rgba(60,50,40,.85)';g.font='600 13px Alegreya Sans, sans-serif';g.textAlign='center';g.fillText('🔒 '+l.n,cx,cy);g.font='12px Alegreya Sans, sans-serif';g.fillText('Se abrirá cuando '+l.msg,cx,cy+17);g.restore()});
+   /* noche */
+   if(night){g.fillStyle='rgba(12,22,60,.48)';g.fillRect(cam.x,cam.y,VW,VH);g.globalCompositeOperation='lighter';TOWN_OBJ.filter(o=>o.k==='farol').forEach(o=>{const gr=g.createRadialGradient(o.x,o.y-70,2,o.x,o.y-70,90);gr.addColorStop(0,'rgba(255,200,110,.55)');gr.addColorStop(1,'rgba(255,200,110,0)');g.fillStyle=gr;g.fillRect(o.x-90,o.y-160,180,180)});g.globalCompositeOperation='source-over'}
+   /* marcas: ! del objetivo y etiquetas */
+   const bobY=Math.sin(t/260)*4;g.textAlign='center';
+   Object.entries(TOWN_LOC).forEach(([k,l])=>{if(k==='puerta')return;if(l.fog&&!(open(k)&&W.fog[k]==='open'))return;const o=TOWN_OBJ.find(o=>o.loc===k),im=o&&TIMG[o.k],top=o&&im&&im.complete?o.y-im.height*o.s:l.at[1]-60;const lx=o?o.x:l.at[0];
+    g.font='700 11px Cinzel, serif';const tw=g.measureText(l.n).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(lx-tw/2,l.at[1]+12,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(l.n,lx,l.at[1]+25);
+    if(k===st.go){g.fillStyle='#ffd56e';g.beginPath();g.arc(lx,top-22+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',lx,top-16+bobY)}});
+   if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}
+  };requestAnimationFrame(frame)},
  scene(st,box){/* escena de historia a pantalla completa: imagen + narración letra a letra; tocar para avanzar */
   const lines=(st.lines||[]).filter(Boolean);let li=-1,tw=null,actOn=!!st.act,FWc=null;
   box.innerHTML=`<div class="cut mv-${st.move||'none'}" id="cut"><div class="cut-in" style="aspect-ratio:${SCN_AR[st.img]||'1200/896'}">${sceneImg(st.img)}</div>${st.fx==='gold'||st.img==='final'?'<div class="goldfx"></div>':''}${st.act?`<div class="cut-act"><small>${esc(st.act[0])}</small><b>${esc(st.act[1])}</b></div>`:''}</div>
@@ -1577,7 +1723,7 @@ const cv=$('#dust'),cx=cv.getContext('2d');let DW,DH,parts=[];
 function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*devicePixelRatio;parts=Array.from({length:40},()=>({x:Math.random()*DW,y:Math.random()*DH,r:(Math.random()*1.6+.4)*devicePixelRatio,s:Math.random()*.25+.05,a:Math.random()*6}))}rs();addEventListener('resize',rs);
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
-if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB}};
+if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter};
 })();
 </script>
 </body></html>
