@@ -1270,7 +1270,7 @@ function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><di
   case 'escenario':return isNight()?plazaOn('<div class="stagewood"></div>'):`<div class="lscene"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="stagewood"></div></div>`;
   case 'final':return img('final');
   case 'taller_m2':return `<div class="lscene charsc m2int"><div class="ls" style="background-image:url(${V()}m2/taller_int.webp)"></div><div class="chr">${charHTML('maestro',true)}</div></div>`;
-  case 'taller_fuera':return `<div class="lscene solo m2bg"><img class="solo-img" src="${V()}town/p_armero.webp" alt=""></div>`;
+  case 'taller_fuera':return `<div class="lscene solo m2bg"><img class="solo-img" src="${V()}town/p_armero.webp${TOWN_V}" alt=""></div>`;
   case 'maestro_forja':return img('m2/maestro_forja');
   case 'bosque':return `<div class="lscene solo m2forest"><img class="solo-img" src="${V()}bosque/abeto_resonante.webp" alt=""></div>`;
   case 'matteo':case 'violin':case 'flauta':case 'laud':return isNight()?plazaOn('<div class="chr">'+charHTML(k,true)+'</div>',{cls:'charsc'}):`<div class="lscene charsc dusk"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="chr">${charHTML(k,true)}</div></div>`;
@@ -1295,7 +1295,7 @@ function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];c
 /* ===================== FLORENCIA EN MOSAICO: mundo cerrado, la cámara sigue al héroe ===================== */
 const TW={W:1500,H:2400,CELL:20};
 /* objetos: x,y = base (pie) del dibujo en coordenadas del mundo; s = escala de dibujo; fp = huella que bloquea [ancho,alto] */
-let TOWN_TRIO=false;const TOWN_V='?v=5';
+let TOWN_TRIO=false;const TOWN_V='?v=6';
 const TOWN_SMALLSH=new Set(['estandarte','puesto','banco','pozo','cipres_1','cipres_2','olivo_1','olivo_2','arbol_redondo','arbusto','limonero','farol_doble','farol_simple','cajas','seto']);
 const TOWN_BUILD=new Set(['armero','palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','capilla','palazzo','gremio','scriptorium','campanario']);
 /* la ciudad es un fragmento de la isla: plaza central (fuente, escenario delante, faroles alrededor, campanario detrás),
@@ -1307,7 +1307,7 @@ const TOWN_OBJ=[
  ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:2400,fp:[300,70]})),
  {k:'puerta_sur',x:750,y:2402,fp:[0,0]},{k:'torre_alta',x:82,y:2400,fp:[90,40]},{k:'torre_alta',x:1418,y:2400,fp:[90,40],flip:1},
  /* plaza central */
- {k:'campanario',x:520,y:1010,fp:[110,50],loc:'campanario'},
+ {k:'campanario',x:520,y:1010,fp:[90,40],loc:'campanario'},
  {k:'fuente_leones',x:750,y:1250,fp:[205,80],loc:'fuente'},
  {k:'escenario_vacio',alt:'escenario_trio',x:750,y:1490,fp:[220,60],loc:'escenario'},
  {k:'farol_doble',x:555,y:1170,fp:[18,10]},{k:'farol_doble',x:945,y:1170,fp:[18,10],flip:1},{k:'farol_doble',x:555,y:1395,fp:[18,10]},{k:'farol_doble',x:945,y:1395,fp:[18,10],flip:1},
@@ -1316,7 +1316,7 @@ const TOWN_OBJ=[
  {k:'casa_d',x:230,y:1520,fp:[140,60]},{k:'casa_e',x:1270,y:1520,fp:[140,60],flip:1},
  {k:'casa_a',x:200,y:990,fp:[140,60]},{k:'casa_c',x:985,y:1000,fp:[140,60],flip:1},
  /* barrios que se abren con la niebla */
- {k:'armero',x:330,y:1975,fp:[175,60],loc:'taller'},{k:'gremio',x:1170,y:1995,fp:[160,64],flip:1,loc:'gremio'},{k:'scriptorium',x:330,y:615,fp:[150,64],loc:'scriptorium'},
+ {k:'armero',x:330,y:1975,fp:[170,56],loc:'taller'},{k:'gremio',x:1170,y:1995,fp:[160,64],flip:1,loc:'gremio'},{k:'scriptorium',x:330,y:615,fp:[150,64],loc:'scriptorium'},
  {k:'casa_e',x:990,y:1965,fp:[140,60],flip:1},{k:'panaderia',x:540,y:2160,fp:[140,60]},{k:'casa_a',x:1345,y:2165,fp:[140,60],flip:1},
  {k:'casa_b',x:140,y:520,fp:[118,56]},{k:'casa_c',x:545,y:575,fp:[140,60]},
  /* barrio de los artesanos (Módulo 2, bajo la niebla) */
