@@ -413,8 +413,9 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .pt.st{background-size:300%;background-position:50% 0%}
 .chw.anim img.fx{position:absolute;left:0;top:0;opacity:0;animation:none}
 .mstage.playing .chw.anim img.f0{opacity:0;animation:none}
-.mstage.playing .chw.anim img.fx{animation:vfr .96s steps(1) infinite}
-.mstage.playing .chw.anim img.f2{animation-delay:-.72s}.mstage.playing .chw.anim img.f3{animation-delay:-.48s}.mstage.playing .chw.anim img.f4{animation-delay:-.24s}
+.chw.anim{--d:.96s}.chw.anim.flauta{--d:1.24s}.chw.anim.laud{--d:.8s}
+.mstage.playing .chw.anim img.fx{animation:vfr var(--d) steps(1) infinite}
+.mstage.playing .chw.anim img.f2{animation-delay:calc(var(--d) * -.75)}.mstage.playing .chw.anim img.f3{animation-delay:calc(var(--d) * -.5)}.mstage.playing .chw.anim img.f4{animation-delay:calc(var(--d) * -.25)}
 @keyframes vfr{0%{opacity:1}25%{opacity:0}100%{opacity:0}}
 </style>
 
@@ -1222,7 +1223,7 @@ function charSvg(who,vb){const sk='#e0b18c',V=vb||'0 0 200 380';let body='',ins=
  else if(who==='laud'){body='<path d="M64 150 Q100 132 136 150 L142 262 L58 262 Z" fill="#2f6b3e"/><path d="M58 262 L40 300 L70 304 L82 266 Z M142 262 L160 300 L130 304 L118 266 Z" fill="#b8892e"/><rect x="40" y="300" width="30" height="72" fill="#b8892e"/><rect x="130" y="300" width="30" height="72" fill="#b8892e"/><rect x="50" y="296" width="100" height="10" fill="#5a3a1e"/><path d="M56 306 L50 372 M144 306 L150 372" stroke="#5a3a1e" stroke-width="6"/>';hair='<path d="M68 96 Q70 56 100 54 Q132 56 134 94 Q124 70 100 72 Q78 74 68 96Z" fill="#3b2514"/><path d="M64 64 Q100 38 138 64 L132 70 Q100 56 70 70 Z" fill="#7a2230"/><path d="M128 56 q26 -26 40 -24 q-16 10 -30 30" fill="#e8d9b0"/>';ins='<g transform="translate(108 236) rotate(-32)"><ellipse rx="42" ry="34" fill="#a8692a" stroke="#5a3210" stroke-width="2"/><circle cx="-6" r="10" fill="#3a2210"/><rect x="30" y="-6" width="74" height="12" fill="#5a3210"/><rect x="100" y="-8" width="16" height="16" fill="#3a2210" transform="rotate(30 100 0)"/></g>'}
  return `<svg viewBox="${V}" xmlns="http://www.w3.org/2000/svg" aria-label="${WHO[who]||''}"><ellipse cx="100" cy="374" rx="70" ry="8" fill="rgba(0,0,0,.35)"/>${body}<rect x="88" y="124" width="24" height="28" fill="${sk}"/><circle cx="100" cy="100" r="31" fill="${sk}"/>${hair}<circle cx="89" cy="100" r="3" fill="#2a1a12"/><circle cx="111" cy="100" r="3" fill="#2a1a12"/><path d="M92 116 Q100 121 108 116" stroke="#8a4a3a" stroke-width="2" fill="none"/>${ins}${extra}</svg>`}
 const V=()=>BASE+'m1v/';const CHARIMG={matteo:'matteo',violin:'violinista',flauta:'flautista',laud:'laudista'};
-const CHARSTAND={violin:'violinista_pie',flauta:'flautista_pie',laud:'laudista_pie'},CHARANIM={violin:['violin_p2','violin_p1','violin_p2','violin_p3','violin_p2']};
+const CHARSTAND={violin:'violinista_pie',flauta:'flautista_pie',laud:'laudista_pie'},CHARANIM={violin:['violin_p2','violin_p1','violin_p2','violin_p3','violin_p2'],flauta:['flauta_p1','flauta_p1','flauta_p2','flauta_p3','flauta_p2'],laud:['laud_p2','laud_p1','laud_p2','laud_p3','laud_p2']};
 function charHTML(who,stand){if(stand&&CHARSTAND[who])return `<span class="chw ${who}"><img src="${V()}${CHARSTAND[who]}.webp" alt="${WHO[who]}" draggable="false"></span>`;if(CHARANIM[who]){const f=CHARANIM[who];return `<span class="chw ${who} anim">${f.map((n,i)=>`<img class="${i?'fx f'+i:'f0'}" src="${V()}${n}.webp" alt="${i?'':WHO[who]}" draggable="false">`).join('')}</span>`}return CHARIMG[who]?`<span class="chw ${who}"><img src="${V()}${CHARIMG[who]}.webp" alt="${WHO[who]}" draggable="false">${who==='matteo'?'<i class="lglow"></i>':''}</span>`:charSvg(who)}
 const portrait=who=>CHARIMG[who]?`<span class="pt ${who}${CHARSTAND[who]?' st':''}" style="background-image:url(${V()}${CHARSTAND[who]||CHARIMG[who]}.webp)"></span>`:charSvg(who,'55 48 90 90');
 const PLZ=[{s:[[45,790],[97,765],[150,800]],p:[95,1300,150]},{s:[[805,790],[860,765],[915,800]],p:[860,1300,150]},{s:[[240,935],[265,925],[290,940]],p:[265,1150,90]},{s:[[690,935],[712,925],[738,940]],p:[712,1150,90]},{s:[[180,985]],p:[185,1150,60]},{s:[[15,1050],[108,560]],p:null}];
