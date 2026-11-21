@@ -1221,7 +1221,7 @@ const TOWN_OBJ=[
  /* monumentos y lugares */
  {k:'duomo',x:750,y:525,s:1.32,fp:[270,100]},
  {k:'campanario',x:330,y:1262,fp:[110,50],loc:'campanario'},
- {k:'fuente',x:750,y:1585,fp:[200,72],loc:'fuente'},
+ {k:'fuente_leones',x:750,y:1600,fp:[205,80],loc:'fuente'},
  {k:'escenario',x:1130,y:890,fp:[190,72],loc:'escenario'},
  {k:'farol_doble',x:1030,y:1300,fp:[18,10]},{k:'farol_doble',x:1270,y:1300,fp:[18,10],flip:1},{k:'farol_doble',x:1030,y:1480,fp:[18,10]},{k:'farol_doble',x:1270,y:1480,fp:[18,10],flip:1},
  ...[[600,1360],[900,1360],[600,1860],[900,1860],[750,1090],[470,960],[1030,1080]].map(([x,y],i)=>({k:'farol_simple',x,y,fp:[16,10],flip:i%2})),
@@ -1326,6 +1326,14 @@ function townPath(G,from,to){const C=TW.CELL,{b,gw,gh}=G,cell=p=>[Math.max(0,Mat
  /* suavizado: saltar puntos con línea de visión */
  const los=(a,c)=>{const n=Math.ceil(Math.hypot(c[0]-a[0],c[1]-a[1])/(C/3));for(let i=1;i<n;i++){const x=a[0]+(c[0]-a[0])*i/n,y=a[1]+(c[1]-a[1])*i/n;if(b[Math.floor(y/C)*gw+Math.floor(x/C)])return false}return true};
  const out=[from];let i=0;while(i<cells.length-1){let j=cells.length-1;while(j>i+1&&!los(out[out.length-1],cells[j]))j--;out.push(cells[j]);i=j}if(!b[cell(to)[1]*gw+cell(to)[0]])out[out.length-1]=to;return out.slice(1)}
+/* agua de la fuente en el mapa (coordenadas del dibujo de 225×255) */
+function townWater(g,x0,y0,k,t){const P=(px,py)=>[x0+px*k,y0+py*k];g.save();
+ const c=P(113,146);g.fillStyle='rgba(105,165,200,.6)';g.beginPath();g.ellipse(c[0],c[1],80*k,21*k,0,0,6.3);g.fill();
+ g.strokeStyle='rgba(235,248,255,.55)';g.lineWidth=1.2;for(let i=0;i<3;i++){const rr=(((t/900)+i/3)%1);g.globalAlpha=1-rr;g.beginPath();g.ellipse(c[0],c[1]+2,(20+rr*55)*k,(4+rr*11)*k,0,0,6.3);g.stroke()}g.globalAlpha=1;
+ [[113,123,113,150,0],[74,114,56,146,-1],[152,114,170,146,1]].forEach(([sx,sy,ex,ey,d])=>{const a=P(sx,sy),b=P(ex,ey),m=P(sx+d*14,sy+8);g.lineCap='round';g.strokeStyle='rgba(205,232,250,.85)';g.lineWidth=3.2*k;g.beginPath();g.moveTo(a[0],a[1]);g.quadraticCurveTo(m[0],m[1],b[0],b[1]);g.stroke();
+  g.setLineDash([4*k,6*k]);g.lineDashOffset=-t/40;g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=1.4*k;g.stroke();g.setLineDash([]);
+  g.fillStyle='rgba(240,250,255,.7)';for(let i=0;i<3;i++){g.beginPath();g.arc(b[0]+(Math.sin(t/120+i*2)*4)*k,b[1]-2*k,1.6*k,0,6.3);g.fill()}});
+ g.restore()}
 /* espíritu del ruido (dibujo en canvas) */
 function drawSpirit(g,x,y,t,calm){const im=TIMG[calm?'espiritu_calmo':'espiritu_ruido'];if(im&&im.complete&&im.width){const b=Math.sin(t*2.2)*5,sh=calm?0:Math.sin(t*31)*1.6;g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(x,y,26,7,0,0,6.3);g.fill();g.drawImage(im,x-im.width/2+sh,y-im.height-14+b,im.width,im.height);return}
  drawSpiritOld(g,x,y,t,calm)}
@@ -1393,7 +1401,7 @@ const STEP={
    g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);{const gr=townGround();g.drawImage(gr,cam.x,cam.y,VW,VH,0,0,VW,VH)}g.translate(-cam.x,-cam.y);
    /* objetos + héroe + espíritus ordenados por profundidad */
    const list=TOWN_OBJ.map(o=>({y:o.y,d:()=>{const im=TIMG[o.k];if(!im||!im.complete||!im.width)return;const sc=o.s||1,w=im.width*sc,h=im.height*sc;if(o.x+w/2<cam.x||o.x-w/2>cam.x+VW||o.y<cam.y||o.y-h>cam.y+VH)return;
-     if(TOWN_SMALLSH.has(o.k)){g.fillStyle='rgba(30,20,10,.2)';g.beginPath();g.ellipse(o.x,o.y-1,w*.3,Math.max(3,w*.07),0,0,6.3);g.fill()}g.save();if(o.flip){g.translate(o.x,0);g.scale(-1,1);g.translate(-o.x,0)}g.drawImage(im,o.x-w/2,o.y-h,w,h);g.restore()}}));
+     if(TOWN_SMALLSH.has(o.k)){g.fillStyle='rgba(30,20,10,.2)';g.beginPath();g.ellipse(o.x,o.y-1,w*.3,Math.max(3,w*.07),0,0,6.3);g.fill()}g.save();if(o.flip){g.translate(o.x,0);g.scale(-1,1);g.translate(-o.x,0)}g.drawImage(im,o.x-w/2,o.y-h,w,h);g.restore();if(o.k==='fuente_leones'&&waterAwake())townWater(g,o.x-w/2,o.y-h,w/225,t)}}));
    const fr=moving?['A','P','B','P'][Math.floor(walkT/.18)%4]:'quieto',hi=TIMG['v'+fr],bob=moving&&(fr==='P')?-2:0;
    list.push({y:LS.hero[1],d:()=>{g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(LS.hero[0],LS.hero[1],13,4,0,0,6.3);g.fill();if(hi&&hi.complete){g.save();g.translate(LS.hero[0],LS.hero[1]+bob);g.scale(facing,1);g.drawImage(hi,-21,-64,41,64);g.restore()}}});
    spirits().forEach(s=>list.push({y:s.y,d:()=>drawSpirit(g,s.x,s.y,t/1000,false)}));
