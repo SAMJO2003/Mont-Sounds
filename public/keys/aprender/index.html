@@ -418,6 +418,7 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .mstage.playing .chw.anim img.f2{animation-delay:calc(var(--d) * -.75)}.mstage.playing .chw.anim img.f3{animation-delay:calc(var(--d) * -.5)}.mstage.playing .chw.anim img.f4{animation-delay:calc(var(--d) * -.25)}
 @keyframes vfr{0%{opacity:1}25%{opacity:0}100%{opacity:0}}
 .jlist{display:flex;flex-direction:column;gap:6px;max-height:62vh;overflow:auto;margin:8px 0 10px}.jrow{display:flex;gap:10px;align-items:center;text-align:left;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(20,15,10,.9);color:#f3e9d6;font:14px/1.3 var(--body)}.jrow.on{border-color:var(--gold);background:rgba(90,66,30,.9)}.jrow b{font:700 15px Cinzel,serif;color:#ffe2a0;min-width:26px;text-align:center}.jrow small{display:block;color:#ffe2a0;font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.cm-books button img{width:40px;height:34px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(255,210,120,.6))}.bk-img{width:100%;max-width:110px;filter:drop-shadow(0 0 10px rgba(255,210,120,.55))}.inv-piano{display:block;width:120px;margin:4px auto 8px;filter:drop-shadow(0 0 14px rgba(255,210,120,.8))}
 </style>
 
 <div id="sky"></div>
@@ -1275,13 +1276,13 @@ function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];c
 const TW={W:1500,H:2400,CELL:20};
 /* objetos: x,y = base (pie) del dibujo en coordenadas del mundo; s = escala de dibujo; fp = huella que bloquea [ancho,alto] */
 let TOWN_TRIO=false;const TOWN_V='?v=5';
-const TOWN_SMALLSH=new Set(['cipres_1','cipres_2','olivo_1','olivo_2','arbol_redondo','arbusto','limonero','farol_doble','farol_simple','cajas','seto']);
-const TOWN_BUILD=new Set(['casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','capilla','palazzo','taller','gremio','scriptorium','campanario']);
+const TOWN_SMALLSH=new Set(['estandarte','puesto','banco','pozo','cipres_1','cipres_2','olivo_1','olivo_2','arbol_redondo','arbusto','limonero','farol_doble','farol_simple','cajas','seto']);
+const TOWN_BUILD=new Set(['palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','capilla','palazzo','taller','gremio','scriptorium','campanario']);
 /* la ciudad es un fragmento de la isla: plaza central (fuente, escenario delante, faroles alrededor, campanario detrás),
    barrios bajo la niebla y una puerta norte cerrada que lleva a zonas más peligrosas en módulos futuros */
 const TOWN_OBJ=[
  /* murallas, puerta sur (entrada) y puerta norte (cerrada) */
- ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:132,fp:[300,64]})),{k:'puerta',x:750,y:150,fp:[245,80],loc:'norte'},
+ ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:132,fp:[300,64]})),{k:'puerta_norte',x:750,y:205,fp:[250,85],loc:'norte'},
  {k:'torre_muralla',x:82,y:150,fp:[150,70]},{k:'torre_muralla',x:1418,y:150,fp:[150,70],flip:1},
  ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:2400,fp:[300,70]})),
  {k:'puerta',x:750,y:2402,fp:[0,0]},{k:'torre_muralla',x:82,y:2400,fp:[150,70]},{k:'torre_muralla',x:1418,y:2400,fp:[150,70],flip:1},
@@ -1291,7 +1292,7 @@ const TOWN_OBJ=[
  {k:'escenario_vacio',alt:'escenario_trio',x:750,y:1490,fp:[220,60],loc:'escenario'},
  {k:'farol_doble',x:555,y:1170,fp:[18,10]},{k:'farol_doble',x:945,y:1170,fp:[18,10],flip:1},{k:'farol_doble',x:555,y:1395,fp:[18,10]},{k:'farol_doble',x:945,y:1395,fp:[18,10],flip:1},
  ...[[690,1690],[810,1690],[690,1960],[810,1960],[690,880],[810,880],[330,1330],[1170,1330]].map(([x,y],i)=>({k:'farol_simple',x,y,fp:[16,10],flip:i%2})),
- {k:'palazzo',x:1190,y:1200,fp:[165,66],flip:1},{k:'casa_b',x:300,y:1215,fp:[118,56]},
+ {k:'palazzo',x:1190,y:1200,fp:[165,66],flip:1},{k:'palazzo_est',x:290,y:1215,fp:[150,60]},
  {k:'casa_d',x:230,y:1520,fp:[140,60]},{k:'casa_e',x:1270,y:1520,fp:[140,60],flip:1},
  {k:'casa_a',x:200,y:990,fp:[140,60]},{k:'casa_c',x:985,y:1000,fp:[140,60],flip:1},
  /* barrios que se abren con la niebla */
@@ -1299,13 +1300,13 @@ const TOWN_OBJ=[
  {k:'casa_e',x:990,y:1965,fp:[140,60],flip:1},{k:'panaderia',x:540,y:2160,fp:[140,60]},{k:'casa_a',x:1345,y:2165,fp:[140,60],flip:1},
  {k:'casa_b',x:140,y:520,fp:[118,56]},{k:'casa_c',x:545,y:575,fp:[140,60]},
  /* barrio de los artesanos (Módulo 2, bajo la niebla) */
- {k:'capilla',x:1180,y:600,fp:[160,64]},{k:'casa_d',x:1360,y:690,fp:[140,60],flip:1},{k:'arbol_redondo',x:1385,y:430,fp:[50,20]},
+ {k:'capilla',x:1170,y:650,fp:[160,64]},{k:'casa_d',x:1360,y:690,fp:[140,60],flip:1},{k:'carpinteria',x:990,y:480,fp:[150,60]},{k:'cobertizo',x:1290,y:440,fp:[150,50]},{k:'forja',x:975,y:745,fp:[150,60]},
  /* árboles */
  ...[[650,1075],[850,1075],[600,1790],[900,1790],[455,1320]].map(([x,y])=>({k:'cipres_1',x,y,fp:[24,16]})),
  ...[[1425,1010],[90,1185],[90,2010],[1425,2290],[90,2290],[1425,1500]].map(([x,y])=>({k:'cipres_2',x,y,fp:[30,18]})),
  {k:'olivo_1',x:160,y:1760,fp:[40,18]},{k:'olivo_2',x:1390,y:1300,fp:[36,18]},{k:'arbol_redondo',x:205,y:2275,fp:[50,20]},{k:'olivo_1',x:150,y:330,fp:[40,18]},
  /* arbustos, macetas y detalles */
- {k:'limonero',x:625,y:1305,fp:[30,14]},{k:'limonero',x:875,y:1305,fp:[30,14]},{k:'arbusto',x:612,y:1520,fp:[40,16]},{k:'arbusto',x:888,y:1520,fp:[40,16]},
+ {k:'limonero',x:625,y:1305,fp:[30,14]},{k:'limonero',x:875,y:1305,fp:[30,14]},{k:'estandarte',x:612,y:1515,fp:[16,10],s:.78},{k:'estandarte',x:888,y:1515,fp:[16,10],s:.78,flip:1},{k:'banco',x:560,y:1290,fp:[60,14]},{k:'banco',x:940,y:1290,fp:[60,14]},{k:'puesto',x:610,y:1880,fp:[100,40]},{k:'puesto',x:890,y:1880,fp:[100,40],flip:1},{k:'pozo',x:210,y:2080,fp:[60,24]},
  {k:'seto',x:640,y:2110,fp:[100,24]},{k:'seto',x:860,y:2110,fp:[100,24]},
  ...[[252,1003],[565,2172],[1300,2178],[265,1532],[1235,1532],[948,1012]].map(([x,y])=>({k:'geranios',x,y,fp:[0,0]})),
  ...[[130,1700],[200,1745],[170,2245],[230,2290],[120,320],[1380,1270]].map(([x,y])=>({k:'flores',x,y,fp:[0,0]})),
@@ -1318,7 +1319,7 @@ const TOWN_LOC={
  plaza:{n:'La plaza de los faroles',ic:'🏮',at:[985,1300]},
  escenario:{n:'El escenario',ic:'🎭',at:[750,1520]},
  puerta:{n:'La puerta',ic:'🚪',at:[750,2150]},
- norte:{n:'Puerta norte',ic:'🔒',at:[750,240],locked:'La puerta norte está cerrada. Se abrirá cuando completes más módulos: al otro lado espera un lugar más peligroso.'},
+ norte:{n:'Puerta norte',ic:'🔒',at:[750,255],locked:'La puerta norte está cerrada. Se abrirá cuando completes más módulos: al otro lado espera un lugar más peligroso.'},
  taller:{n:'Taller del lutier',ic:'🪕',at:[330,2010],fog:[90,1700,600,2180],need:'campanario',msg:'el campanario despierte'},
  gremio:{n:'El gremio',ic:'📜',at:[1170,2040],fog:[900,1760,1430,2200],need:'fuente',msg:'la fuente vuelva a fluir'},
  scriptorium:{n:'El scriptorium',ic:'✒️',at:[330,660],fog:[80,380,620,760],need:'plaza',msg:'la plaza recupere su luz'},
@@ -1442,16 +1443,16 @@ const CHORD_BOOK={C:{n:'Do mayor',ps:[60,64,67],emo:'Luminoso, estable y alegre.
  G:{n:'Sol mayor',ps:[67,71,74]},Am:{n:'La menor',ps:[69,72,76]}};
 const INSTR_BOOK=[{id:'piano_viejo',n:'Piano viejo',d:'Un piano gastado que te acompaña desde el inicio del viaje. Sus teclas amarillentas todavía guardan magia: invócalo cuando quieras para enfrentar a los espíritus.',p:'Poder: acordes y melodías básicas'},{id:'laud',n:'Laúd'},{id:'violin',n:'Violín'},{id:'flauta',n:'Flauta'}];
 function unlockChord(k){S.chords=S.chords||[];if(!S.chords.includes(k)){S.chords.push(k);save();setTimeout(()=>toast(`📖 Nuevo acorde en tu libro: ${CHORD_BOOK[k].n}`),600)}}
-function booksHTML(){return `<div class="cm-books"><button type="button" data-book="acordes" aria-label="Libro de acordes">📖<small>Acordes</small></button><button type="button" data-book="instr" aria-label="Libro de instrumentos">🎹<small>Instrumentos</small></button></div>`}
+function booksHTML(){return `<div class="cm-books"><button type="button" data-book="acordes" aria-label="Libro de acordes"><img src="${V()}ui_libro.webp" alt=""><small>Acordes</small></button><button type="button" data-book="instr" aria-label="Libro de instrumentos"><img src="${V()}ui_piano.webp" alt=""><small>Instrumentos</small></button></div>`}
 function bindBooks(root){(root||document).querySelectorAll('[data-book]').forEach(b=>b.onclick=e=>{e.stopPropagation();openBook(b.dataset.book)})}
 function openBook(tab){const have=S.chords||[],prevKB=ACTIVE_KB;
  const tabs=`<div class="bk-tabs"><button type="button" data-t="acordes" class="${tab==='acordes'?'on':''}">📖 Acordes</button><button type="button" data-t="instr" class="${tab==='instr'?'on':''}">🎹 Instrumentos</button></div>`;
  const chords=Object.entries(CHORD_BOOK).map(([k,c])=>have.includes(k)?`<div class="bk-item">${mStaff({notes:[{ps:c.ps,d:'w'}],w:150,h:104})}<div><h3>${c.n}</h3><p class="small"><b>Notas:</b> ${c.ps.map(p=>NAMES[p%12]).join(', ')}</p><p class="small"><b>Emoción:</b> ${c.emo}</p><p class="small"><b>Úsalo:</b> ${c.uso}</p><p class="small"><b>Cómo se forma:</b> ${c.how}</p><button class="chipb" type="button" data-play="${k}">▶ Escuchar</button></div></div>`:`<div class="bk-item lock"><div class="bk-q">?</div><div><h3>Acorde por descubrir</h3><p class="small">Lo aprenderás más adelante en tu viaje.</p></div></div>`).join('');
- const inst=INSTR_BOOK.map(x=>x.d?`<div class="bk-item"><div class="bk-q">🎹</div><div><h3>${x.n}</h3><p class="small">${x.d}</p><p class="small"><b>${x.p}</b></p><button class="cta" type="button" id="bkInv">Invocar el piano</button></div></div>`:`<div class="bk-item lock"><div class="bk-q">?</div><div><h3>${x.n}</h3><p class="small">Aún no lo tienes. Lo conseguirás más adelante (con el lutier o como recompensa).</p></div></div>`).join('');
+ const inst=INSTR_BOOK.map(x=>x.d?`<div class="bk-item"><img class="bk-img" src="${V()}ui_piano.webp" alt="Piano viejo"><div><h3>${x.n}</h3><p class="small">${x.d}</p><p class="small"><b>${x.p}</b></p><button class="cta" type="button" id="bkInv">Invocar el piano</button></div></div>`:`<div class="bk-item lock"><div class="bk-q">?</div><div><h3>${x.n}</h3><p class="small">Aún no lo tienes. Lo conseguirás más adelante (con el lutier o como recompensa).</p></div></div>`).join('');
  sheet(`<span class="eyebrow">Libro del viajero</span>${tabs}<div class="bk-list">${tab==='acordes'?(have.length?'':'<p class="small">Todavía no conoces ningún acorde. Los espíritus te enseñarán el primero.</p>')+chords:inst}</div><button class="ghost" type="button" id="bkClose">Cerrar</button>`);
  $$('.bk-tabs [data-t]').forEach(b=>b.onclick=()=>openBook(b.dataset.t));$('#bkClose').onclick=()=>{ACTIVE_KB=prevKB;closeSheet()};
  $$('[data-play]').forEach(b=>b.onclick=()=>{const c=CHORD_BOOK[b.dataset.play],t=ac().currentTime+.05;c.ps.forEach((p,i)=>tone(p,.6,.9,'piano',t+i*.18));c.ps.forEach(p=>tone(p,.55,1.4,'piano',t+.8))});
- const iv=$('#bkInv');if(iv)iv.onclick=()=>{sheet(`<span class="eyebrow">Invocación</span><h2>Tu piano viejo aparece</h2><p class="small">Tócalo libremente. Prueba los acordes que conoces${have.length?': '+have.map(k=>CHORD_BOOK[k].n).join(', '):''}.</p><div id="invk"></div><button class="ghost" type="button" id="invBack">Guardar el piano</button>`);keyboard($('#invk'),{lo:48,hi:72,labels:true});$('#invBack').onclick=()=>{ACTIVE_KB=prevKB;closeSheet()}}}
+ const iv=$('#bkInv');if(iv)iv.onclick=()=>{sheet(`<span class="eyebrow">Invocación</span><h2>Tu piano viejo aparece</h2><img class="inv-piano" src="${V()}ui_piano.webp" alt=""><p class="small">Tócalo libremente. Prueba los acordes que conoces${have.length?': '+have.map(k=>CHORD_BOOK[k].n).join(', '):''}.</p><div id="invk"></div><button class="ghost" type="button" id="invBack">Guardar el piano</button>`);keyboard($('#invk'),{lo:48,hi:72,labels:true});$('#invBack').onclick=()=>{ACTIVE_KB=prevKB;closeSheet()}}}
 
 /* ===================== ENCUENTRO MUSICAL CON UN ESPÍRITU ===================== */
 const ENC_PCS={C:[0,4,7],F:[5,9,0],G:[7,11,2]};
