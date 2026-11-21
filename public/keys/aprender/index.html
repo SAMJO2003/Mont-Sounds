@@ -427,6 +427,9 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .enc-sp.hit{animation:spHit .5s}@keyframes spHit{0%,100%{filter:none;transform:none}30%{filter:brightness(2.2) sepia(1) saturate(4) hue-rotate(-10deg);transform:translateX(6px)}60%{transform:translateX(-6px)}}
 .tut{position:absolute;left:12px;right:84px;bottom:calc(64px + env(safe-area-inset-bottom,0px));z-index:7;background:rgba(16,12,8,.92);border:1px solid #e8c27a;border-radius:8px;padding:12px 14px;color:#f3e9d6;font:15px/1.45 'Special Elite',monospace;box-shadow:0 10px 30px rgba(0,0,0,.5)}.tut b{color:#ffe2a0;font-weight:400}.tut>b{display:block;margin-bottom:4px;font-size:16px}.tut-arrow{position:absolute;right:-30px;bottom:-6px;font-style:normal;font-size:30px;color:#ffe2a0;animation:tutA 1s ease-in-out infinite alternate}@keyframes tutA{to{transform:translate(6px,6px)}}
 .cm-books button.pulse{animation:bkPulse 1s ease-in-out infinite alternate;border-color:#ffe2a0}@keyframes bkPulse{from{box-shadow:0 0 0 0 rgba(255,214,130,.0)}to{box-shadow:0 0 0 8px rgba(255,214,130,.45)}}
+.fmap{background:#2b2414}.f-faint{position:absolute;inset:0;z-index:30;background:#0c0a08;opacity:0;transition:opacity .8s;display:grid;place-items:center;pointer-events:none}.f-faint.on{opacity:1;pointer-events:auto}.f-faint p{color:#ffe4b0;font:600 18px Cinzel,serif}
+.bk-tags{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px}.bk-tags span{font-size:11px;padding:2px 7px;border-radius:9px;background:rgba(255,220,150,.14);color:#f3dcb0}.bk-tags .ok{background:rgba(110,190,110,.22);color:#c9f0c0}.bk-tags .no{background:rgba(200,110,90,.2);color:#f3c0b0}.bk-emo{font-size:46px}
+.pt.pt-emo{display:inline-grid;place-items:center;font-size:22px;background:rgba(255,220,150,.15)}.lscene.m2bg{background:radial-gradient(ellipse at 50% 60%,#7a5a36,#2a1d10 75%)}.lscene.m2forest{background:radial-gradient(ellipse at 50% 60%,#4d6a35,#142010 75%)}
 </style>
 
 <div id="sky"></div>
@@ -551,15 +554,19 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
    {type:'scene',img:'llegada',who:'matteo',move:'zoom',lines:['—Has hecho mucho por Florencia. Pero tu viaje no termina aquí.','Observas el camino que sale de la ciudad. Una nueva aventura te espera.']}
   ]},
  /* ---------------- 02 ---------------- */
- {id:'w1m02',t:'El origen de los instrumentos',d:'Cómo producen sonido los instrumentos y cómo se agrupan en familias: cuerda, viento, percusión y teclado.',
+ {id:'w1m02',t:'El origen de los instrumentos',d:'El maestro Bernardo necesita madera de los abetos resonantes. Aprende qué vibra en cada instrumento, cruza la puerta norte y enfréntate con acordes a los Espíritus del Ruido del bosque.',scene:true,game:true,
   disc:{id:'a-familias',name:'Cómo se clasifican los instrumentos',per:'Sistema publicado en 1914',text:'Los musicólogos Erich von Hornbostel y Curt Sachs propusieron en 1914 clasificar los instrumentos según qué vibra: una cuerda, una columna de aire, una membrana o el propio cuerpo del instrumento. Su sistema, con ampliaciones posteriores, se sigue usando en los museos.',sig:'Saber qué vibra te ayuda a entender por qué cada instrumento suena como suena.'},
   steps:[
-   {type:'story',ph:'Descubrir',art:'families',title:'¿Qué es lo que vibra?',text:'Cada instrumento hace vibrar algo distinto. En la cuerda vibra una cuerda frotada, pulsada o golpeada. En el viento vibra el aire dentro de un tubo. En la percusión vibra una membrana o el cuerpo del instrumento al golpearlo. El piano es especial: es de teclado, pero por dentro unos martillos golpean cuerdas.',fact:'Cuerda · viento · percusión · y los teclados, que pueden usar cuerdas o tubos.'},
-   {type:'sort',ph:'Práctica',q:'Clasifica cada instrumento en su familia',fams:['Cuerda','Viento','Percusión'],items:[['Violín',0],['Flauta',1],['Tambor',2],['Laúd',0],['Trompeta',1],['Pandero',2],['Arpa',0],['Chirimía',1]]},
-   {type:'choice',ph:'Práctica',q:'¿Cómo produce el sonido una flauta?',opts:['Vibra una cuerda','Vibra el aire dentro del tubo','Se golpea una membrana'],a:1,why:'En los instrumentos de viento vibra la columna de aire.'},
-   {type:'choice',ph:'Práctica',q:'¿Y el tambor?',opts:['Vibra una membrana al golpearla','Vibra el aire','Vibra una cuerda'],a:0,why:'Al golpear, la membrana (el parche) vibra.'},
-   {type:'timbre',ph:'Práctica',q:'Escucha y mira: ¿de qué familia es?',items:[{kind:'strings',opts:['Cuerda','Viento','Percusión'],a:0},{kind:'flute',opts:['Cuerda','Viento','Percusión'],a:1},{kind:'drum',opts:['Cuerda','Viento','Percusión'],a:2}]},
-   {type:'ensemble',ph:'Reto creativo',q:'Arma tu agrupación',sub:'Elige al menos un instrumento de cada familia y escucha cómo suenan juntos.'}
+   {type:'scene',act:['Módulo 2','El origen de los instrumentos'],img:'taller_m2',move:'zoom',lines:['El Espíritu Guardián despertó y Florencia vuelve a sonar.','Pero los músicos de la ciudad necesitan instrumentos nuevos… y el maestro Bernardo, el lutier, te ha mandado llamar.']},
+   {type:'citymap',from:'puerta',go:'taller',act:'Misión 1',mission:'Ve al taller del maestro Bernardo, al suroeste de la plaza.'},
+   {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',lines:['—¡Viajero! Pasa, pasa. Aquí nacen los instrumentos de Florencia.','—Todo instrumento suena porque algo vibra. En la cuerda vibra una cuerda; en el viento, el aire dentro de un tubo; en la percusión, un parche o el propio cuerpo del instrumento.','—Tu piano viejo es especial: es de teclado, pero por dentro unos martillos golpean cuerdas. Veamos si distingues las familias.']},
+   {type:'sort',who:'maestro',ph:'Práctica',q:'Clasifica cada instrumento en su familia',fams:['Cuerda','Viento','Percusión'],items:[['Violín',0],['Flauta',1],['Tambor',2],['Laúd',0],['Trompeta',1],['Pandero',2],['Arpa',0],['Chirimía',1]]},
+   {type:'timbre',who:'maestro',ph:'Práctica',q:'Escucha y mira: ¿de qué familia es?',items:[{kind:'strings',opts:['Cuerda','Viento','Percusión'],a:0},{kind:'flute',opts:['Cuerda','Viento','Percusión'],a:1},{kind:'drum',opts:['Cuerda','Viento','Percusión'],a:2}]},
+   {type:'scene',img:'bosque',who:'maestro',move:'zoom',give:'piccolo',chords:['F','G'],lines:['—¡Muy bien! Ahora necesito tu ayuda: para la tapa de un laúd hace falta madera de abeto resonante.','—Esos abetos crecen en el Bosque de los Abetos Resonantes, al otro lado de la puerta norte. Son los más antiguos y tienen chispas doradas.','—Toma este piccolo. Con su soplo despertarás a los abetos resonantes y te darán un poco de su madera. Pero ojo: el piccolo no sirve para combatir.','—En el bosque rondan Espíritus del Ruido. Si te tocan, invoca tu piano y enfréntalos con acordes: Do mayor, Fa mayor y Sol mayor. Los anoté en tu libro.','—Y si te vencen, no temas: despertarás aquí, junto al taller, con todo lo que hayas recogido.']},
+   {type:'citymap',go:'norte',act:'Misión 2',mission:'La puerta norte ya está abierta. Sal de la ciudad hacia el bosque.'},
+   {type:'forest',act:'Misión 2 · Bosque de los Abetos Resonantes',need:3,mission:'Busca los 3 abetos resonantes en los claros y despiértalos con el piccolo.'},
+   {type:'citymap',from:'norte',go:'taller',act:'Misión 3',mission:'Lleva la madera especial al taller del maestro Bernardo.'},
+   {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',give:'laud',lines:['—¡Madera de abeto resonante! Escucha cómo suena cuando la golpeo: vibra durante mucho tiempo.','—Por eso la usamos para la tapa: la cuerda vibra, la tapa de abeto amplifica esa vibración y la caja la llena de aire y de voz.','—Aquí tienes: tu primer Laúd común. No sirve para combatir, pero te ayudará a explorar. Los instrumentos de mayor rareza tendrán poderes nuevos.'],accept:'Completar el módulo',reward:'🏅 Módulo 2 completado: El origen de los instrumentos'}
   ]},
  /* ---------------- 03 ---------------- */
  {id:'w1m03',t:'El lenguaje escrito',d:'Cómo se escribe la música: líneas, espacios y los primeros símbolos.',
@@ -1140,7 +1147,7 @@ function micRow(host){if(!LS)return;let row=host.nextElementSibling;if(!row||!ro
  row.querySelector('.micbtn').onclick=async()=>{S.input=inputMode()==='mic'?'touch':'mic';save();await applyInput();document.querySelectorAll('.microw').forEach(r=>micRow(r.previousElementSibling));if(inputMode()==='mic')toast('Toca en tu piano: la app te escucha. Mira el indicador verde arriba.')};
  const c=row.querySelector('[data-cal]');if(c)c.onclick=()=>earCalibrate()}
 function syncLessonBar(){const c=$('#lCalm');if(c){c.textContent=S.calm?'🕊':'⏳';c.setAttribute('aria-pressed',!!S.calm)}const b=$('#lInput');if(b)b.textContent=({touch:'🎹',mic:'🎤',midi:'🎛'})[inputMode()];const a=$('#lAids');if(a){a.setAttribute('aria-pressed',aidsOn());a.style.opacity=aidsOn()?1:.45}}
-const STEP_NAMES={scene:'Escena',citymap:'Mapa',bells:'Campanas',water:'Fuente',lights:'Faroles',seqperf:'Fuente musical',spirit:'Espíritu',musico:'Músicos',melody:'Melodía',create:'Crear',story:'Historia'};
+const STEP_NAMES={scene:'Escena',citymap:'Mapa',bells:'Campanas',water:'Fuente',lights:'Faroles',seqperf:'Fuente musical',spirit:'Espíritu',musico:'Músicos',melody:'Melodía',create:'Crear',story:'Historia',forest:'Bosque',sort:'Clasificar',timbre:'Timbre'};
 function jumpMenu(){if(!LS)return;const st=LS.L.steps;sheet(`<span class="eyebrow">Revisión</span><h2>Ir a un ejercicio</h2><div class="jlist">${st.map((x,i)=>{const t=x.mission||x.q||x.sub||(x.lines&&x.lines[0])||x.title||x.name||'';return `<button type="button" class="jrow${i===LS.i?' on':''}" data-j="${i}"><b>${i+1}</b><span><small>${esc(STEP_NAMES[x.type]||x.type)}${x.mode?' · '+esc(({low:'la más grave',high:'la más aguda',rush:'relámpago',order:'ordenar',broken:'escalera',repeat:'repetir',odd:'nota distinta',tune:'afinar',contour:'contorno',rhythm:'ritmo'})[x.mode]||x.mode):''}</small>${esc(t.replace(/^—/,'').slice(0,80))}</span></button>`}).join('')}</div><button class="ghost" type="button" id="jClose">Cerrar</button>`);
  $('#jClose').onclick=closeSheet;$$('.jrow').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;closeSheet();LOOPMEL.on=false;const prev=st.slice(0,j);
   LS.mapDone=prev.filter(x=>x.type==='citymap').map(x=>x.go);LS.mapPrev=null;LS.scene={};if(prev.some(x=>x.type==='bells'))LS.scene.bells=true;if(prev.some(x=>x.type==='water'||x.fx==='water'))LS.scene.water=true;if(prev.some(x=>x.type==='lights'))LS.scene.lights=true;if(prev.some(x=>x.type==='seqperf'))LS.scene.fountain=true;
@@ -1230,7 +1237,7 @@ function roadRoute(fromPx,toPx){/* camino más corto por las calles (Dijkstra co
  const dist={_S:0},prev={},Q=new Set(Object.keys(N));while(Q.size){let u=null;for(const k of Q)if(dist[k]!=null&&(u===null||dist[k]<dist[u]))u=k;if(u===null)break;Q.delete(u);if(u==='_T')break;for(const [v,w] of adj[u]||[])if(Q.has(v)&&(dist[v]==null||dist[u]+w<dist[v])){dist[v]=dist[u]+w;prev[v]=u}}
  const path=[];let u='_T';while(u&&u!=='_S'){path.unshift(N[u]);u=prev[u]}return path}
 
-const WHO={matteo:'Matteo',violin:'La violinista',flauta:'El flautista',laud:'El laudista'};
+const WHO={maestro:'Maestro Bernardo',matteo:'Matteo',violin:'La violinista',flauta:'El flautista',laud:'El laudista'};
 /* personajes provisionales (bocetos) hasta tener las imágenes de Gemini */
 function charSvg(who,vb){const sk='#e0b18c',V=vb||'0 0 200 380';let body='',ins='',hair='',extra='';
  if(who==='matteo'){body='<path d="M58 150 Q100 128 142 150 L160 372 L40 372 Z" fill="#2b3d6b"/><path d="M84 150 L100 372 L116 150" fill="#22325a"/><rect x="62" y="226" width="76" height="9" fill="#5a4026"/>';hair='<path d="M70 92 Q100 40 130 92 Q128 70 100 64 Q72 70 70 92Z" fill="#d8d4cc"/><path d="M76 108 Q100 168 124 108 Q118 140 100 146 Q82 140 76 108Z" fill="#ece8e0"/>';ins='<g transform="translate(150 230)"><circle r="34" fill="rgba(255,200,110,.25)"/><rect x="-11" y="-16" width="22" height="30" rx="4" fill="#b88a3e" stroke="#6b4a1e" stroke-width="2"/><circle r="6" fill="#ffd27a"/><path d="M-6 -16 Q0 -30 6 -16" fill="none" stroke="#6b4a1e" stroke-width="2"/></g><path d="M138 170 Q156 200 150 214" stroke="#2b3d6b" stroke-width="16" fill="none" stroke-linecap="round"/>'}
@@ -1241,14 +1248,14 @@ function charSvg(who,vb){const sk='#e0b18c',V=vb||'0 0 200 380';let body='',ins=
 const V=()=>BASE+'m1v/';const CHARIMG={matteo:'matteo',violin:'violinista',flauta:'flautista',laud:'laudista'};
 const CHARSTAND={violin:'violinista_pie',flauta:'flautista_pie',laud:'laudista_pie'},CHARANIM={violin:['violin_p2','violin_p1','violin_p2','violin_p3','violin_p2'],flauta:['flauta_p1','flauta_p1','flauta_p2','flauta_p3','flauta_p2'],laud:['laud_p2','laud_p1','laud_p2','laud_p3','laud_p2']};
 function charHTML(who,stand){if(stand&&CHARSTAND[who])return `<span class="chw ${who}"><img src="${V()}${CHARSTAND[who]}.webp" alt="${WHO[who]}" draggable="false"></span>`;if(CHARANIM[who]){const f=CHARANIM[who];return `<span class="chw ${who} anim">${f.map((n,i)=>`<img class="${i?'fx f'+i:'f0'}" src="${V()}${n}.webp" alt="${i?'':WHO[who]}" draggable="false">`).join('')}</span>`}return CHARIMG[who]?`<span class="chw ${who}"><img src="${V()}${CHARIMG[who]}.webp" alt="${WHO[who]}" draggable="false">${who==='matteo'?'<i class="lglow"></i>':''}</span>`:charSvg(who)}
-const portrait=who=>CHARIMG[who]?`<span class="pt ${who}${CHARSTAND[who]?' st':''}" style="background-image:url(${V()}${CHARSTAND[who]||CHARIMG[who]}.webp)"></span>`:charSvg(who,'55 48 90 90');
+const portrait=who=>who==='maestro'?'<span class="pt pt-emo">🪚</span>':CHARIMG[who]?`<span class="pt ${who}${CHARSTAND[who]?' st':''}" style="background-image:url(${V()}${CHARSTAND[who]||CHARIMG[who]}.webp)"></span>`:charSvg(who,'55 48 90 90');
 const PLZ=[{s:[[45,790],[97,765],[150,800]],p:[95,1300,150]},{s:[[805,790],[860,765],[915,800]],p:[860,1300,150]},{s:[[240,935],[265,925],[290,940]],p:[265,1150,90]},{s:[[690,935],[712,925],[738,940]],p:[712,1150,90]},{s:[[180,985]],p:[185,1150,60]},{s:[[15,1050],[108,560]],p:null}];
 const SCN_AR={llegada:'896/1200',entrada:'895/1200',dormida:'941/1672',plaza:'941/1672',plaza_on:'941/1672',escenario:'941/1672',final:'941/1671',campanario:'768/1376',fuente:'941/1672',matteo:'941/1672',violin:'941/1672',flauta:'941/1672',laud:'941/1672',campana:'1/1'};
 /* imágenes de cada escena: cuando lleguen las de Gemini (verticales) basta con poner {full:'ruta'} */
 const SCN={};
 function plazaOn(extra='',o={}){return plazaHTML(Object.assign({},o,{on:true,extra}))}
 function waterAwake(){if(!LS)return false;if(LS.scene&&LS.scene.water)return true;const n=LS.L.steps.findIndex(s=>s.fx==='water');return n>=0&&LS.i>=n}
-function isNight(){if(!LS)return true;const n=LS.L.steps.findIndex(s=>s.night);return n<0||LS.i>=n}
+function isNight(){if(!LS)return true;const n=LS.L.steps.findIndex(s=>s.night);if(n<0)return LS.L.id!=='w1m02';return LS.i>=n}
 function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><div class="ls" style="background-image:url(${R.full})"></div></div>`;const img=f=>`<div class="lscene"><div class="ls" style="background-image:url(${V()}${f}.webp)"></div></div>`;
  switch(k){
   case 'llegada':return img('llegada');
@@ -1261,6 +1268,8 @@ function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><di
   case 'plaza_on':return plazaOn();
   case 'escenario':return isNight()?plazaOn('<div class="stagewood"></div>'):`<div class="lscene"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="stagewood"></div></div>`;
   case 'final':return img('final');
+  case 'taller_m2':return `<div class="lscene solo m2bg"><img class="solo-img" src="${V()}town/p_taller.webp" alt=""></div>`;
+  case 'bosque':return `<div class="lscene solo m2forest"><img class="solo-img" src="${V()}bosque/abeto_resonante.webp" alt=""></div>`;
   case 'matteo':case 'violin':case 'flauta':case 'laud':return isNight()?plazaOn('<div class="chr">'+charHTML(k,true)+'</div>',{cls:'charsc'}):`<div class="lscene charsc dusk"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="chr">${charHTML(k,true)}</div></div>`;
   default:if(k&&k.startsWith('art:'))return `<div class="lscene solo"><div style="position:absolute;inset:14% 12% 34%;display:grid;place-items:center">${art(k.slice(4))}</div></div>`;
  }return `<div class="lscene solo"></div>`}
@@ -1453,19 +1462,142 @@ function heroPlayer(img){if(!img)return {hit(){}};const src=n=>V()+'h_'+n+'.webp
 /* ===================== LIBRITOS: acordes e instrumentos ===================== */
 const CHORD_BOOK={C:{n:'Do mayor',ps:[60,64,67],emo:'Luminoso, estable y alegre. Suena a “casa”: cuando una pieza termina en Do mayor sentimos que llegamos.',uso:'Para empezar o cerrar una melodía, para escenas de calma, celebración o victoria.',how:'Do + Mi + Sol: una tercera mayor (Do–Mi) con una tercera menor encima (Mi–Sol).'},
  F:{n:'Fa mayor',ps:[65,69,72],emo:'Cálido y abierto, como dar un paso hacia adelante.',uso:'En Do mayor es el acorde IV: prepara el camino hacia Sol o de vuelta a Do. Ideal para momentos de esperanza.',how:'Fa + La + Do.'},
- G:{n:'Sol mayor',ps:[67,71,74]},Am:{n:'La menor',ps:[69,72,76]}};
-const INSTR_BOOK=[{id:'piano_viejo',n:'Piano viejo',d:'Un piano gastado que te acompaña desde el inicio del viaje. Sus teclas amarillentas todavía guardan magia: invócalo cuando quieras para enfrentar a los espíritus.',p:'Poder: acordes y melodías básicas'},{id:'laud',n:'Laúd'},{id:'violin',n:'Violín'},{id:'flauta',n:'Flauta'}];
+ G:{n:'Sol mayor',ps:[67,71,74],emo:'Brillante y con impulso, como si quisiera volver a casa.',uso:'En Do mayor es el acorde V: crea tensión que se resuelve en Do.',how:'Sol + Si + Re.'},Am:{n:'La menor',ps:[69,72,76]}};
+const INSTR_BOOK=[{id:'piano_viejo',n:'Piano viejo',fam:'percusion',rar:'comun',img:'ui_piano',d:'Un piano gastado que te acompaña desde el inicio del viaje. Sus teclas amarillentas todavía guardan magia: invócalo cuando quieras para enfrentar a los espíritus. Por dentro, sus martillos golpean cuerdas: por eso combate como la percusión.',p:'Poder: acordes y melodías básicas'},
+ {id:'piccolo',n:'Piccolo común',fam:'viento',rar:'comun',gather:'comun',ic:'🪈',d:'Una flautita de madera hecha por el maestro Bernardo. Su soplo despierta a los abetos resonantes y mueve mecanismos de viento sencillos.',p:'Poder: recolectar pequeñas cantidades de materiales comunes'},
+ {id:'laud',n:'Laúd común',fam:'cuerda',rar:'comun',ic:'🪕',d:'Un laúd sencillo con tapa de abeto resonante. Sus cuerdas vibran sobre la caja de madera.',p:'Poder: exploración (muy pronto)'},
+ {id:'tamburo',n:'Tamburo común',fam:'percusion',rar:'comun',ic:'🥁',d:'Un tambor de marco con parche de cuero. Como es de percusión, podrá combatir.',p:'Poder: ritmos de combate (muy pronto)'},
+ {id:'violin',n:'Violín'},{id:'flauta',n:'Flauta'}];
 function unlockChord(k){S.chords=S.chords||[];if(!S.chords.includes(k)){S.chords.push(k);save();setTimeout(()=>toast(`📖 Nuevo acorde en tu libro: ${CHORD_BOOK[k].n}`),600)}}
 function booksHTML(){return `<div class="cm-books"><button type="button" data-book="acordes" aria-label="Libro de acordes"><img src="${V()}ui_libro.webp" alt=""><small>Acordes</small></button><button type="button" data-book="instr" aria-label="Libro de instrumentos"><img src="${V()}ui_piano.webp" alt=""><small>Instrumentos</small></button></div>`}
 function bindBooks(root){(root||document).querySelectorAll('[data-book]').forEach(b=>b.onclick=e=>{e.stopPropagation();openBook(b.dataset.book)})}
 function openBook(tab){const have=S.chords||[],prevKB=ACTIVE_KB;
  const tabs=`<div class="bk-tabs"><button type="button" data-t="acordes" class="${tab==='acordes'?'on':''}">📖 Acordes</button><button type="button" data-t="instr" class="${tab==='instr'?'on':''}">🎹 Instrumentos</button></div>`;
  const chords=Object.entries(CHORD_BOOK).map(([k,c])=>have.includes(k)?`<div class="bk-item">${mStaff({notes:[{ps:c.ps,d:'w'}],w:150,h:104})}<div><h3>${c.n}</h3><p class="small"><b>Notas:</b> ${c.ps.map(p=>NAMES[p%12]).join(', ')}</p><p class="small"><b>Emoción:</b> ${c.emo}</p><p class="small"><b>Úsalo:</b> ${c.uso}</p><p class="small"><b>Cómo se forma:</b> ${c.how}</p><button class="chipb" type="button" data-play="${k}">▶ Escuchar</button></div></div>`:`<div class="bk-item lock"><div class="bk-q">?</div><div><h3>Acorde por descubrir</h3><p class="small">Lo aprenderás más adelante en tu viaje.</p></div></div>`).join('');
- const inst=INSTR_BOOK.map(x=>x.d?`<div class="bk-item"><img class="bk-img" src="${V()}ui_piano.webp" alt="Piano viejo"><div><h3>${x.n}</h3><p class="small">${x.d}</p><p class="small"><b>${x.p}</b></p><button class="cta" type="button" id="bkInv">Invocar el piano</button></div></div>`:`<div class="bk-item lock"><div class="bk-q">?</div><div><h3>${x.n}</h3><p class="small">Aún no lo tienes. Lo conseguirás más adelante (con el lutier o como recompensa).</p></div></div>`).join('');
+ const inst=INSTR_BOOK.map(x=>x.fam&&hasInstr(x.id)?`<div class="bk-item">${x.img?`<img class="bk-img" src="${V()}${x.img}.webp" alt="${x.n}">`:`<div class="bk-q bk-emo">${x.ic||'🎵'}</div>`}<div><h3>${x.n}</h3><p class="bk-tags"><span>${FAM_N[x.fam]}</span><span>${RAR_N[x.rar]}</span>${instrCan(x.id,'combat')?'<span class="ok">⚔ Combate</span>':'<span class="no">Sin combate</span>'}${x.gather?'<span class="ok">🌿 Recolección</span>':''}</p><p class="small">${x.d}</p><p class="small"><b>${x.p}</b></p>${x.id==='piano_viejo'?'<button class="cta" type="button" id="bkInv">Invocar el piano</button>':''}</div></div>`:`<div class="bk-item lock"><div class="bk-q">?</div><div><h3>${x.n}</h3><p class="small">Aún no lo tienes. Lo conseguirás más adelante (con el lutier o como recompensa).</p></div></div>`).join('');
  sheet(`<span class="eyebrow">Libro del viajero</span>${tabs}<div class="bk-list">${tab==='acordes'?(have.length?'':'<p class="small">Todavía no conoces ningún acorde. Los espíritus te enseñarán el primero.</p>')+chords:inst}</div><button class="ghost" type="button" id="bkClose">Cerrar</button>`);
  $$('.bk-tabs [data-t]').forEach(b=>b.onclick=()=>openBook(b.dataset.t));$('#bkClose').onclick=()=>{ACTIVE_KB=prevKB;closeSheet()};
  $$('[data-play]').forEach(b=>b.onclick=()=>{const c=CHORD_BOOK[b.dataset.play],t=ac().currentTime+.05;c.ps.forEach((p,i)=>tone(p,.6,.9,'piano',t+i*.18));c.ps.forEach(p=>tone(p,.55,1.4,'piano',t+.8))});
  const iv=$('#bkInv');if(iv)iv.onclick=()=>{if(INVOKE_HOOK){const h=INVOKE_HOOK;INVOKE_HOOK=null;ACTIVE_KB=prevKB;closeSheet();h();return}sheet(`<span class="eyebrow">Invocación</span><h2>Tu piano viejo aparece</h2><img class="inv-piano" id="invHero" src="${V()}h_invocar_1.webp" alt=""><p class="small">Tócalo libremente. Prueba los acordes que conoces${have.length?': '+have.map(k=>CHORD_BOOK[k].n).join(', '):''}.</p><div id="invk"></div><button class="ghost" type="button" id="invBack">Guardar el piano</button>`);const ihp=heroPlayer($('#invHero'));keyboard($('#invk'),{lo:48,hi:72,labels:true,onKey:()=>ihp.hit()});$('#invBack').onclick=()=>{ACTIVE_KB=prevKB;closeSheet()}}}
+
+/* ===================== MÓDULO 2 · BOSQUE DE LOS ABETOS RESONANTES ===================== */
+/* Instrumentos: familia, rareza y poderes. Regla actual: solo la percusión común combate (el piano viejo cuenta: sus martillos golpean cuerdas).
+   Las rarezas superiores declaran sus poderes en `powers` (combate y/o recolección) cuando se diseñen. */
+const RARITY=['comun','raro','epico','legendario'],RAR_N={comun:'Común',raro:'Raro',epico:'Épico',legendario:'Legendario'},FAM_N={percusion:'Percusión',viento:'Viento',cuerda:'Cuerda',teclado:'Teclado'};
+function instrCan(id,what,matRar){const x=INSTR_BOOK.find(i=>i.id===id);if(!x||!x.fam)return false;const r=RARITY.indexOf(x.rar||'comun'),pw=x.powers||{};
+ if(what==='combat')return r===0?x.fam==='percusion':!!pw.combat;
+ if(what==='gather'){const lim=r===0?x.gather:(pw.gather||x.gather);return !!lim&&RARITY.indexOf(matRar||'comun')<=RARITY.indexOf(lim)}return false}
+function hasInstr(id){return id==='piano_viejo'||(S.instr||[]).includes(id)}
+function giveInstr(id){S.instr=S.instr||[];if(S.instr.includes(id))return;S.instr.push(id);save();const x=INSTR_BOOK.find(i=>i.id===id);if(x)setTimeout(()=>toast(`🎒 Nuevo instrumento: ${x.n}`),700)}
+/* desafíos de acordes por nivel del espíritu (el acorde no queda atado a un enemigo: se sortea en cada encuentro) */
+const NOISE_LEVELS={1:{pool:['C','F'],n:2,hint:true},2:{pool:['C','F','G'],n:2,hint:true},3:{pool:['C','F','G'],n:3,hint:false}};
+function noiseTasks(lv){const L=NOISE_LEVELS[lv]||NOISE_LEVELS[1],out=[];let prev=null;for(let i=0;i<L.n;i++){let c;do{c=L.pool[Math.floor(Math.random()*L.pool.length)]}while(c===prev&&L.pool.length>1);prev=c;
+  out.push({t:'chord',ch:c,hint:L.hint,say:`Toca ${CHORD_BOOK[c].n}: ${CHORD_BOOK[c].ps.map(p=>NAMES[p%12]).join(', ')} a la vez`})}return out}
+
+const FW={W:1400,H:2200};
+const F_PATH=[[700,2200],[700,1900],[470,1640],[520,1260],[900,1080],[960,720],[660,470],[700,230]];
+const F_CLEAR=[[390,1590,170,115],[1010,1050,170,115],[610,370,185,115]];
+const F_SPECIAL=[{id:'t1',k:'abeto_resonante_apagado',x:330,y:1555,res:true},{id:'d1',k:'abeto_1',x:470,y:1520},
+ {id:'t2',k:'abeto_resonante_apagado',x:1075,y:1015,res:true},{id:'d2',k:'abeto_1',x:935,y:990},{id:'rare',k:'tocon_resonante',x:1110,y:1135,rare:true},
+ {id:'d3',k:'abeto_3',x:500,y:330},{id:'t3',k:'abeto_resonante_apagado',x:705,y:325,res:true}];
+const F_SPIRITS=[{id:'f1',zone:[560,1700,880,2010],lv:1},{id:'f2',zone:[400,1270,700,1480],lv:1},{id:'f3',zone:[680,920,1080,1230],lv:2},{id:'f4',zone:[640,520,1020,820],lv:2},{id:'f5',zone:[440,240,900,470],lv:3}];
+const F_ENTRY=[700,2090];
+const F_PIECES=['abeto_1','abeto_3','grupo_abetos','abeto_resonante','abeto_resonante_apagado','tocon','tocon_resonante','tronco','roca','rocas','helechos','arbusto_bayas','setas'];
+function forestAssets(){townAssets();F_PIECES.forEach(k=>timg('b_'+k,V()+'bosque/'+k+'.webp'+TOWN_V));timg('f_suelo',V()+'bosque/t_suelo.webp'+TOWN_V);timg('f_claro',V()+'bosque/t_claro.webp'+TOWN_V)}
+function fDistPath(x,y){let best=1e9;for(let i=0;i<F_PATH.length-1;i++){const a=F_PATH[i],b=F_PATH[i+1],dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/L));best=Math.min(best,Math.hypot(x-a[0]-dx*t,y-a[1]-dy*t))}return best}
+let FOREST=null;function forestLayout(){if(FOREST)return FOREST;const r=townRng(31),objs=[];
+ const inClear=(x,y,m)=>F_CLEAR.some(([cx,cy,rx,ry])=>((x-cx)/(rx+m))**2+((y-cy)/(ry+m))**2<1),nearSp=(x,y)=>F_SPECIAL.some(s=>Math.hypot(x-s.x,y-s.y)<105);
+ for(let y=60;y<FW.H+60;y+=74)for(let x=10;x<FW.W+20;x+=84){const px=x+(r()-.5)*56,py=y+(r()-.5)*36,dp=fDistPath(px,py);
+  if(dp<92||inClear(px,py,30)||nearSp(px,py)||(py>FW.H-160&&Math.abs(px-700)<190))continue;if(dp<160&&r()<.5)continue;
+  const q=r(),k=q<.52?'abeto_1':q<.74?'abeto_3':'grupo_abetos';objs.push({k,x:px,y:py,s:.5*(.86+r()*.28),flip:r()<.5,fp:k==='grupo_abetos'?[90,22]:k==='abeto_3'?[22,12]:[34,16]})}
+ for(let i=0;i<190;i++){const x=40+r()*(FW.W-80),y=90+r()*(FW.H-140),dp=fDistPath(x,y);if(dp<48||nearSp(x,y))continue;const q=r(),k=q<.36?'helechos':q<.56?'arbusto_bayas':q<.7?'setas':q<.87?'rocas':'roca',blk=k==='roca'||k==='rocas';
+  if(blk&&(dp<85||inClear(x,y,10)))continue;objs.push({k,x,y,s:k==='roca'?.55:k==='rocas'?.52:k==='setas'?.55:.6,flip:r()<.5,fp:k==='roca'?[70,24]:k==='rocas'?[50,18]:null,small:1})}
+ [[590,1780],[835,1520],[760,980],[860,610],[540,560],[880,1960]].forEach(([x,y],i)=>{const dp=fDistPath(x,y);if(dp<75)x+=x<700?-90:90;objs.push({k:i%2?'tronco':'tocon',x,y,s:i%2?.5:.45,flip:i%3===0,fp:i%2?[100,24]:[48,16],small:1})});
+ F_SPECIAL.forEach(sp=>objs.push({k:sp.k,x:sp.x,y:sp.y,s:sp.k.startsWith('abeto_res')?.53:.5,fp:sp.rare?[50,16]:[38,16],sp}));
+ FOREST=objs;return objs}
+let FOREST_GROUND=null;function forestGround(){if(FOREST_GROUND)return FOREST_GROUND;const mk=()=>{const c=document.createElement('canvas');c.width=FW.W;c.height=FW.H;return c},c=mk(),g=c.getContext('2d'),r=townRng(5);
+ if(!['f_suelo','f_claro','tierra_camino'].every(k=>TIMG[k]&&TIMG[k].complete&&TIMG[k].width)){g.fillStyle='#5e3f22';g.fillRect(0,0,FW.W,FW.H);return c}
+ const pat=k=>g.createPattern(TIMG[k],'repeat');g.fillStyle=pat('f_suelo');g.fillRect(0,0,FW.W,FW.H);
+ const M=mk(),m=M.getContext('2d'),T=mk(),tc=T.getContext('2d'),OFF=FW.W+400;
+ const soft=(draw,k,blur,alpha)=>{m.setTransform(1,0,0,1,0,0);m.clearRect(0,0,FW.W,FW.H);m.save();m.translate(-OFF,0);m.shadowColor='#fff';m.shadowBlur=blur;m.shadowOffsetX=OFF;m.fillStyle='#fff';m.strokeStyle='#fff';m.lineCap='round';m.lineJoin='round';draw(m);m.restore();
+  tc.globalCompositeOperation='source-over';tc.clearRect(0,0,FW.W,FW.H);tc.fillStyle=tc.createPattern(TIMG[k],'repeat');tc.fillRect(0,0,FW.W,FW.H);tc.globalCompositeOperation='destination-in';tc.drawImage(M,0,0);tc.globalCompositeOperation='source-over';g.save();g.globalAlpha=alpha==null?1:alpha;g.drawImage(T,0,0);g.restore()};
+ soft(c=>F_CLEAR.forEach(([x,y,rx,ry])=>{c.beginPath();c.ellipse(x,y,rx,ry,0,0,6.3);c.fill()}),'f_claro',40,.95);
+ soft(c=>{c.lineWidth=66;c.beginPath();F_PATH.forEach((p,i)=>i?c.lineTo(p[0],p[1]):c.moveTo(p[0],p[1]));c.stroke()},'tierra_camino',24,.9);
+ for(let i=0;i<70;i++){const x=r()*FW.W,y=r()*FW.H,R=70+r()*180,gr=g.createRadialGradient(x,y,0,x,y,R),lt=r()<.45;gr.addColorStop(0,lt?'rgba(255,225,150,.13)':'rgba(25,30,10,.18)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(x-R,y-R,R*2,R*2)}
+ const vg=g.createRadialGradient(FW.W/2,FW.H/2,450,FW.W/2,FW.H/2,1400);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(10,20,5,.35)');g.fillStyle=vg;g.fillRect(0,0,FW.W,FW.H);
+ FOREST_GROUND=c;return c}
+function forestGrid(){const C=TW.CELL,gw=Math.ceil(FW.W/C),gh=Math.ceil(FW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
+ block(0,0,FW.W,170);block(0,0,40,FW.H);block(FW.W-40,0,FW.W,FW.H);block(0,FW.H-20,FW.W,FW.H);forestLayout().forEach(o=>{if(o.fp)block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});return {b,gw,gh}}
+
+function stepForest(st,box){forestAssets();const need=st.need||3;if(!S.m2||S.m2.done)S.m2={wood:0,trees:[],tried:[],calm:[]};const M=S.m2;M.tried=M.tried||[];
+ if(!LS.fhero)LS.fhero=F_ENTRY.slice();const H=LS.fhero,objs=forestLayout(),G=forestGrid();
+ box.innerHTML=`<div class="cmap tmap fmap" id="cmap"><canvas id="tcv"></canvas>
+  <div class="cm-quest"><small>${esc(st.act||'Misión')}</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
+  <div class="cm-hint">Toca el suelo para caminar. Toca un abeto de los claros para soplar el piccolo. ¡Cuidado con los espíritus!</div>${booksHTML()}</div>`;
+ bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
+ const hud=()=>{$('#fmis').textContent=M.wood>=need?'¡Tienes la madera! Vuelve por el sendero del sur hasta Florencia y llévala al taller.':(st.mission||'Busca los abetos resonantes en los claros y despiértalos con el piccolo.');$('#fhud').textContent=`🪵 Madera especial ${Math.min(M.wood,need)}/${need} · 🪙 ${S.coins||0}`};hud();
+ const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
+ const cam={x:H[0]-VW/2,y:H[1]-VH*.55},clampCam=()=>{cam.x=Math.max(0,Math.min(FW.W-VW,cam.x));cam.y=Math.max(0,Math.min(FW.H-VH,cam.y))};clampCam();
+ let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),alive=true,busy=false,arriving=null,pingP=null,pingT=0,atExit=true,fx=[];
+ const free=(x,y)=>x>0&&y>0&&x<FW.W&&y<FW.H&&!G.b[Math.floor(y/20)*G.gw+Math.floor(x/20)];
+ const pick=s=>{for(let i=0;i<24;i++){const x=s.zone[0]+Math.random()*(s.zone[2]-s.zone[0]),y=s.zone[1]+Math.random()*(s.zone[3]-s.zone[1]);if(free(x,y)){s.tx=x;s.ty=y;return true}}s.tx=s.x;s.ty=s.y;return false};
+ let sps=[];const spawn=()=>{sps=F_SPIRITS.filter(s=>!M.calm.includes(s.id)).map(s=>{const o=Object.assign({},s,{x:0,y:0,tx:0,ty:0,wait:Math.random()});pick(o);o.x=o.tx;o.y=o.ty;pick(o);return o})};spawn();
+ const walkTo=(p,cb)=>{const pth=townPath(G,H,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=cb||null};
+ const resume=()=>{busy=false;last=performance.now()};
+ /* recolección con el piccolo */
+ const gather=sp=>{busy=true;moving=false;path=[];const prevKB=ACTIVE_KB,close=()=>{ACTIVE_KB=prevKB;closeSheet();resume()};
+  if(sp.rare){sheet(`<span class="eyebrow">Madera rara</span><h2>Un tocón que brilla con fuerza</h2><p>Sus anillos dorados vibran con mucha energía. Tu <b>Piccolo común</b> no tiene poder suficiente: esta madera es <b>rara</b>.</p><p class="small">Los materiales raros, épicos y legendarios necesitan instrumentos superiores y técnicas musicales más avanzadas. Volverás por ella más adelante.</p><button class="cta" type="button" id="gOk">Entendido</button>`);$('#gOk').onclick=close;return}
+  if(M.trees.includes(sp.id)){toast('Ya despertaste este abeto. Busca otro claro.');resume();return}
+  if(!hasInstr('piccolo'))giveInstr('piccolo');
+  const call=[72,76,79];let i=0;
+  sheet(`<span class="eyebrow">Piccolo común · recolección</span><h2>La llamada del viento</h2><p class="small">Toca estas tres notas, subiendo, para soplar sobre el abeto. Si es un abeto resonante, despertará y te dará un poco de su madera.</p>${mStaff({notes:call.map(p=>({p,d:'q'})),names:true,w:220})}<div id="gk"></div><div class="fb" id="gfb"></div><button class="ghost" type="button" id="gNo">Cancelar</button>`);
+  $('#gNo').onclick=close;
+  const kb=keyboard($('#gk'),{lo:67,hi:84,labels:aidsOn(),kind:()=>'flute',onKey:p=>{if(p%12===call[i]%12){kb.flash(p,'good');i++;if(i>=call.length)done()}else{kb.flash(p,'wrong');i=0;const f=$('#gfb');f.className='fb on bad';f.innerHTML='<b>Otra vez desde el principio</b>'+call.map(q=>NAMES[q%12]).join(', ')+', subiendo.'}}});call.forEach(p=>kb.hint(p,true));
+  const done=()=>{if(!M.tried.includes(sp.id))M.tried.push(sp.id);
+   if(sp.res){M.trees.push(sp.id);M.wood++;S.inv=S.inv||{};S.inv.madera_especial=(S.inv.madera_especial||0)+1;save();hud();for(let j=0;j<18;j++)fx.push({x:sp.x+(Math.random()-.5)*80,y:sp.y-40-Math.random()*160,t:performance.now()+j*40});
+    const t=ac().currentTime+.1;[72,76,79,84].forEach((p,j)=>tone(p,.5,.6,'flute',t+j*.12));
+    sheet(`<span class="eyebrow">¡Abeto resonante!</span><h2>El árbol despierta</h2><p>Las vetas doradas de la corteza vibran con tu soplo. Recoges <b>una pequeña porción de madera especial</b> 🪵 (${Math.min(M.wood,need)}/${need}).</p><p class="small">Esta madera vibra muy bien: por eso los lutieres la eligen para la tapa de los instrumentos de cuerda.</p><button class="cta" type="button" id="gOk">Seguir</button>`)}
+   else sheet(`<span class="eyebrow">Abeto común</span><h2>Este abeto no responde</h2><p>Su corteza no tiene vetas doradas: es un abeto común. Su madera sirve para construir, pero no para un instrumento mágico.</p><p class="small">Pista: los abetos resonantes son los más grandes y antiguos, y tienen pequeñas chispas doradas alrededor.</p><button class="cta" type="button" id="gOk">Seguir buscando</button>`);
+   $('#gOk').onclick=close}};
+ /* combate: el espíritu toca al viajero */
+ const fight=s=>{busy=true;moving=false;path=[];const first=!M.met;
+  townEncounter({name:'Espíritu del Ruido',battle:true,heroHP:4,tasks:noiseTasks(s.lv),winBtn:'Volver al bosque',winText:'El ruido se transforma en una nota clara y se disuelve entre los abetos.',
+   intro:first?['¡Un Espíritu del Ruido te alcanza!','Invocas tu piano viejo: en este módulo es tu único instrumento de combate.','Toca el acorde que te pida. Cada acierto le quita resistencia; cada nota equivocada te quita un poco de vida.']:null,
+   introStaff:first?{notes:['C','F','G'].map(c=>({ps:CHORD_BOOK[c].ps,d:'w'})),names:true,sp:70,w:300,cap:'Do mayor · Fa mayor · Sol mayor'}:null,
+   onLose:()=>faint()},()=>{M.met=1;M.calm.push(s.id);sps=sps.filter(x=>x!==s);['C','F','G'].forEach(unlockChord);S.coins=(S.coins||0)+5;save();hud();toast('El espíritu recuperó su equilibrio. 🪙 +5 florines');resume()});M.met=1;save()};
+ /* derrota: transición y reaparición en el taller del maestro, sin perder nada */
+ const faint=()=>{const f=document.createElement('div');f.className='f-faint';f.innerHTML='<p>Todo da vueltas…</p>';wrap.appendChild(f);requestAnimationFrame(()=>f.classList.add('on'));
+  setTimeout(()=>{sheet(`<span class="eyebrow">Punto de control · Taller del maestro</span><h2>Despiertas junto al taller</h2><p>«Esos espíritus son traviesos —dice el maestro Bernardo—. Descansa un poco. Tus cosas están a salvo.»</p><p class="small">Conservas tu madera especial (🪵 ${M.wood}/${need}), tus florines, tus instrumentos y todo tu progreso.</p><button class="cta gold" type="button" id="fBack">Volver al bosque</button>`);
+   $('#fBack').onclick=()=>{closeSheet();H[0]=F_ENTRY[0];H[1]=F_ENTRY[1];cam.x=H[0]-VW/2;cam.y=H[1]-VH*.55;clampCam();spawn();atExit=true;f.classList.remove('on');setTimeout(()=>f.remove(),700);resume()}},900)};
+ const leave=()=>{if(M.wood>=need){M.done=1;save();busy=true;alive=false;setTimeout(next,250);return}toast(`Todavía te falta madera especial (${M.wood}/${need}). Busca los abetos resonantes en los claros.`)};
+ const hitSpecial=(wx,wy)=>objs.find(o=>{if(!o.sp)return false;const im=TIMG['b_'+o.k];if(!im||!im.width)return false;const w=im.width*o.s,h=im.height*o.s;return wx>o.x-w*.4&&wx<o.x+w*.4&&wy>o.y-h&&wy<o.y+12});
+ cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),wx=e.clientX-r.left+cam.x,wy=e.clientY-r.top+cam.y;pingP=[wx,wy];pingT=performance.now();
+  const s=sps.find(s=>Math.hypot(wx-s.x,wy-(s.y-30))<50);if(s){walkTo([s.x,s.y]);return}
+  const o=hitSpecial(wx,wy);if(o){const sp=o.sp,side=sp.x<700?1:-1;walkTo([sp.x+side*55,sp.y+22],()=>gather(sp));return}
+  if(wy>FW.H-110&&Math.abs(wx-700)<140){walkTo([700,FW.H-40],leave);return}walkTo([wx,wy])});
+ const ro=new ResizeObserver(fit);ro.observe(wrap);
+ const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
+  if(!busy){if(moving&&path.length){const p=path[0],dx=p[0]-H[0],dy=p[1]-H[1],d=Math.hypot(dx,dy),v=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';
+    if(d<=v){H[0]=p[0];H[1]=p[1];path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(a)a()}}else{H[0]+=dx/d*v;H[1]+=dy/d*v}walkT+=dt}
+   if(H[1]>FW.H-90){if(!atExit&&!moving){atExit=true;leave()}}else atExit=false;
+   sps.forEach(s=>{const dh=Math.hypot(H[0]-s.x,H[1]-s.y);if(dh<150&&H[1]<FW.H-150){s.tx=H[0];s.ty=H[1]}if(s.wait>0){s.wait-=dt;return}const dx=s.tx-s.x,dy=s.ty-s.y,d=Math.hypot(dx,dy);if(d<4){s.wait=.6+Math.random()*1.6;pick(s);return}
+    const v=(dh<150?52:36)*dt,nx=s.x+dx/d*v,ny=s.y+dy/d*v;if(free(nx,ny)&&nx>s.zone[0]-120&&nx<s.zone[2]+120&&ny>s.zone[1]-120&&ny<s.zone[3]+120){s.x=nx;s.y=ny}else pick(s)});
+   const hit=sps.find(s=>Math.hypot(H[0]-s.x,H[1]-s.y)<44);if(hit)fight(hit)}
+  cam.x+=(H[0]-VW/2-cam.x)*Math.min(1,dt*5);cam.y+=(H[1]-VH*.55-cam.y)*Math.min(1,dt*5);clampCam();
+  g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);g.drawImage(forestGround(),cam.x,cam.y,VW,VH,0,0,VW,VH);g.translate(-cam.x,-cam.y);
+  const list=[];objs.forEach(o=>{const awake=o.sp&&o.sp.res&&M.trees.includes(o.sp.id),k='b_'+(awake?'abeto_resonante':o.k),im=TIMG[k];if(!im||!im.complete||!im.width)return;const w=im.width*o.s,h=im.height*o.s;if(o.x+w/2<cam.x||o.x-w/2>cam.x+VW||o.y-h>cam.y+VH||o.y<cam.y-20)return;
+   list.push({y:o.y,d:()=>{g.fillStyle='rgba(15,20,5,.28)';g.beginPath();g.ellipse(o.x,o.y-2,w*(o.small?.32:.22),Math.max(3,w*.06),0,0,6.3);g.fill();g.save();if(o.flip){g.translate(o.x,0);g.scale(-1,1);g.translate(-o.x,0)}g.drawImage(im,o.x-w/2,o.y-h,w,h);g.restore();
+    if(o.sp&&(o.sp.res||o.sp.rare)){const n=awake?7:6;for(let i=0;i<n;i++){const a=t/900+i*2.1,px=o.x+Math.sin(a*1.3+i)*w*.32,py=o.y-h*.25-((t/40+i*60)%(h*.6)),al=awake||o.sp.rare?.9:.6+.4*Math.sin(t/260+i*1.7);g.fillStyle=`rgba(255,200,90,${Math.max(0,al)*.35})`;g.beginPath();g.arc(px,py,7,0,6.3);g.fill();g.fillStyle=`rgba(255,230,140,${Math.max(0,al)})`;g.beginPath();g.arc(px,py,2.8,0,6.3);g.fill()}}}})});
+  const fi=[1,2,3,2][Math.floor(walkT/.16)%4],hk=moving?(hdir==='front'?'h_frente_'+fi:'h_lado_'+fi):'h_quieto_'+(Math.floor(t/1300)%2+1),hi=TIMG[hk],hflip=moving&&hdir==='side'&&facing<0,bob=moving&&fi===2?-1.5:0;
+  list.push({y:H[1],d:()=>{g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(H[0],H[1],13,4,0,0,6.3);g.fill();if(hi&&hi.complete&&hi.naturalWidth){const k=68/144,w=hi.width*k,h=hi.height*k;g.save();g.translate(H[0],H[1]+bob);if(hflip)g.scale(-1,1);g.drawImage(hi,-w/2,-h+2,w,h);g.restore()}}});
+  sps.forEach(s=>list.push({y:s.y,d:()=>{for(let i=0;i<2;i++){const q=((t/1300)+i/2)%1;g.strokeStyle=`rgba(170,140,255,${.45*(1-q)})`;g.lineWidth=2;g.beginPath();g.ellipse(s.x,s.y-30,18+q*46,9+q*22,0,0,6.3);g.stroke()}drawSpirit(g,s.x,s.y,t/1000+s.zone[0],false)}}));
+  list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
+  fx=fx.filter(p=>t-p.t<1400);fx.forEach(p=>{const k=(t-p.t)/1400;if(k<0)return;g.fillStyle=`rgba(255,220,120,${1-k})`;g.font='16px serif';g.fillText('♪',p.x,p.y-k*60)});
+  /* salida hacia Florencia */
+  const bobY=Math.sin(t/260)*4;g.textAlign='center';g.font='700 11px Cinzel, serif';const lbl='Florencia',tw=g.measureText(lbl).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(700-tw/2,FW.H-62,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(lbl,700,FW.H-49);
+  if(M.wood>=need){g.fillStyle='#ffd56e';g.beginPath();g.arc(700,FW.H-90+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',700,FW.H-84+bobY)}
+  if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}
+ };requestAnimationFrame(frame)}
 
 /* ===================== ENCUENTRO MUSICAL CON UN ESPÍRITU ===================== */
 const ENC_PCS={C:[0,4,7],F:[5,9,0],G:[7,11,2]};
@@ -1479,6 +1611,7 @@ function townEncounter(sp,onWin){const tasks=sp.tasks||[{t:'high',say:'Toca una 
  const bar=ov.querySelector('.enc-bar i'),dots=ov.querySelector('.enc-dots'),stf=ov.querySelector('.enc-staff');let kb=null;const hp=heroPlayer(ov.querySelector('#ehero'));let life=sp.heroHP||3;const hpEl=ov.querySelector('.enc-hp');const drawHP=()=>{if(hpEl)hpEl.innerHTML='<small>Tu vida</small>'+Array.from({length:sp.heroHP||3},(_,i)=>`<i class="${i<life?'on':''}">♥</i>`).join('')};drawHP();
  const pop=(txt,cls,host)=>{const e=document.createElement('b');e.className='dmg '+cls;e.textContent=txt;(host||ov.querySelector('.enc-top')).appendChild(e);setTimeout(()=>e.remove(),1100)};
  const hurt=()=>{if(!sp.battle)return;life--;drawHP();pop('−1 ♥','bad',ov.querySelector('.enc-hero'));ov.classList.remove('hit');void ov.offsetWidth;ov.classList.add('hit');if(navigator.vibrate)navigator.vibrate([60,40,60]);
+  if(life<=0&&sp.onLose){k=tasks.length;setTimeout(()=>{const f=$('#encfb');f.className='fb on bad';f.innerHTML='<b>El ruido te aturdió</b>Pierdes este enfrentamiento, pero no tus materiales ni tu progreso.';const b=document.createElement('button');b.className='cta';b.type='button';b.textContent='Continuar';b.onclick=()=>{alive=false;ov.classList.add('out');setTimeout(()=>{ov.remove();sp.onLose()},450)};ov.querySelector('.enc-mid').appendChild(b)},500);return}
   if(life<=0){setTimeout(()=>{life=sp.heroHP||3;k=0;calm=0;drawHP();const f=$('#encfb');f.className='fb on bad';f.innerHTML='<b>El ruido te aturdió</b>Respira y vuelve a intentarlo: recuperas toda tu vida.';setTimeout(show,1400)},500)}};
  const chordOf=T=>ENC_PCS[T.ch].map(pc=>[60,48,72].map(o=>o+pc).find(q=>q>=60&&q<=79)).sort((a,b)=>a-b);
  const show=()=>{const T=tasks[k];bar.style.width=(100-k/tasks.length*100)+'%';dots.innerHTML=tasks.map((x,i)=>`<i class="${i<k?'ok':i===k?'cur':''}"></i>`).join('');const say=$('#encsay');say.classList.remove('tw-seen');say.innerHTML=`<b class="g-q">${k+1}/${tasks.length} · ${esc(T.say)}</b>`;typeIn(say);seq=[];got=[];arp=[];
@@ -1505,9 +1638,10 @@ function stepSpirit(st,box){townAssets();box.innerHTML=`<div class="lscene chars
 
 const STEP={
  spirit(st,box){return stepSpirit(st,box)},
+ forest(st,box){return stepForest(st,box)},
  citymap(st,box){/* Florencia en mosaico: el héroe camina libre (sin atravesar edificios); la cámara lo sigue */
-  townAssets();LS.mapDone=LS.mapDone||[];TOWN_TRIO=st.go==='escenario'||LS.mapDone.includes('escenario');if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
-  S.mundo=S.mundo||{spirits:{},fog:{}};const W=S.mundo;const open=k=>{const l=TOWN_LOC[k];return !l||!l.fog||LS.mapDone.includes(l.need)||W.fog[k]==='open'};
+  townAssets();LS.mapDone=LS.mapDone||[];TOWN_TRIO=st.go==='escenario'||LS.mapDone.includes('escenario')||LS.L.id!=='w1m01';if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
+  S.mundo=S.mundo||{spirits:{},fog:{}};const W=S.mundo;const open=k=>{const l=TOWN_LOC[k];return !l||!l.fog||LS.L.id!=='w1m01'||LS.mapDone.includes(l.need)||W.fog[k]==='open'};
   const newly=Object.keys(TOWN_LOC).filter(k=>TOWN_LOC[k].fog&&open(k)&&W.fog[k]!=='open');
   let G=townGrid(k=>open(k)&&!newly.includes(k)||W.fog[k]==='open');
   if(!LS.hero||LS.townV!==2){LS.hero=TOWN_LOC[st.from||'puerta'].at.slice();LS.townV=2}const night=isNight(),lampsOn=!night||LS.mapDone.includes('plaza')||!!(LS.scene&&LS.scene.lights&&st.go!=='plaza');
@@ -1572,6 +1706,7 @@ const STEP={
   if(st.fx==='lights'){const order=[2,3,4,5,0,1];box.querySelectorAll('.luz').forEach(e=>e.classList.remove('on'));order.forEach((i,j)=>setTimeout(()=>{box.querySelectorAll(`.luz[data-luz="${i}"]`).forEach(e=>e.classList.add('on'))},900+j*650))}
   if(st.fx==='bells'){const t=ac().currentTime+.4;[60,64,67,72].forEach((p,i)=>bell(p,.6,t+i*.45))}
   if(st.playKeep&&LS.keep[st.playKeep]){const mel=LS.keep[st.playKeep];if(st.loop)loopMelody(mel);else setTimeout(()=>{const a=ac();let t=a.currentTime+.1;mel.forEach(n=>{tone(n.p,n.v,n.d*.5*.95,'trio',t);t+=n.d*.5})},1200)}
+  if(st.give)giveInstr(st.give);if(st.chords)st.chords.forEach(unlockChord);
   if(st.coins&&!st._paid){st._paid=1;S.coins=(S.coins||0)+st.coins;save();setTimeout(()=>toast(`🪙 +${st.coins} florines`),900)}
   const show=()=>{li++;if(li>=lines.length){if(st.accept){acc.hidden=false;nx.hidden=true;return}if(FWc)FWc.stop();next();return}
    const L=lines[li],dlg=L.startsWith('—');const tag=dlg&&st.who;wh.hidden=!tag;if(tag)wh.innerHTML=portrait(st.who)+'<span>'+esc(WHO[st.who])+'</span>';
