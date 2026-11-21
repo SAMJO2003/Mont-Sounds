@@ -430,6 +430,7 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .fmap{background:#2b2414}.f-faint{position:absolute;inset:0;z-index:30;background:#0c0a08;opacity:0;transition:opacity .8s;display:grid;place-items:center;pointer-events:none}.f-faint.on{opacity:1;pointer-events:auto}.f-faint p{color:#ffe4b0;font:600 18px Cinzel,serif}
 .bk-tags{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px}.bk-tags span{font-size:11px;padding:2px 7px;border-radius:9px;background:rgba(255,220,150,.14);color:#f3dcb0}.bk-tags .ok{background:rgba(110,190,110,.22);color:#c9f0c0}.bk-tags .no{background:rgba(200,110,90,.2);color:#f3c0b0}.bk-emo{font-size:46px}
 .pt.pt-emo{display:inline-grid;place-items:center;font-size:22px;background:rgba(255,220,150,.15)}.lscene.m2bg{background:radial-gradient(ellipse at 50% 60%,#7a5a36,#2a1d10 75%)}.lscene.m2forest{background:radial-gradient(ellipse at 50% 60%,#4d6a35,#142010 75%)}
+.ic-mat{height:16px;vertical-align:-3px}.mat-big{display:block;width:130px;margin:4px auto 8px;filter:drop-shadow(0 0 12px rgba(255,210,120,.6))}.lscene.m2int .chr{height:72%}
 </style>
 
 <div id="sky"></div>
@@ -557,7 +558,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
  {id:'w1m02',t:'El origen de los instrumentos',d:'El maestro Bernardo necesita madera de los abetos resonantes. Aprende qué vibra en cada instrumento, cruza la puerta norte y enfréntate con acordes a los Espíritus del Ruido del bosque.',scene:true,game:true,
   disc:{id:'a-familias',name:'Cómo se clasifican los instrumentos',per:'Sistema publicado en 1914',text:'Los musicólogos Erich von Hornbostel y Curt Sachs propusieron en 1914 clasificar los instrumentos según qué vibra: una cuerda, una columna de aire, una membrana o el propio cuerpo del instrumento. Su sistema, con ampliaciones posteriores, se sigue usando en los museos.',sig:'Saber qué vibra te ayuda a entender por qué cada instrumento suena como suena.'},
   steps:[
-   {type:'scene',act:['Módulo 2','El origen de los instrumentos'],img:'taller_m2',move:'zoom',lines:['El Espíritu Guardián despertó y Florencia vuelve a sonar.','Pero los músicos de la ciudad necesitan instrumentos nuevos… y el maestro Bernardo, el lutier, te ha mandado llamar.']},
+   {type:'scene',act:['Módulo 2','El origen de los instrumentos'],img:'taller_fuera',move:'zoom',lines:['El Espíritu Guardián despertó y Florencia vuelve a sonar.','Pero los músicos de la ciudad necesitan instrumentos nuevos… y el maestro Bernardo, el lutier, te ha mandado llamar.']},
    {type:'citymap',from:'puerta',go:'taller',act:'Misión 1',mission:'Ve al taller del maestro Bernardo, al suroeste de la plaza.'},
    {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',lines:['—¡Viajero! Pasa, pasa. Aquí nacen los instrumentos de Florencia.','—Todo instrumento suena porque algo vibra. En la cuerda vibra una cuerda; en el viento, el aire dentro de un tubo; en la percusión, un parche o el propio cuerpo del instrumento.','—Tu piano viejo es especial: es de teclado, pero por dentro unos martillos golpean cuerdas. Veamos si distingues las familias.']},
    {type:'sort',who:'maestro',ph:'Práctica',q:'Clasifica cada instrumento en su familia',fams:['Cuerda','Viento','Percusión'],items:[['Violín',0],['Flauta',1],['Tambor',2],['Laúd',0],['Trompeta',1],['Pandero',2],['Arpa',0],['Chirimía',1]]},
@@ -566,7 +567,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
    {type:'citymap',go:'norte',act:'Misión 2',mission:'La puerta norte ya está abierta. Sal de la ciudad hacia el bosque.'},
    {type:'forest',act:'Misión 2 · Bosque de los Abetos Resonantes',need:3,mission:'Busca los 3 abetos resonantes en los claros y despiértalos con el piccolo.'},
    {type:'citymap',from:'norte',go:'taller',act:'Misión 3',mission:'Lleva la madera especial al taller del maestro Bernardo.'},
-   {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',give:'laud',lines:['—¡Madera de abeto resonante! Escucha cómo suena cuando la golpeo: vibra durante mucho tiempo.','—Por eso la usamos para la tapa: la cuerda vibra, la tapa de abeto amplifica esa vibración y la caja la llena de aire y de voz.','—Aquí tienes: tu primer Laúd común. No sirve para combatir, pero te ayudará a explorar. Los instrumentos de mayor rareza tendrán poderes nuevos.'],accept:'Completar el módulo',reward:'🏅 Módulo 2 completado: El origen de los instrumentos'}
+   {type:'scene',img:'maestro_forja',who:'maestro',move:'zoom',give:'laud',lines:['—¡Madera de abeto resonante! Escucha cómo suena cuando la golpeo: vibra durante mucho tiempo.','—Por eso la usamos para la tapa: la cuerda vibra, la tapa de abeto amplifica esa vibración y la caja la llena de aire y de voz.','—Aquí tienes: tu primer Laúd común. No sirve para combatir, pero te ayudará a explorar. Los instrumentos de mayor rareza tendrán poderes nuevos.'],accept:'Completar el módulo',reward:'🏅 Módulo 2 completado: El origen de los instrumentos'}
   ]},
  /* ---------------- 03 ---------------- */
  {id:'w1m03',t:'El lenguaje escrito',d:'Cómo se escribe la música: líneas, espacios y los primeros símbolos.',
@@ -1245,12 +1246,12 @@ function charSvg(who,vb){const sk='#e0b18c',V=vb||'0 0 200 380';let body='',ins=
  else if(who==='flauta'){body='<path d="M64 150 Q100 132 136 150 L146 286 L54 286 Z" fill="#7d5f3f"/><rect x="62" y="286" width="32" height="86" fill="#4b3a2a"/><rect x="106" y="286" width="32" height="86" fill="#4b3a2a"/>';hair='<path d="M68 96 Q70 56 100 54 Q132 56 134 94 Q124 70 100 72 Q78 74 68 96Z" fill="#6b4524"/><ellipse cx="100" cy="58" rx="36" ry="12" fill="#5c3b2a"/>';ins='<rect x="88" y="112" width="104" height="7" rx="3" fill="#c79a5a" stroke="#7a5626" stroke-width="1.5"/><circle cx="140" cy="115" r="2" fill="#5a3a16"/><circle cx="152" cy="115" r="2" fill="#5a3a16"/><circle cx="164" cy="115" r="2" fill="#5a3a16"/>'}
  else if(who==='laud'){body='<path d="M64 150 Q100 132 136 150 L142 262 L58 262 Z" fill="#2f6b3e"/><path d="M58 262 L40 300 L70 304 L82 266 Z M142 262 L160 300 L130 304 L118 266 Z" fill="#b8892e"/><rect x="40" y="300" width="30" height="72" fill="#b8892e"/><rect x="130" y="300" width="30" height="72" fill="#b8892e"/><rect x="50" y="296" width="100" height="10" fill="#5a3a1e"/><path d="M56 306 L50 372 M144 306 L150 372" stroke="#5a3a1e" stroke-width="6"/>';hair='<path d="M68 96 Q70 56 100 54 Q132 56 134 94 Q124 70 100 72 Q78 74 68 96Z" fill="#3b2514"/><path d="M64 64 Q100 38 138 64 L132 70 Q100 56 70 70 Z" fill="#7a2230"/><path d="M128 56 q26 -26 40 -24 q-16 10 -30 30" fill="#e8d9b0"/>';ins='<g transform="translate(108 236) rotate(-32)"><ellipse rx="42" ry="34" fill="#a8692a" stroke="#5a3210" stroke-width="2"/><circle cx="-6" r="10" fill="#3a2210"/><rect x="30" y="-6" width="74" height="12" fill="#5a3210"/><rect x="100" y="-8" width="16" height="16" fill="#3a2210" transform="rotate(30 100 0)"/></g>'}
  return `<svg viewBox="${V}" xmlns="http://www.w3.org/2000/svg" aria-label="${WHO[who]||''}"><ellipse cx="100" cy="374" rx="70" ry="8" fill="rgba(0,0,0,.35)"/>${body}<rect x="88" y="124" width="24" height="28" fill="${sk}"/><circle cx="100" cy="100" r="31" fill="${sk}"/>${hair}<circle cx="89" cy="100" r="3" fill="#2a1a12"/><circle cx="111" cy="100" r="3" fill="#2a1a12"/><path d="M92 116 Q100 121 108 116" stroke="#8a4a3a" stroke-width="2" fill="none"/>${ins}${extra}</svg>`}
-const V=()=>BASE+'m1v/';const CHARIMG={matteo:'matteo',violin:'violinista',flauta:'flautista',laud:'laudista'};
+const V=()=>BASE+'m1v/';const CHARIMG={maestro:'m2/maestro_pie',matteo:'matteo',violin:'violinista',flauta:'flautista',laud:'laudista'};
 const CHARSTAND={violin:'violinista_pie',flauta:'flautista_pie',laud:'laudista_pie'},CHARANIM={violin:['violin_p2','violin_p1','violin_p2','violin_p3','violin_p2'],flauta:['flauta_p1','flauta_p1','flauta_p2','flauta_p3','flauta_p2'],laud:['laud_p2','laud_p1','laud_p2','laud_p3','laud_p2']};
 function charHTML(who,stand){if(stand&&CHARSTAND[who])return `<span class="chw ${who}"><img src="${V()}${CHARSTAND[who]}.webp" alt="${WHO[who]}" draggable="false"></span>`;if(CHARANIM[who]){const f=CHARANIM[who];return `<span class="chw ${who} anim">${f.map((n,i)=>`<img class="${i?'fx f'+i:'f0'}" src="${V()}${n}.webp" alt="${i?'':WHO[who]}" draggable="false">`).join('')}</span>`}return CHARIMG[who]?`<span class="chw ${who}"><img src="${V()}${CHARIMG[who]}.webp" alt="${WHO[who]}" draggable="false">${who==='matteo'?'<i class="lglow"></i>':''}</span>`:charSvg(who)}
-const portrait=who=>who==='maestro'?'<span class="pt pt-emo">🪚</span>':CHARIMG[who]?`<span class="pt ${who}${CHARSTAND[who]?' st':''}" style="background-image:url(${V()}${CHARSTAND[who]||CHARIMG[who]}.webp)"></span>`:charSvg(who,'55 48 90 90');
+const portrait=who=>CHARIMG[who]?`<span class="pt ${who}${CHARSTAND[who]?' st':''}" style="background-image:url(${V()}${CHARSTAND[who]||CHARIMG[who]}.webp)"></span>`:charSvg(who,'55 48 90 90');
 const PLZ=[{s:[[45,790],[97,765],[150,800]],p:[95,1300,150]},{s:[[805,790],[860,765],[915,800]],p:[860,1300,150]},{s:[[240,935],[265,925],[290,940]],p:[265,1150,90]},{s:[[690,935],[712,925],[738,940]],p:[712,1150,90]},{s:[[180,985]],p:[185,1150,60]},{s:[[15,1050],[108,560]],p:null}];
-const SCN_AR={llegada:'896/1200',entrada:'895/1200',dormida:'941/1672',plaza:'941/1672',plaza_on:'941/1672',escenario:'941/1672',final:'941/1671',campanario:'768/1376',fuente:'941/1672',matteo:'941/1672',violin:'941/1672',flauta:'941/1672',laud:'941/1672',campana:'1/1'};
+const SCN_AR={llegada:'896/1200',entrada:'895/1200',dormida:'941/1672',plaza:'941/1672',plaza_on:'941/1672',escenario:'941/1672',final:'941/1671',campanario:'768/1376',fuente:'941/1672',matteo:'941/1672',violin:'941/1672',flauta:'941/1672',laud:'941/1672',campana:'1/1',maestro_forja:'895/1200'};
 /* imágenes de cada escena: cuando lleguen las de Gemini (verticales) basta con poner {full:'ruta'} */
 const SCN={};
 function plazaOn(extra='',o={}){return plazaHTML(Object.assign({},o,{on:true,extra}))}
@@ -1268,7 +1269,9 @@ function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><di
   case 'plaza_on':return plazaOn();
   case 'escenario':return isNight()?plazaOn('<div class="stagewood"></div>'):`<div class="lscene"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="stagewood"></div></div>`;
   case 'final':return img('final');
-  case 'taller_m2':return `<div class="lscene solo m2bg"><img class="solo-img" src="${V()}town/p_taller.webp" alt=""></div>`;
+  case 'taller_m2':return `<div class="lscene charsc m2int"><div class="ls" style="background-image:url(${V()}m2/taller_int.webp)"></div><div class="chr">${charHTML('maestro',true)}</div></div>`;
+  case 'taller_fuera':return `<div class="lscene solo m2bg"><img class="solo-img" src="${V()}town/p_armero.webp" alt=""></div>`;
+  case 'maestro_forja':return img('m2/maestro_forja');
   case 'bosque':return `<div class="lscene solo m2forest"><img class="solo-img" src="${V()}bosque/abeto_resonante.webp" alt=""></div>`;
   case 'matteo':case 'violin':case 'flauta':case 'laud':return isNight()?plazaOn('<div class="chr">'+charHTML(k,true)+'</div>',{cls:'charsc'}):`<div class="lscene charsc dusk"><div class="ls" style="background-image:url(${V()}dormida.webp)"></div><div class="chr">${charHTML(k,true)}</div></div>`;
   default:if(k&&k.startsWith('art:'))return `<div class="lscene solo"><div style="position:absolute;inset:14% 12% 34%;display:grid;place-items:center">${art(k.slice(4))}</div></div>`;
@@ -1294,15 +1297,15 @@ const TW={W:1500,H:2400,CELL:20};
 /* objetos: x,y = base (pie) del dibujo en coordenadas del mundo; s = escala de dibujo; fp = huella que bloquea [ancho,alto] */
 let TOWN_TRIO=false;const TOWN_V='?v=5';
 const TOWN_SMALLSH=new Set(['estandarte','puesto','banco','pozo','cipres_1','cipres_2','olivo_1','olivo_2','arbol_redondo','arbusto','limonero','farol_doble','farol_simple','cajas','seto']);
-const TOWN_BUILD=new Set(['palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','capilla','palazzo','taller','gremio','scriptorium','campanario']);
+const TOWN_BUILD=new Set(['armero','palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','capilla','palazzo','gremio','scriptorium','campanario']);
 /* la ciudad es un fragmento de la isla: plaza central (fuente, escenario delante, faroles alrededor, campanario detrás),
    barrios bajo la niebla y una puerta norte cerrada que lleva a zonas más peligrosas en módulos futuros */
 const TOWN_OBJ=[
  /* murallas, puerta sur (entrada) y puerta norte (cerrada) */
  ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:132,fp:[300,64]})),{k:'puerta_norte',x:750,y:205,fp:[250,85],loc:'norte'},
- {k:'torre_muralla',x:82,y:150,fp:[150,70]},{k:'torre_muralla',x:1418,y:150,fp:[150,70],flip:1},
+ {k:'torre_alta',x:82,y:160,fp:[90,40]},{k:'torre_alta',x:1418,y:160,fp:[90,40],flip:1},
  ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:2400,fp:[300,70]})),
- {k:'puerta',x:750,y:2402,fp:[0,0]},{k:'torre_muralla',x:82,y:2400,fp:[150,70]},{k:'torre_muralla',x:1418,y:2400,fp:[150,70],flip:1},
+ {k:'puerta_sur',x:750,y:2402,fp:[0,0]},{k:'torre_alta',x:82,y:2400,fp:[90,40]},{k:'torre_alta',x:1418,y:2400,fp:[90,40],flip:1},
  /* plaza central */
  {k:'campanario',x:520,y:1010,fp:[110,50],loc:'campanario'},
  {k:'fuente_leones',x:750,y:1250,fp:[205,80],loc:'fuente'},
@@ -1313,7 +1316,7 @@ const TOWN_OBJ=[
  {k:'casa_d',x:230,y:1520,fp:[140,60]},{k:'casa_e',x:1270,y:1520,fp:[140,60],flip:1},
  {k:'casa_a',x:200,y:990,fp:[140,60]},{k:'casa_c',x:985,y:1000,fp:[140,60],flip:1},
  /* barrios que se abren con la niebla */
- {k:'taller',x:330,y:1965,fp:[150,64],loc:'taller'},{k:'gremio',x:1170,y:1995,fp:[160,64],flip:1,loc:'gremio'},{k:'scriptorium',x:330,y:615,fp:[150,64],loc:'scriptorium'},
+ {k:'armero',x:330,y:1975,fp:[175,60],loc:'taller'},{k:'gremio',x:1170,y:1995,fp:[160,64],flip:1,loc:'gremio'},{k:'scriptorium',x:330,y:615,fp:[150,64],loc:'scriptorium'},
  {k:'casa_e',x:990,y:1965,fp:[140,60],flip:1},{k:'panaderia',x:540,y:2160,fp:[140,60]},{k:'casa_a',x:1345,y:2165,fp:[140,60],flip:1},
  {k:'casa_b',x:140,y:520,fp:[118,56]},{k:'casa_c',x:545,y:575,fp:[140,60]},
  /* barrio de los artesanos (Módulo 2, bajo la niebla) */
@@ -1337,7 +1340,7 @@ const TOWN_LOC={
  escenario:{n:'El escenario',ic:'🎭',at:[750,1520]},
  puerta:{n:'La puerta',ic:'🚪',at:[750,2150]},
  norte:{n:'Puerta norte',ic:'🔒',at:[750,255],locked:'La puerta norte está cerrada. Se abrirá cuando completes más módulos: al otro lado espera un lugar más peligroso.'},
- taller:{n:'Taller del lutier',ic:'🪕',at:[330,2010],fog:[90,1700,600,2180],need:'campanario',msg:'el campanario despierte'},
+ taller:{n:'Armero de instrumentos',ic:'🪕',at:[330,2010],fog:[90,1700,600,2180],need:'campanario',msg:'el campanario despierte'},
  gremio:{n:'El gremio',ic:'📜',at:[1170,2040],fog:[900,1760,1430,2200],need:'fuente',msg:'la fuente vuelva a fluir'},
  scriptorium:{n:'El scriptorium',ic:'✒️',at:[330,660],fog:[80,380,620,760],need:'plaza',msg:'la plaza recupere su luz'},
  artesanos:{n:'Barrio de los artesanos',ic:'🔨',at:[1170,830],fog:[880,330,1440,790],need:'modulo2',msg:'empiece el Módulo 2'}};
@@ -1464,9 +1467,9 @@ const CHORD_BOOK={C:{n:'Do mayor',ps:[60,64,67],emo:'Luminoso, estable y alegre.
  F:{n:'Fa mayor',ps:[65,69,72],emo:'Cálido y abierto, como dar un paso hacia adelante.',uso:'En Do mayor es el acorde IV: prepara el camino hacia Sol o de vuelta a Do. Ideal para momentos de esperanza.',how:'Fa + La + Do.'},
  G:{n:'Sol mayor',ps:[67,71,74],emo:'Brillante y con impulso, como si quisiera volver a casa.',uso:'En Do mayor es el acorde V: crea tensión que se resuelve en Do.',how:'Sol + Si + Re.'},Am:{n:'La menor',ps:[69,72,76]}};
 const INSTR_BOOK=[{id:'piano_viejo',n:'Piano viejo',fam:'percusion',rar:'comun',img:'ui_piano',d:'Un piano gastado que te acompaña desde el inicio del viaje. Sus teclas amarillentas todavía guardan magia: invócalo cuando quieras para enfrentar a los espíritus. Por dentro, sus martillos golpean cuerdas: por eso combate como la percusión.',p:'Poder: acordes y melodías básicas'},
- {id:'piccolo',n:'Piccolo común',fam:'viento',rar:'comun',gather:'comun',ic:'🪈',d:'Una flautita de madera hecha por el maestro Bernardo. Su soplo despierta a los abetos resonantes y mueve mecanismos de viento sencillos.',p:'Poder: recolectar pequeñas cantidades de materiales comunes'},
- {id:'laud',n:'Laúd común',fam:'cuerda',rar:'comun',ic:'🪕',d:'Un laúd sencillo con tapa de abeto resonante. Sus cuerdas vibran sobre la caja de madera.',p:'Poder: exploración (muy pronto)'},
- {id:'tamburo',n:'Tamburo común',fam:'percusion',rar:'comun',ic:'🥁',d:'Un tambor de marco con parche de cuero. Como es de percusión, podrá combatir.',p:'Poder: ritmos de combate (muy pronto)'},
+ {id:'piccolo',n:'Piccolo común',fam:'viento',rar:'comun',gather:'comun',img:'m2/instr_piccolo',d:'Una flautita de madera hecha por el maestro Bernardo. Su soplo despierta a los abetos resonantes y mueve mecanismos de viento sencillos.',p:'Poder: recolectar pequeñas cantidades de materiales comunes'},
+ {id:'laud',n:'Laúd común',fam:'cuerda',rar:'comun',img:'m2/instr_laud',d:'Un laúd sencillo con tapa de abeto resonante. Sus cuerdas vibran sobre la caja de madera.',p:'Poder: exploración (muy pronto)'},
+ {id:'tamburo',n:'Tamburo común',fam:'percusion',rar:'comun',img:'m2/instr_tamburo',d:'Un tambor de marco con parche de cuero. Como es de percusión, podrá combatir.',p:'Poder: ritmos de combate (muy pronto)'},
  {id:'violin',n:'Violín'},{id:'flauta',n:'Flauta'}];
 function unlockChord(k){S.chords=S.chords||[];if(!S.chords.includes(k)){S.chords.push(k);save();setTimeout(()=>toast(`📖 Nuevo acorde en tu libro: ${CHORD_BOOK[k].n}`),600)}}
 function booksHTML(){return `<div class="cm-books"><button type="button" data-book="acordes" aria-label="Libro de acordes"><img src="${V()}ui_libro.webp" alt=""><small>Acordes</small></button><button type="button" data-book="instr" aria-label="Libro de instrumentos"><img src="${V()}ui_piano.webp" alt=""><small>Instrumentos</small></button></div>`}
@@ -1535,7 +1538,7 @@ function stepForest(st,box){forestAssets();const need=st.need||3;if(!S.m2||S.m2.
   <div class="cm-quest"><small>${esc(st.act||'Misión')}</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
   <div class="cm-hint">Toca el suelo para caminar. Toca un abeto de los claros para soplar el piccolo. ¡Cuidado con los espíritus!</div>${booksHTML()}</div>`;
  bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
- const hud=()=>{$('#fmis').textContent=M.wood>=need?'¡Tienes la madera! Vuelve por el sendero del sur hasta Florencia y llévala al taller.':(st.mission||'Busca los abetos resonantes en los claros y despiértalos con el piccolo.');$('#fhud').textContent=`🪵 Madera especial ${Math.min(M.wood,need)}/${need} · 🪙 ${S.coins||0}`};hud();
+ const hud=()=>{$('#fmis').textContent=M.wood>=need?'¡Tienes la madera! Vuelve por el sendero del sur hasta Florencia y llévala al taller.':(st.mission||'Busca los abetos resonantes en los claros y despiértalos con el piccolo.');$('#fhud').innerHTML=`<img class="ic-mat" src="${V()}m2/ic_madera_especial.webp" alt=""> Madera especial ${Math.min(M.wood,need)}/${need} · 🪙 ${S.coins||0}`};hud();
  const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
  const cam={x:H[0]-VW/2,y:H[1]-VH*.55},clampCam=()=>{cam.x=Math.max(0,Math.min(FW.W-VW,cam.x));cam.y=Math.max(0,Math.min(FW.H-VH,cam.y))};clampCam();
  let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),alive=true,busy=false,arriving=null,pingP=null,pingT=0,atExit=true,fx=[];
@@ -1546,7 +1549,7 @@ function stepForest(st,box){forestAssets();const need=st.need||3;if(!S.m2||S.m2.
  const resume=()=>{busy=false;last=performance.now()};
  /* recolección con el piccolo */
  const gather=sp=>{busy=true;moving=false;path=[];const prevKB=ACTIVE_KB,close=()=>{ACTIVE_KB=prevKB;closeSheet();resume()};
-  if(sp.rare){sheet(`<span class="eyebrow">Madera rara</span><h2>Un tocón que brilla con fuerza</h2><p>Sus anillos dorados vibran con mucha energía. Tu <b>Piccolo común</b> no tiene poder suficiente: esta madera es <b>rara</b>.</p><p class="small">Los materiales raros, épicos y legendarios necesitan instrumentos superiores y técnicas musicales más avanzadas. Volverás por ella más adelante.</p><button class="cta" type="button" id="gOk">Entendido</button>`);$('#gOk').onclick=close;return}
+  if(sp.rare){sheet(`<span class="eyebrow">Madera rara</span><h2>Un tocón que brilla con fuerza</h2><img class="mat-big" src="${V()}m2/ic_madera_rara.webp" alt="Madera rara"><p>Sus anillos dorados vibran con mucha energía. Tu <b>Piccolo común</b> no tiene poder suficiente: esta madera es <b>rara</b>.</p><p class="small">Los materiales raros, épicos y legendarios necesitan instrumentos superiores y técnicas musicales más avanzadas. Volverás por ella más adelante.</p><button class="cta" type="button" id="gOk">Entendido</button>`);$('#gOk').onclick=close;return}
   if(M.trees.includes(sp.id)){toast('Ya despertaste este abeto. Busca otro claro.');resume();return}
   if(!hasInstr('piccolo'))giveInstr('piccolo');
   const call=[72,76,79];let i=0;
@@ -1556,7 +1559,7 @@ function stepForest(st,box){forestAssets();const need=st.need||3;if(!S.m2||S.m2.
   const done=()=>{if(!M.tried.includes(sp.id))M.tried.push(sp.id);
    if(sp.res){M.trees.push(sp.id);M.wood++;S.inv=S.inv||{};S.inv.madera_especial=(S.inv.madera_especial||0)+1;save();hud();for(let j=0;j<18;j++)fx.push({x:sp.x+(Math.random()-.5)*80,y:sp.y-40-Math.random()*160,t:performance.now()+j*40});
     const t=ac().currentTime+.1;[72,76,79,84].forEach((p,j)=>tone(p,.5,.6,'flute',t+j*.12));
-    sheet(`<span class="eyebrow">¡Abeto resonante!</span><h2>El árbol despierta</h2><p>Las vetas doradas de la corteza vibran con tu soplo. Recoges <b>una pequeña porción de madera especial</b> 🪵 (${Math.min(M.wood,need)}/${need}).</p><p class="small">Esta madera vibra muy bien: por eso los lutieres la eligen para la tapa de los instrumentos de cuerda.</p><button class="cta" type="button" id="gOk">Seguir</button>`)}
+    sheet(`<span class="eyebrow">¡Abeto resonante!</span><h2>El árbol despierta</h2><img class="mat-big" src="${V()}m2/ic_madera_especial.webp" alt="Madera especial"><p>Las vetas doradas de la corteza vibran con tu soplo. Recoges <b>una pequeña porción de madera especial</b> 🪵 (${Math.min(M.wood,need)}/${need}).</p><p class="small">Esta madera vibra muy bien: por eso los lutieres la eligen para la tapa de los instrumentos de cuerda.</p><button class="cta" type="button" id="gOk">Seguir</button>`)}
    else sheet(`<span class="eyebrow">Abeto común</span><h2>Este abeto no responde</h2><p>Su corteza no tiene vetas doradas: es un abeto común. Su madera sirve para construir, pero no para un instrumento mágico.</p><p class="small">Pista: los abetos resonantes son los más grandes y antiguos, y tienen pequeñas chispas doradas alrededor.</p><button class="cta" type="button" id="gOk">Seguir buscando</button>`);
    $('#gOk').onclick=close}};
  /* combate: el espíritu toca al viajero */
@@ -1653,7 +1656,7 @@ const STEP={
   const cam={x:LS.hero[0]-VW/2,y:LS.hero[1]-VH*.55};const clampCam=()=>{cam.x=Math.max(0,Math.min(TW.W-VW,cam.x));cam.y=Math.max(0,Math.min(TW.H-VH,cam.y))};clampCam();
   let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),alive=true,busy=false,arriving=null,pingP=null,pingT=0,fogAnim={};
   newly.forEach(k=>{fogAnim[k]=0});if(newly.length)setTimeout(()=>{newly.forEach(k=>{W.fog[k]='open'});save();G=townGrid(open);toast('¡La niebla se levanta! Descubriste: '+newly.map(k=>TOWN_LOC[k].n).join(', '))},900);
-  const spirits=()=>TOWN_SPIRITS.filter(s=>W.spirits[s.id]!=='calmado'&&open(s.need)&&W.fog[s.need]==='open').concat(st.hunt&&!huntDone?[huntSp]:[]);
+  const spirits=()=>TOWN_SPIRITS.filter(s=>LS.L.id==='w1m01'&&W.spirits[s.id]!=='calmado'&&open(s.need)&&W.fog[s.need]==='open').concat(st.hunt&&!huntDone?[huntSp]:[]);
   const walkTo=(p,onArrive)=>{const pth=townPath(G,LS.hero,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=onArrive||null};
   let huntDone=false;const huntSp=st.hunt?Object.assign({id:'hunt',battle:true},st.hunt):null;const goalAt=st.hunt?[st.hunt.x,st.hunt.y]:TOWN_LOC[st.go].at;
   const hitLoc=(wx,wy)=>{for(const [k,l] of Object.entries(TOWN_LOC)){const o=TOWN_OBJ.find(o=>o.loc===k);if(o){const im=TIMG[o.k];if(im&&im.complete){const w=im.width*(o.s||1),h=im.height*(o.s||1);if(wx>o.x-w/2&&wx<o.x+w/2&&wy>o.y-h&&wy<o.y+10)return k}}if(Math.hypot(wx-l.at[0],wy-l.at[1])<70)return k}return null};
