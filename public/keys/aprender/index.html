@@ -1647,7 +1647,7 @@ function townEncounter(sp,onWin){const tasks=sp.tasks||[{t:'high',say:'Toca una 
 function stepSpirit(st,box){townAssets();box.innerHTML=`<div class="lscene charsc dusk"><div class="ls" style="background-image:url(${V()}campanario_top.webp)"></div></div>`;foot('…',()=>{},{disabled:true});
  townEncounter({name:st.name||'Espíritu del Ruido',intro:st.intro,introStaff:st.chord?{notes:[{ps:CHORD_BOOK[st.chord].ps,d:'w'}],names:true,w:170,cap:CHORD_BOOK[st.chord].n}:null,tasks:st.tasks,winText:st.winText,winBtn:'Continuar'},()=>{if(st.chord)unlockChord(st.chord);if(st.coins){S.coins=(S.coins||0)+st.coins;save();toast(`+${st.coins} florines`)}next()})}
 
-const FAM_IMG={'Violín':'m2/fam_violin','Flauta':'m2/instr_piccolo','Tambor':'m2/fam_tambor','Laúd':'m2/instr_laud','Trompeta':'m2/fam_trompeta','Pandero':'m2/instr_tamburo','Arpa':'m2/fam_arpa','Chirimía':'m2/fam_chirimia'};
+const FAM_IMG={'Violín':'m2/fam_violin','Flauta':'m2/fam_flauta','Tambor':'m2/fam_tambor','Laúd':'m2/instr_laud','Trompeta':'m2/fam_trompeta','Pandero':'m2/instr_tamburo','Arpa':'m2/fam_arpa','Chirimía':'m2/fam_chirimia'};
 const STEP={
  spirit(st,box){return stepSpirit(st,box)},
  forest(st,box){return stepForest(st,box)},
