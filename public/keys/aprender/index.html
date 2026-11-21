@@ -431,6 +431,8 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .bk-tags{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 6px}.bk-tags span{font-size:11px;padding:2px 7px;border-radius:9px;background:rgba(255,220,150,.14);color:#f3dcb0}.bk-tags .ok{background:rgba(110,190,110,.22);color:#c9f0c0}.bk-tags .no{background:rgba(200,110,90,.2);color:#f3c0b0}.bk-emo{font-size:46px}
 .pt.pt-emo{display:inline-grid;place-items:center;font-size:22px;background:rgba(255,220,150,.15)}.lscene.m2bg{background:radial-gradient(ellipse at 50% 60%,#7a5a36,#2a1d10 75%)}.lscene.m2forest{background:radial-gradient(ellipse at 50% 60%,#4d6a35,#142010 75%)}
 .ic-mat{height:16px;vertical-align:-3px}.mat-big{display:block;width:130px;margin:4px auto 8px;filter:drop-shadow(0 0 12px rgba(255,210,120,.6))}.lscene.m2int .chr{height:72%}
+.inv-stage{position:relative;height:150px;margin:2px auto 4px;width:220px}.inv-circle{position:absolute;left:50%;bottom:4px;width:200px;height:52px;margin-left:-100px;border-radius:50%;border:2px solid rgba(255,215,110,.9);box-shadow:0 0 18px rgba(255,200,90,.9),inset 0 0 18px rgba(255,200,90,.7);animation:invc 1.4s ease-out both,invr 3s linear infinite}.inv-h{position:absolute;left:8px;bottom:6px;height:140px;filter:drop-shadow(0 0 10px rgba(255,210,120,.7))}.inv-i{position:absolute;right:6px;bottom:30px;width:96px;opacity:0;animation:invi 1.2s .9s ease-out forwards;filter:drop-shadow(0 0 14px rgba(255,215,110,.95))}@keyframes invc{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}@keyframes invr{50%{box-shadow:0 0 30px rgba(255,210,110,1),inset 0 0 26px rgba(255,210,110,.9)}}@keyframes invi{from{opacity:0;transform:translateY(30px) scale(.5) rotate(-30deg)}to{opacity:1;transform:none}}
+.dstaff{background:radial-gradient(ellipse at 50% 40%,#3a2a18,#1c1410);border-radius:14px;padding:4px 6px;margin:6px 0}.dstaff .mstaff{margin:0 auto}.inv-stage{height:124px!important}.inv-h{height:118px!important}.inv-i{width:84px!important}
 </style>
 
 <div id="sky"></div>
@@ -565,7 +567,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
    {type:'timbre',who:'maestro',ph:'Práctica',q:'Escucha y mira: ¿de qué familia es?',items:[{kind:'strings',opts:['Cuerda','Viento','Percusión'],a:0},{kind:'flute',opts:['Cuerda','Viento','Percusión'],a:1},{kind:'drum',opts:['Cuerda','Viento','Percusión'],a:2}]},
    {type:'scene',img:'bosque',who:'maestro',move:'zoom',give:'piccolo',chords:['F','G'],lines:['—¡Muy bien! Ahora necesito tu ayuda: para la tapa de un laúd hace falta madera de abeto resonante.','—Esos abetos crecen en el Bosque de los Abetos Resonantes, al otro lado de la puerta norte. Son los más antiguos y tienen chispas doradas.','—Toma este piccolo. Con su soplo despertarás a los abetos resonantes y te darán un poco de su madera. Pero ojo: el piccolo no sirve para combatir.','—En el bosque rondan Espíritus del Ruido. Si te tocan, invoca tu piano y enfréntalos con acordes: Do mayor, Fa mayor y Sol mayor. Los anoté en tu libro.','—Y si te vencen, no temas: despertarás aquí, junto al taller, con todo lo que hayas recogido.']},
    {type:'citymap',go:'norte',act:'Misión 2',mission:'La puerta norte ya está abierta. Sal de la ciudad hacia el bosque.'},
-   {type:'forest',act:'Misión 2 · Bosque de los Abetos Resonantes',need:3,mission:'Busca los 3 abetos resonantes en los claros y despiértalos con el piccolo.'},
+   {type:'forest',act:'Misión 2 · Bosque de los Abetos Resonantes',need:3,mission:'Recoge madera de cualquier árbol y busca los 3 abetos resonantes (con chispas doradas): su madera especial sirve para instrumentos mágicos.'},
    {type:'citymap',from:'norte',go:'taller',act:'Misión 3',mission:'Lleva la madera especial al taller del maestro Bernardo.'},
    {type:'scene',img:'maestro_forja',who:'maestro',move:'zoom',give:'laud',lines:['—¡Madera de abeto resonante! Escucha cómo suena cuando la golpeo: vibra durante mucho tiempo.','—Por eso la usamos para la tapa: la cuerda vibra, la tapa de abeto amplifica esa vibración y la caja la llena de aire y de voz.','—Aquí tienes: tu primer Laúd común. No sirve para combatir, pero te ayudará a explorar. Los instrumentos de mayor rareza tendrán poderes nuevos.'],accept:'Completar el módulo',reward:'🏅 Módulo 2 completado: El origen de los instrumentos'}
   ]},
@@ -1302,9 +1304,9 @@ const TOWN_BUILD=new Set(['armero','palazzo_est','carpinteria','forja','cobertiz
    barrios bajo la niebla y una puerta norte cerrada que lleva a zonas más peligrosas en módulos futuros */
 const TOWN_OBJ=[
  /* murallas, puerta sur (entrada) y puerta norte (cerrada) */
- ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:132,fp:[300,64]})),{k:'puerta_norte',x:750,y:205,fp:[250,85],loc:'norte'},
+ ...[150,450,1050,1350].map((x,i)=>({k:i%2?'muro_b':'muro_a',x,y:132,fp:[300,64]})),{k:'puerta_norte',x:750,y:205,fp:[250,85],loc:'norte'},
  {k:'torre_alta',x:82,y:160,fp:[90,40]},{k:'torre_alta',x:1418,y:160,fp:[90,40],flip:1},
- ...[150,450,1050,1350].map(x=>({k:'muralla_recta',x,y:2400,fp:[300,70]})),
+ ...[150,450,1050,1350].map((x,i)=>({k:i%2?'muro_b':'muro_a',x,y:2400,fp:[300,70]})),
  {k:'puerta_sur',x:750,y:2402,fp:[0,0]},{k:'torre_alta',x:82,y:2400,fp:[90,40]},{k:'torre_alta',x:1418,y:2400,fp:[90,40],flip:1},
  /* plaza central */
  {k:'campanario',x:520,y:1010,fp:[90,40],loc:'campanario'},
@@ -1532,60 +1534,65 @@ let FOREST_GROUND=null;function forestGround(){if(FOREST_GROUND)return FOREST_GR
 function forestGrid(){const C=TW.CELL,gw=Math.ceil(FW.W/C),gh=Math.ceil(FW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
  block(0,0,FW.W,170);block(0,0,40,FW.H);block(FW.W-40,0,FW.W,FW.H);block(0,FW.H-20,FW.W,FW.H);forestLayout().forEach(o=>{if(o.fp)block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});return {b,gw,gh}}
 
-function stepForest(st,box){forestAssets();const need=st.need||3;if(!S.m2||S.m2.done)S.m2={wood:0,trees:[],tried:[],calm:[]};const M=S.m2;M.tried=M.tried||[];
+function stepForest(st,box){forestAssets();const need=st.need||3;if(!S.m2||S.m2.done)S.m2={wood:0,trees:[],tried:[],calm:[]};const M=S.m2;M.tried=M.tried||[];M.cut=M.cut||[];M.common=M.common||0;
  if(!LS.fhero)LS.fhero=F_ENTRY.slice();const H=LS.fhero,objs=forestLayout(),G=forestGrid();
  box.innerHTML=`<div class="cmap tmap fmap" id="cmap"><canvas id="tcv"></canvas>
   <div class="cm-quest"><small>${esc(st.act||'Misión')}</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
-  <div class="cm-hint">Toca el suelo para caminar. Toca un abeto de los claros para soplar el piccolo. ¡Cuidado con los espíritus!</div>${booksHTML()}</div>`;
+  <div class="cm-hint">Toca el suelo para caminar. Toca cualquier árbol para recoger madera con el piccolo. ¡Cuidado con los espíritus!</div>${booksHTML()}</div>`;
  bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
- const hud=()=>{$('#fmis').textContent=M.wood>=need?'¡Tienes la madera! Vuelve por el sendero del sur hasta Florencia y llévala al taller.':(st.mission||'Busca los abetos resonantes en los claros y despiértalos con el piccolo.');$('#fhud').innerHTML=`<img class="ic-mat" src="${V()}m2/ic_madera_especial.webp" alt=""> Madera especial ${Math.min(M.wood,need)}/${need} · 🪙 ${S.coins||0}`};hud();
+ const hud=()=>{$('#fmis').textContent=M.wood>=need?'¡Tienes la madera! Vuelve por el sendero del sur hasta Florencia y llévala al taller.':(st.mission||'Busca los abetos resonantes en los claros y despiértalos con el piccolo.');$('#fhud').innerHTML=`<img class="ic-mat" src="${V()}m2/ic_madera_especial.webp" alt=""> Especial ${Math.min(M.wood,need)}/${need} · <img class="ic-mat" src="${V()}m2/ic_madera_comun.webp" alt=""> Común ${M.common} · 🪙 ${S.coins||0}`};hud();
  const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
  const cam={x:H[0]-VW/2,y:H[1]-VH*.55},clampCam=()=>{cam.x=Math.max(0,Math.min(FW.W-VW,cam.x));cam.y=Math.max(0,Math.min(FW.H-VH,cam.y))};clampCam();
  let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),alive=true,busy=false,arriving=null,pingP=null,pingT=0,atExit=true,fx=[];
  const free=(x,y)=>x>0&&y>0&&x<FW.W&&y<FW.H&&!G.b[Math.floor(y/20)*G.gw+Math.floor(x/20)];
  const pick=s=>{for(let i=0;i<24;i++){const x=s.zone[0]+Math.random()*(s.zone[2]-s.zone[0]),y=s.zone[1]+Math.random()*(s.zone[3]-s.zone[1]);if(free(x,y)){s.tx=x;s.ty=y;return true}}s.tx=s.x;s.ty=s.y;return false};
- let sps=[];const spawn=()=>{sps=F_SPIRITS.filter(s=>!M.calm.includes(s.id)).map(s=>{const o=Object.assign({},s,{x:0,y:0,tx:0,ty:0,wait:Math.random()});pick(o);o.x=o.tx;o.y=o.ty;pick(o);return o})};spawn();
+ let sps=[];const spawn=()=>{sps=F_SPIRITS.map(s=>{const o=Object.assign({},s,{x:0,y:0,tx:0,ty:0,wait:Math.random(),good:M.calm.includes(s.id)});pick(o);o.x=o.tx;o.y=o.ty;pick(o);return o})};spawn();
  const walkTo=(p,cb)=>{const pth=townPath(G,H,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=cb||null};
  const resume=()=>{busy=false;last=performance.now()};
- /* recolección con el piccolo */
- const gather=sp=>{busy=true;moving=false;path=[];const prevKB=ACTIVE_KB,close=()=>{ACTIVE_KB=prevKB;closeSheet();resume()};
+ /* recolección con el piccolo: cualquier árbol da madera común; los abetos resonantes dan madera especial (para instrumentos mágicos) */
+ const TREEK=new Set(['abeto_1','abeto_3','grupo_abetos','abeto_resonante_apagado']);objs.forEach((o,n)=>{o.tid=o.sp?o.sp.id:'n'+n});
+ const gather=o=>{const sp=o.sp||{};busy=true;moving=false;path=[];const prevKB=ACTIVE_KB,close=()=>{ACTIVE_KB=prevKB;closeSheet();resume()};
+  if(Math.hypot(H[0]-o.x,H[1]-o.y)>110){toast('No llegas hasta ese árbol: acércate por otro lado.');resume();return}
   if(sp.rare){sheet(`<span class="eyebrow">Madera rara</span><h2>Un tocón que brilla con fuerza</h2><img class="mat-big" src="${V()}m2/ic_madera_rara.webp" alt="Madera rara"><p>Sus anillos dorados vibran con mucha energía. Tu <b>Piccolo común</b> no tiene poder suficiente: esta madera es <b>rara</b>.</p><p class="small">Los materiales raros, épicos y legendarios necesitan instrumentos superiores y técnicas musicales más avanzadas. Volverás por ella más adelante.</p><button class="cta" type="button" id="gOk">Entendido</button>`);$('#gOk').onclick=close;return}
-  if(M.trees.includes(sp.id)){toast('Ya despertaste este abeto. Busca otro claro.');resume();return}
+  if(sp.res?M.trees.includes(sp.id):M.cut.includes(o.tid)){toast(sp.res?'Ya despertaste este abeto resonante.':'Ya recogiste madera de este árbol. Prueba con otro.');resume();return}
   if(!hasInstr('piccolo'))giveInstr('piccolo');
   const call=[72,76,79];let i=0;
-  sheet(`<span class="eyebrow">Piccolo común · recolección</span><h2>La llamada del viento</h2><p class="small">Toca estas tres notas, subiendo, para soplar sobre el abeto. Si es un abeto resonante, despertará y te dará un poco de su madera.</p>${mStaff({notes:call.map(p=>({p,d:'q'})),names:true,w:220})}<div id="gk"></div><div class="fb" id="gfb"></div><button class="ghost" type="button" id="gNo">Cancelar</button>`);
+  sheet(`<span class="eyebrow">Piccolo común · recolección</span><div class="inv-stage"><div class="inv-circle"></div><img class="inv-h" src="${V()}h_invocar_1.webp" alt="El viajero invoca su piccolo"><img class="inv-i" src="${V()}m2/instr_piccolo.webp" alt=""></div><h2>La llamada del viento</h2><p class="small">Invocas tu piccolo. Toca estas tres notas, subiendo, para soplar sobre el árbol y recoger su madera.</p><div class="dstaff">${mStaff({notes:call.map(p=>({p,d:'q'})),names:true,w:220})}</div><div id="gk"></div><div class="fb" id="gfb"></div><button class="ghost" type="button" id="gNo">Cancelar</button>`);
+  {const t=ac().currentTime+.1;[79,84,88].forEach((p,j)=>tone(p,.35,.5,'flute',t+j*.15))}
+  setTimeout(()=>{const c=$('#card');if(c)c.scrollTop=0},80);
   $('#gNo').onclick=close;
   const kb=keyboard($('#gk'),{lo:67,hi:84,labels:aidsOn(),kind:()=>'flute',onKey:p=>{if(p%12===call[i]%12){kb.flash(p,'good');i++;if(i>=call.length)done()}else{kb.flash(p,'wrong');i=0;const f=$('#gfb');f.className='fb on bad';f.innerHTML='<b>Otra vez desde el principio</b>'+call.map(q=>NAMES[q%12]).join(', ')+', subiendo.'}}});call.forEach(p=>kb.hint(p,true));
-  const done=()=>{if(!M.tried.includes(sp.id))M.tried.push(sp.id);
-   if(sp.res){M.trees.push(sp.id);M.wood++;S.inv=S.inv||{};S.inv.madera_especial=(S.inv.madera_especial||0)+1;save();hud();for(let j=0;j<18;j++)fx.push({x:sp.x+(Math.random()-.5)*80,y:sp.y-40-Math.random()*160,t:performance.now()+j*40});
+  const done=()=>{S.inv=S.inv||{};for(let j=0;j<(sp.res?18:8);j++)fx.push({x:o.x+(Math.random()-.5)*70,y:o.y-30-Math.random()*(sp.res?160:90),t:performance.now()+j*40});
+   if(sp.res){M.trees.push(sp.id);M.wood++;S.inv.madera_especial=(S.inv.madera_especial||0)+1;save();hud();
     const t=ac().currentTime+.1;[72,76,79,84].forEach((p,j)=>tone(p,.5,.6,'flute',t+j*.12));
-    sheet(`<span class="eyebrow">¡Abeto resonante!</span><h2>El árbol despierta</h2><img class="mat-big" src="${V()}m2/ic_madera_especial.webp" alt="Madera especial"><p>Las vetas doradas de la corteza vibran con tu soplo. Recoges <b>una pequeña porción de madera especial</b> 🪵 (${Math.min(M.wood,need)}/${need}).</p><p class="small">Esta madera vibra muy bien: por eso los lutieres la eligen para la tapa de los instrumentos de cuerda.</p><button class="cta" type="button" id="gOk">Seguir</button>`)}
-   else sheet(`<span class="eyebrow">Abeto común</span><h2>Este abeto no responde</h2><p>Su corteza no tiene vetas doradas: es un abeto común. Su madera sirve para construir, pero no para un instrumento mágico.</p><p class="small">Pista: los abetos resonantes son los más grandes y antiguos, y tienen pequeñas chispas doradas alrededor.</p><button class="cta" type="button" id="gOk">Seguir buscando</button>`);
+    sheet(`<span class="eyebrow">¡Abeto resonante!</span><h2>El árbol despierta</h2><img class="mat-big" src="${V()}m2/ic_madera_especial.webp" alt="Madera especial"><p>Las vetas doradas de la corteza vibran con tu soplo. Recoges <b>madera especial</b> (${Math.min(M.wood,need)}/${need}): el material importante para crear <b>instrumentos mágicos</b>.</p><p class="small">Solo los abetos resonantes la dan: son los más grandes y antiguos, con chispas doradas.</p><button class="cta" type="button" id="gOk">Seguir</button>`)}
+   else{M.cut.push(o.tid);M.common++;S.inv.madera_comun=(S.inv.madera_comun||0)+1;save();hud();
+    sheet(`<span class="eyebrow">Madera de abeto</span><h2>+1 madera común</h2><img class="mat-big" src="${V()}m2/ic_madera_comun.webp" alt="Madera común"><p>Recoges un poco de madera de abeto. Sirve para construir y reparar instrumentos sencillos.</p><p class="small">Para un instrumento mágico necesitas <b>madera especial</b>: búscala en los abetos resonantes de los claros, los que tienen chispas doradas.</p><button class="cta" type="button" id="gOk">Seguir</button>`)}
    $('#gOk').onclick=close}};
  /* combate: el espíritu toca al viajero */
  const fight=s=>{busy=true;moving=false;path=[];const first=!M.met;
-  townEncounter({name:'Espíritu del Ruido',battle:true,heroHP:4,tasks:noiseTasks(s.lv),winBtn:'Volver al bosque',winText:'El ruido se transforma en una nota clara y se disuelve entre los abetos.',
+  townEncounter({name:'Espíritu del Ruido',battle:true,heroHP:4,tasks:noiseTasks(s.lv),winBtn:'Volver al bosque',winText:'El ruido se transforma en una nota clara: ahora es un espíritu bueno que pasea por el bosque.',
    intro:first?['¡Un Espíritu del Ruido te alcanza!','Invocas tu piano viejo: en este módulo es tu único instrumento de combate.','Toca el acorde que te pida. Cada acierto le quita resistencia; cada nota equivocada te quita un poco de vida.']:null,
    introStaff:first?{notes:['C','F','G'].map(c=>({ps:CHORD_BOOK[c].ps,d:'w'})),names:true,sp:70,w:300,cap:'Do mayor · Fa mayor · Sol mayor'}:null,
-   onLose:()=>faint()},()=>{M.met=1;M.calm.push(s.id);sps=sps.filter(x=>x!==s);['C','F','G'].forEach(unlockChord);S.coins=(S.coins||0)+5;save();hud();toast('El espíritu recuperó su equilibrio. 🪙 +5 florines');resume()});M.met=1;save()};
+   onLose:()=>faint()},()=>{M.met=1;M.calm.push(s.id);s.good=true;s.wait=1;pick(s);['C','F','G'].forEach(unlockChord);S.coins=(S.coins||0)+5;save();hud();toast('¡El espíritu se volvió bueno! Ahora pasea tranquilo por el bosque. 🪙 +5 florines');resume()});M.met=1;save()};
  /* derrota: transición y reaparición en el taller del maestro, sin perder nada */
  const faint=()=>{const f=document.createElement('div');f.className='f-faint';f.innerHTML='<p>Todo da vueltas…</p>';wrap.appendChild(f);requestAnimationFrame(()=>f.classList.add('on'));
   setTimeout(()=>{sheet(`<span class="eyebrow">Punto de control · Taller del maestro</span><h2>Despiertas junto al taller</h2><p>«Esos espíritus son traviesos —dice el maestro Bernardo—. Descansa un poco. Tus cosas están a salvo.»</p><p class="small">Conservas tu madera especial (🪵 ${M.wood}/${need}), tus florines, tus instrumentos y todo tu progreso.</p><button class="cta gold" type="button" id="fBack">Volver al bosque</button>`);
    $('#fBack').onclick=()=>{closeSheet();H[0]=F_ENTRY[0];H[1]=F_ENTRY[1];cam.x=H[0]-VW/2;cam.y=H[1]-VH*.55;clampCam();spawn();atExit=true;f.classList.remove('on');setTimeout(()=>f.remove(),700);resume()}},900)};
  const leave=()=>{if(M.wood>=need){M.done=1;save();busy=true;alive=false;setTimeout(next,250);return}toast(`Todavía te falta madera especial (${M.wood}/${need}). Busca los abetos resonantes en los claros.`)};
- const hitSpecial=(wx,wy)=>objs.find(o=>{if(!o.sp)return false;const im=TIMG['b_'+o.k];if(!im||!im.width)return false;const w=im.width*o.s,h=im.height*o.s;return wx>o.x-w*.4&&wx<o.x+w*.4&&wy>o.y-h&&wy<o.y+12});
+ const hitTree=(wx,wy)=>{let best=null;objs.forEach(o=>{if(!(o.sp||TREEK.has(o.k)))return;const im=TIMG['b_'+o.k];if(!im||!im.width)return;const w=im.width*o.s,h=im.height*o.s;if(wx>o.x-w*.36&&wx<o.x+w*.36&&wy>o.y-h&&wy<o.y+14&&(!best||o.y>best.y))best=o});return best};
  cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),wx=e.clientX-r.left+cam.x,wy=e.clientY-r.top+cam.y;pingP=[wx,wy];pingT=performance.now();
-  const s=sps.find(s=>Math.hypot(wx-s.x,wy-(s.y-30))<50);if(s){walkTo([s.x,s.y]);return}
-  const o=hitSpecial(wx,wy);if(o){const sp=o.sp,side=sp.x<700?1:-1;walkTo([sp.x+side*55,sp.y+22],()=>gather(sp));return}
+  const s=sps.find(s=>!s.good&&Math.hypot(wx-s.x,wy-(s.y-30))<50);if(s){walkTo([s.x,s.y]);return}
+  const o=hitTree(wx,wy);if(o){const side=H[0]<o.x?-1:1;walkTo([o.x+side*45,o.y+22],()=>gather(o));return}
   if(wy>FW.H-110&&Math.abs(wx-700)<140){walkTo([700,FW.H-40],leave);return}walkTo([wx,wy])});
  const ro=new ResizeObserver(fit);ro.observe(wrap);
  const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
   if(!busy){if(moving&&path.length){const p=path[0],dx=p[0]-H[0],dy=p[1]-H[1],d=Math.hypot(dx,dy),v=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';
     if(d<=v){H[0]=p[0];H[1]=p[1];path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(a)a()}}else{H[0]+=dx/d*v;H[1]+=dy/d*v}walkT+=dt}
-   if(H[1]>FW.H-90){if(!atExit&&!moving){atExit=true;leave()}}else atExit=false;
-   sps.forEach(s=>{const dh=Math.hypot(H[0]-s.x,H[1]-s.y);if(dh<150&&H[1]<FW.H-150){s.tx=H[0];s.ty=H[1]}if(s.wait>0){s.wait-=dt;return}const dx=s.tx-s.x,dy=s.ty-s.y,d=Math.hypot(dx,dy);if(d<4){s.wait=.6+Math.random()*1.6;pick(s);return}
-    const v=(dh<150?52:36)*dt,nx=s.x+dx/d*v,ny=s.y+dy/d*v;if(free(nx,ny)&&nx>s.zone[0]-120&&nx<s.zone[2]+120&&ny>s.zone[1]-120&&ny<s.zone[3]+120){s.x=nx;s.y=ny}else pick(s)});
-   const hit=sps.find(s=>Math.hypot(H[0]-s.x,H[1]-s.y)<44);if(hit)fight(hit)}
+   if(H[1]>FW.H-55){if(!atExit&&!moving){atExit=true;leave()}}else if(H[1]<FW.H-90)atExit=false;
+   sps.forEach(s=>{const dh=Math.hypot(H[0]-s.x,H[1]-s.y);if(!s.good&&dh<150&&H[1]<FW.H-150){s.tx=H[0];s.ty=H[1]}if(s.wait>0){s.wait-=dt;return}const dx=s.tx-s.x,dy=s.ty-s.y,d=Math.hypot(dx,dy);if(d<4){s.wait=.6+Math.random()*1.6;pick(s);return}
+    const v=(s.good?24:dh<150?52:36)*dt,nx=s.x+dx/d*v,ny=s.y+dy/d*v;if(free(nx,ny)&&nx>s.zone[0]-120&&nx<s.zone[2]+120&&ny>s.zone[1]-120&&ny<s.zone[3]+120){s.x=nx;s.y=ny}else pick(s)});
+   const hit=sps.find(s=>!s.good&&Math.hypot(H[0]-s.x,H[1]-s.y)<44);if(hit)fight(hit)}
   cam.x+=(H[0]-VW/2-cam.x)*Math.min(1,dt*5);cam.y+=(H[1]-VH*.55-cam.y)*Math.min(1,dt*5);clampCam();
   g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);g.drawImage(forestGround(),cam.x,cam.y,VW,VH,0,0,VW,VH);g.translate(-cam.x,-cam.y);
   const list=[];objs.forEach(o=>{const awake=o.sp&&o.sp.res&&M.trees.includes(o.sp.id),k='b_'+(awake?'abeto_resonante':o.k),im=TIMG[k];if(!im||!im.complete||!im.width)return;const w=im.width*o.s,h=im.height*o.s;if(o.x+w/2<cam.x||o.x-w/2>cam.x+VW||o.y-h>cam.y+VH||o.y<cam.y-20)return;
@@ -1593,7 +1600,7 @@ function stepForest(st,box){forestAssets();const need=st.need||3;if(!S.m2||S.m2.
     if(o.sp&&(o.sp.res||o.sp.rare)){const n=awake?7:6;for(let i=0;i<n;i++){const a=t/900+i*2.1,px=o.x+Math.sin(a*1.3+i)*w*.32,py=o.y-h*.25-((t/40+i*60)%(h*.6)),al=awake||o.sp.rare?.9:.6+.4*Math.sin(t/260+i*1.7);g.fillStyle=`rgba(255,200,90,${Math.max(0,al)*.35})`;g.beginPath();g.arc(px,py,7,0,6.3);g.fill();g.fillStyle=`rgba(255,230,140,${Math.max(0,al)})`;g.beginPath();g.arc(px,py,2.8,0,6.3);g.fill()}}}})});
   const fi=[1,2,3,2][Math.floor(walkT/.16)%4],hk=moving?(hdir==='front'?'h_frente_'+fi:'h_lado_'+fi):'h_quieto_'+(Math.floor(t/1300)%2+1),hi=TIMG[hk],hflip=moving&&hdir==='side'&&facing<0,bob=moving&&fi===2?-1.5:0;
   list.push({y:H[1],d:()=>{g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(H[0],H[1],13,4,0,0,6.3);g.fill();if(hi&&hi.complete&&hi.naturalWidth){const k=68/144,w=hi.width*k,h=hi.height*k;g.save();g.translate(H[0],H[1]+bob);if(hflip)g.scale(-1,1);g.drawImage(hi,-w/2,-h+2,w,h);g.restore()}}});
-  sps.forEach(s=>list.push({y:s.y,d:()=>{for(let i=0;i<2;i++){const q=((t/1300)+i/2)%1;g.strokeStyle=`rgba(170,140,255,${.45*(1-q)})`;g.lineWidth=2;g.beginPath();g.ellipse(s.x,s.y-30,18+q*46,9+q*22,0,0,6.3);g.stroke()}drawSpirit(g,s.x,s.y,t/1000+s.zone[0],false)}}));
+  sps.forEach(s=>list.push({y:s.y,d:()=>{if(s.good){for(let i=0;i<4;i++){const a=t/700+i*1.57;g.fillStyle=`rgba(255,225,140,${.5+.4*Math.sin(t/300+i)})`;g.beginPath();g.arc(s.x+Math.cos(a)*30,s.y-40+Math.sin(a)*14,2.4,0,6.3);g.fill()}}else for(let i=0;i<2;i++){const q=((t/1300)+i/2)%1;g.strokeStyle=`rgba(170,140,255,${.45*(1-q)})`;g.lineWidth=2;g.beginPath();g.ellipse(s.x,s.y-30,18+q*46,9+q*22,0,0,6.3);g.stroke()}drawSpirit(g,s.x,s.y,t/1000+s.zone[0],s.good)}}));
   list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
   fx=fx.filter(p=>t-p.t<1400);fx.forEach(p=>{const k=(t-p.t)/1400;if(k<0)return;g.fillStyle=`rgba(255,220,120,${1-k})`;g.font='16px serif';g.fillText('♪',p.x,p.y-k*60)});
   /* salida hacia Florencia */
