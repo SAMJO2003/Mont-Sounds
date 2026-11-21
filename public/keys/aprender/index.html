@@ -439,6 +439,7 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .newb{position:relative}.newb::after{content:'!';position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#e0342c;color:#fff;font:900 14px/20px 'Alegreya Sans',sans-serif;text-align:center;box-shadow:0 0 0 2px #1a0f08,0 0 10px rgba(224,52,44,.8);animation:nbp 1.2s ease-in-out infinite}@keyframes nbp{50%{transform:scale(1.2)}}
 #vLesson.game>.enc.wood,.enc.wood{background:radial-gradient(120% 80% at 50% 10%,#6a4422,#1c1007 72%)}.wtop .enc-tree{height:190px;max-width:52%;object-fit:contain;filter:drop-shadow(0 10px 16px rgba(0,0,0,.6))}.enc-tree.fall{animation:tfall 1.1s ease-in forwards}.enc-tree.glow{filter:drop-shadow(0 0 26px rgba(255,210,110,1)) brightness(1.15);transition:filter .6s}@keyframes tfall{60%{transform:rotate(14deg)}100%{transform:rotate(80deg) translate(20px,40px);opacity:0}}
 .wtop small{font-size:12px;color:#ffd98c}.enc-hero .tpic{position:absolute;right:-28%;bottom:28%;width:62%;opacity:0;animation:invi 1.2s .9s ease-out forwards;filter:drop-shadow(0 0 14px rgba(255,215,110,.95))}.treward{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;color:#f3e2c0}.treward img{width:120px;filter:drop-shadow(0 0 18px rgba(255,210,120,.9));animation:flin .6s both,flbob 2.4s ease-in-out infinite}.treward b{font:700 20px Cinzel,serif;color:#ffd98c}.treward small{opacity:.8}.bag{color:#ffd56e}.lost{color:#ffb4a8;font-weight:700}
+.wtop .enc-hero{width:46%;max-width:230px}
 </style>
 
 <div id="sky"></div>
@@ -1595,10 +1596,11 @@ function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC|
   if(!hasInstr('piccolo'))giveInstr('piccolo');treeInvoke(o,res)};
  const treeInvoke=(o,res)=>{const pat=flutePattern(Z.call),nmz=pat.map(p=>NAMES[p%12]).join(', ');let i=0,fin=false;const prevKB=ACTIVE_KB;
   const ov=document.createElement('div');ov.className='enc wood';
-  ov.innerHTML=`<div class="enc-iris"></div><div class="enc-box"><div class="enc-top wtop"><div class="enc-hero"><img src="${V()}h_invocar_1.webp" alt="El viajero invoca su piccolo"><img class="tpic" src="${V()}m2/instr_piccolo.webp" alt=""></div><img class="enc-tree" src="${V()}bosque/${dk(o)}.webp" alt=""><b class="enc-name">${res?'Abeto resonante':'Abeto'}</b><small>${res?'Da savia mágica':'Da madera común'}</small></div>
+  ov.innerHTML=`<div class="enc-iris"></div><div class="enc-box"><div class="enc-top wtop"><div class="enc-hero"><img id="tHero" class="hero-anim" src="${V()}h_invocar_1.webp" alt="El viajero invoca su piccolo"></div><img class="enc-tree" src="${V()}bosque/${dk(o)}.webp" alt=""><b class="enc-name">${res?'Abeto resonante':'Abeto'}</b><small>${res?'Da savia mágica':'Da madera común'}</small></div>
    <div class="enc-mid"><div class="dstaff">${mStaff({notes:pat.map(p=>({p,d:'q'})),names:true,w:Math.max(220,pat.length*56+90)})}</div><div class="g-say"><b class="g-q">Llamada del viento: ${nmz}</b><span class="g-sub">Invocas tu piccolo. Toca las notas en orden para soplar sobre el árbol.</span></div><div class="fb" id="tfb"></div></div>
    <div class="enc-kb" id="tkb"></div><button class="ghost" type="button" id="tNo">Cancelar</button></div>`;
   $('#vLesson').appendChild(ov);setTimeout(()=>ov.classList.add('in'),40);
+  {const hi=ov.querySelector('#tHero'),fr=n=>V()+'h_'+n+'.webp';['inv_piccolo_2','inv_piccolo_3'].forEach(n=>{const im=new Image();im.src=fr(n)});setTimeout(()=>{if(hi.isConnected)hi.src=fr('inv_piccolo_2')},700);setTimeout(()=>{if(hi.isConnected)hi.src=fr('inv_piccolo_3')},1800)}
   const close=()=>{ACTIVE_KB=prevKB;ov.classList.add('out');setTimeout(()=>ov.remove(),400);resume()};ov.querySelector('#tNo').onclick=close;
   {const t=ac().currentTime+.1;[79,84,88].forEach((p,j)=>tone(p,.35,.5,'flute',t+j*.15))}
   const kb=keyboard(ov.querySelector('#tkb'),{lo:67,hi:84,labels:aidsOn(),kind:()=>'flute',onKey:p=>{if(fin)return;const f=ov.querySelector('#tfb');
