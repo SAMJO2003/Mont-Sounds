@@ -1263,7 +1263,7 @@ const TEX=['adoquin','adoquin_oscuro','losas','tierra_camino','cesped','pradera_
 let TOWN_GROUND_TMP=null;function townGround(){if(TOWN_GROUND)return TOWN_GROUND;const ready=TEX.concat(DEC,[...TOWN_BUILD]).every(k=>{const i=TIMG[k];return i&&i.complete&&i.width});if(!ready&&TOWN_GROUND_TMP)return TOWN_GROUND_TMP;
  const c=document.createElement('canvas');c.width=TW.W;c.height=TW.H;const g=c.getContext('2d'),r=townRng(7);
  if(!ready){g.fillStyle='#b99a6e';g.fillRect(0,0,TW.W,TW.H);TOWN_GROUND_TMP=c;return c}
- const pat=k=>g.createPattern(TIMG[k],'repeat');
+ const TILT=.7,pat=k=>{const p=g.createPattern(TIMG[k],'repeat');if(p.setTransform&&k!=='muralla')p.setTransform(new DOMMatrix().scale(1,TILT));return p};
  /* forma irregular (borde natural) */
  const blob=(x,y,w,h,seed)=>{g.beginPath();for(let k=0;k<=48;k++){const a=k/48*6.283,j=1+.1*Math.sin(a*5+seed)+.06*Math.sin(a*11+seed*2)+.04*Math.sin(a*19+seed*3);const px=x+Math.cos(a)*w*j,py=y+Math.sin(a)*h*j;k?g.lineTo(px,py):g.moveTo(px,py)}g.closePath()};
  const fillWith=(k,ox,oy)=>{g.save();g.translate(ox||0,oy||0);g.fillStyle=pat(k);g.fill();g.restore()};
@@ -1280,7 +1280,7 @@ let TOWN_GROUND_TMP=null;function townGround(){if(TOWN_GROUND)return TOWN_GROUND
  blob(750,2230,150,90,9);fillWith('tierra_camino');
  /* 4b · calles principales de losas (cintas con bordillo) y senderos desde cada puerta */
  const AV=[[[750,2250],[750,1700]],[[750,1460],[750,720]],[[200,1365],[1300,1365]],[[1130,960],[1130,1365]],[[330,690],[330,1250]],[[330,2065],[1170,2065]],[[150,765],[1350,765]],[[330,1365],[330,2065]],[[1170,1365],[1170,2065]]];
- const ribbon=(pts,wd,k)=>{g.save();g.lineCap='round';g.lineJoin='round';g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.lineWidth=wd+8;g.strokeStyle='rgba(105,86,62,.9)';g.stroke();g.lineWidth=wd;const pp=pat(k);if(pp.setTransform)pp.setTransform(new DOMMatrix().scale(.55));g.strokeStyle=pp;g.stroke();g.lineWidth=wd+8;g.globalAlpha=.25;g.strokeStyle='rgba(255,240,210,.5)';g.setLineDash([2,10]);g.stroke();g.restore()};
+ const ribbon=(pts,wd,k)=>{g.save();g.lineCap='round';g.lineJoin='round';g.beginPath();pts.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.lineWidth=wd+8;g.strokeStyle='rgba(105,86,62,.9)';g.stroke();g.lineWidth=wd;const pp=pat(k);if(pp.setTransform)pp.setTransform(new DOMMatrix().scale(.55,.55*TILT));g.strokeStyle=pp;g.stroke();g.lineWidth=wd+8;g.globalAlpha=.25;g.strokeStyle='rgba(255,240,210,.5)';g.setLineDash([2,10]);g.stroke();g.restore()};
  AV.forEach(p=>ribbon(p,58,'losas'));
  const nearestAV=(x,y)=>{let best=null;AV.forEach(([a,b])=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/L)),q=[a[0]+dx*t,a[1]+dy*t],d=Math.hypot(x-q[0],y-q[1]);if(!best||d<best.d)best={d,q}});return best.q};
  TOWN_OBJ.filter(o=>TOWN_BUILD.has(o.k)).forEach((o,i)=>{const im=TIMG[o.k],w=im&&im.width?im.width*(o.s||1):150,door=[o.x+(o.flip?w*.12:-w*.12),o.y+8],q=nearestAV(door[0],door[1]);
