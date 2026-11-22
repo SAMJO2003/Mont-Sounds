@@ -1363,7 +1363,7 @@ $('#lClose').onclick=()=>{if(!LS)return;sheet(`<h2>¿Salir de la lección?</h2><
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
 function next(){if(!micGlobal)micOff();EAR.chordDown=[];EAR.cj=null;EAR.heard=null;LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
 function head(ph,q,sub){const cur=LS&&LS.L.steps[LS.i],who=cur&&cur.who;if(!q&&!sub)return `<span class="lphase">${esc(ph||'')}</span>`;return `<span class="lphase">${esc(ph||'')}</span><div class="g-say">${who&&WHO[who]?`<span class="g-who">${portrait(who)}<span>${esc(WHO[who])}</span></span>`:''}${q?`<b class="g-q">${esc(q)}</b>`:''}${sub?`<span class="g-sub">${esc(sub)}</span>`:''}</div>`}
-function renderStep(){const st=LS.L.steps[LS.i],box=$('#lStage');$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
+function renderStep(){$('#lFoot').classList.remove('hide-foot');const st=LS.L.steps[LS.i],box=$('#lStage');$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
  (STEP[st.type]||STEP.story)(st,box);if(st.stage&&!box.querySelector('.mstage'))box.insertAdjacentHTML('afterbegin',mstageHTML(st.stage));$('.lbody').scrollTop=0}
 /* ===================== MODO JUEGO: narración, escenas y personajes ===================== */
 /* ===================== MAPA DE LA CIUDAD: moverse por las calles y cumplir misiones ===================== */
