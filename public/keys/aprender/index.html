@@ -441,7 +441,7 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .wtop small{font-size:12px;color:#ffd98c}.enc-hero .tpic{position:absolute;right:-28%;bottom:28%;width:62%;opacity:0;animation:invi 1.2s .9s ease-out forwards;filter:drop-shadow(0 0 14px rgba(255,215,110,.95))}.treward{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;color:#f3e2c0}.treward img{width:120px;filter:drop-shadow(0 0 18px rgba(255,210,120,.9));animation:flin .6s both,flbob 2.4s ease-in-out infinite}.treward b{font:700 20px Cinzel,serif;color:#ffd98c}.treward small{opacity:.8}.bag{color:#ffd56e}.lost{color:#ffb4a8;font-weight:700}
 .wtop .enc-hero{width:46%;max-width:230px}
 .m3{position:relative;min-height:100%;display:flex;flex-direction:column;gap:8px;padding:6px 2px 4px;color:#f3e2c0;overflow:hidden}
-.m3::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-gradient(90% 60% at 50% 32%,#3a2614 0%,#160d07 60%,#070403 100%)}
+.m3{isolation:isolate;width:min(calc(100vw - 28px),520px);box-sizing:border-box;margin:0 auto}.m3::before{content:'';position:absolute;inset:0;z-index:-1;background:radial-gradient(90% 60% at 50% 32%,#3a2614 0%,#160d07 60%,#070403 100%)}
 .m3-vig{position:absolute;inset:-20%;pointer-events:none;background:radial-gradient(60% 45% at 50% 30%,rgba(255,190,90,.16),transparent 70%);animation:m3cand 3.2s ease-in-out infinite;z-index:0}
 @keyframes m3cand{0%,100%{opacity:.85}40%{opacity:1}60%{opacity:.7}}
 .m3-dust,.m3sc .m3-dust{position:absolute;inset:0;pointer-events:none;z-index:1;background-image:radial-gradient(2px 2px at 20% 30%,rgba(255,220,140,.8),transparent),radial-gradient(1.5px 1.5px at 70% 60%,rgba(255,220,140,.7),transparent),radial-gradient(2px 2px at 40% 80%,rgba(255,220,140,.6),transparent),radial-gradient(1.5px 1.5px at 85% 20%,rgba(255,220,140,.7),transparent),radial-gradient(1px 1px at 55% 45%,rgba(255,220,140,.9),transparent);background-size:240px 260px;animation:m3dust 18s linear infinite}
@@ -517,6 +517,15 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .room-ov{position:absolute;inset:0;z-index:30;background:#070403;overflow:auto;opacity:0;transition:opacity .45s}.room-ov.in{opacity:1}.room-ov.out{opacity:0}
 .room-q{z-index:4}
 .enc-phase{position:absolute;left:0;right:0;top:34%;z-index:20;display:flex;justify-content:center;pointer-events:none;animation:encph 2.2s ease-in-out forwards}.enc-phase b{font:700 22px Cinzel,serif;color:#ffd98c;padding:10px 22px;border-radius:14px;background:rgba(10,6,3,.85);border:1px solid rgba(255,215,120,.6);text-shadow:0 0 16px rgba(255,200,100,.8);box-shadow:0 0 40px rgba(255,200,100,.35)}@keyframes encph{0%{opacity:0;transform:scale(.8)}15%,75%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.05)}}
+.fin .fin-stage{position:relative;z-index:2;height:min(52vh,420px);margin:18px auto 6px;width:100%;max-width:420px}
+.fin-staff{position:absolute;left:3%;right:3%;top:30%;z-index:3;transition:opacity 1.2s,transform 1.2s}.fin.mapon .fin-staff{opacity:0;transform:translateY(-30px) scale(.9)}
+.fin-map{position:absolute;inset:6% 4%;z-index:2;opacity:0;transform:scale(.85) rotate(-2deg);transition:opacity 1.4s,transform 1.6s cubic-bezier(.2,.8,.2,1);filter:drop-shadow(0 18px 30px rgba(0,0,0,.75))}.fin.mapon .fin-map{opacity:1;transform:none}
+.m3-map2{width:100%;height:auto}.m3-map2.drawn .m3-route{animation:finroute 2.2s ease-in-out both}@keyframes finroute{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}.m3-map2 .m3-reg{animation:m3map 1.8s ease-in-out infinite}.m3-map2.drawn .m3-reg,.m3-map2.drawn .m3-reg2{animation:finreg 1.2s 2s both,m3map 1.8s 3.2s ease-in-out infinite}@keyframes finreg{from{r:0;opacity:0}to{opacity:1}}
+.fin-fly{position:absolute;inset:0;z-index:5;pointer-events:none}.fin-note{position:absolute;transform:translate(-50%,-50%);font-size:26px;color:#fff3c0;text-shadow:0 0 12px #ffd56e,0 0 24px #ffb340;transition:left 1.1s cubic-bezier(.5,0,.3,1),top 1.1s cubic-bezier(.5,-.6,.3,1),font-size 1.1s}.fin-note.go{font-size:16px}
+.fin-ink{bottom:-2%;color:#ffe9b8;font-size:15px;text-shadow:0 0 10px rgba(255,200,100,.8)}
+.fin-codex{position:relative;z-index:3;margin:6px auto;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;animation:m3up .8s both}.fin-codex b{font:700 18px Cinzel,serif;color:#ffd98c}.fin-codex small{color:#e8d2a8}.fin-book{font-size:54px;animation:finbook 1.2s cubic-bezier(.2,1.6,.4,1) both,flbob 2.6s 1.2s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(255,210,110,.9))}@keyframes finbook{from{transform:scale(0) rotate(-30deg)}to{transform:none}}
+.cx-book{background:linear-gradient(#e9d6aa,#d9bd86);border-radius:10px;padding:10px;box-shadow:inset 0 0 30px rgba(110,70,30,.5)}.cx-intro{font:italic 14px Georgia,serif;color:#5a3a18;margin:0 0 8px;text-align:center}.cx-book .bk-item.cx{background:rgba(255,248,230,.55);color:#3a2410;border:1px solid rgba(120,80,40,.35)}.cx-book .bk-item.cx h3{color:#3a2410}.cx-book .bk-item.cx .small{color:#4a3018}.cx-book .cx-k{color:#8a5a2a}.cx-book .bk-item.cx.lock{opacity:.55;border-style:dashed}.cx-book .dstaff{background:radial-gradient(ellipse at 50% 40%,#3a2a18,#1c1410)}.cx-map{margin:6px 0}
+.cx-book .bk-item.cx p.small,.cx-book .bk-item.cx p{color:#3a2410!important;opacity:1!important}
 </style>
 
 <div id="sky"></div>
@@ -720,7 +729,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
     rounds:[{aid:1,say:'Primero con nombres.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},{aid:2,say:'Ahora solo con la tecla.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},{aid:3,say:'Y ahora, solo leyendo.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]}],
     reveal:'El manuscrito recupera su melodía original.',revealSub:'Las notas brillan… y sobre la mesa aparece un mapa antiguo.'}}],
     exit:{x:180,y:470,label:'Ver el mapa',ic:'🗺️',need:['a7'],locked:'El manuscrito aún está incompleto.',hint:'Algo aparece sobre la mesa…'}},
-   {type:'scene',ckClear:1,img:'m3_mapa',who:'isabella',move:'zoom',codex:'m3_pista',lines:['—¡Estas notas no forman solamente una melodía!','—El Maestro escondió un camino dentro de su propia música.','En el mapa aparece una inscripción: «Cuando la música pierda su voz, buscad aquello que fue olvidado».','—Quizá esta sea la primera pista de lo que ocurrió con él.'],accept:'Completar el módulo',reward:'🏅 Módulo 3 completado: El lenguaje escrito'}
+   {type:'finale',codex:['m3_pista','m3_mapa'],lines:['—¡Estas notas no forman solamente una melodía!','—El Maestro escondió un camino dentro de su propia música.','—Quizá esta sea la primera pista de lo que ocurrió con él.'],accept:'Completar el módulo',reward:'🏅 Módulo 3 completado: El lenguaje escrito'}
   ]},
  /* ---------------- 04 ---------------- */
  {id:'w1m04',t:'Los instrumentos olvidados',d:'El clavecín y el clavicordio: cómo suenan, cómo funcionan y de qué época son.',
@@ -1289,7 +1298,7 @@ function micRow(host){if(!LS)return;let row=host.nextElementSibling;if(!row||!ro
  row.querySelector('.micbtn').onclick=async()=>{S.input=inputMode()==='mic'?'touch':'mic';save();await applyInput();document.querySelectorAll('.microw').forEach(r=>micRow(r.previousElementSibling));if(inputMode()==='mic')toast('Toca en tu piano: la app te escucha. Mira el indicador verde arriba.')};
  const c=row.querySelector('[data-cal]');if(c)c.onclick=()=>earCalibrate()}
 function syncLessonBar(){const c=$('#lCalm');if(c){c.textContent=S.calm?'🕊':'⏳';c.setAttribute('aria-pressed',!!S.calm)}const b=$('#lInput');if(b)b.textContent=({touch:'🎹',mic:'🎤',midi:'🎛'})[inputMode()];const a=$('#lAids');if(a){a.setAttribute('aria-pressed',aidsOn());a.style.opacity=aidsOn()?1:.45}}
-const STEP_NAMES={scene:'Escena',citymap:'Mapa',bells:'Campanas',water:'Fuente',lights:'Faroles',seqperf:'Fuente musical',spirit:'Espíritu',musico:'Músicos',melody:'Melodía',create:'Crear',story:'Historia',forest:'Bosque',mystery:'Acertijo',room:'Sala',sort:'Clasificar',timbre:'Timbre'};
+const STEP_NAMES={scene:'Escena',citymap:'Mapa',bells:'Campanas',water:'Fuente',lights:'Faroles',seqperf:'Fuente musical',spirit:'Espíritu',musico:'Músicos',melody:'Melodía',create:'Crear',story:'Historia',forest:'Bosque',mystery:'Acertijo',room:'Sala',finale:'Final',sort:'Clasificar',timbre:'Timbre'};
 function jumpMenu(){if(!LS)return;const st=LS.L.steps;sheet(`<span class="eyebrow">Revisión</span><h2>Ir a un ejercicio</h2><div class="jlist">${st.map((x,i)=>{const t=x.mission||x.q||x.sub||(x.lines&&x.lines[0])||x.title||x.name||'';return `<button type="button" class="jrow${i===LS.i?' on':''}" data-j="${i}"><b>${i+1}</b><span><small>${esc(STEP_NAMES[x.type]||x.type)}${x.mode?' · '+esc(({low:'la más grave',high:'la más aguda',rush:'relámpago',order:'ordenar',broken:'escalera',repeat:'repetir',odd:'nota distinta',tune:'afinar',contour:'contorno',rhythm:'ritmo'})[x.mode]||x.mode):''}</small>${esc(t.replace(/^—/,'').slice(0,80))}</span></button>`}).join('')}</div><button class="ghost" type="button" id="jClose">Cerrar</button>`);
  $('#jClose').onclick=closeSheet;$$('.jrow').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;closeSheet();LOOPMEL.on=false;const prev=st.slice(0,j);
   LS.mapDone=prev.filter(x=>x.type==='citymap').map(x=>x.go);LS.mapPrev=null;LS.scene={};if(prev.some(x=>x.type==='bells'))LS.scene.bells=true;if(prev.some(x=>x.type==='water'||x.fx==='water'))LS.scene.water=true;if(prev.some(x=>x.type==='lights'))LS.scene.lights=true;if(prev.some(x=>x.type==='seqperf'))LS.scene.fountain=true;
@@ -1990,13 +1999,51 @@ function stepRoom(st,box){townAssets();const RM=ROOMS[st.room];S.m3=S.m3||{};S.m
  if(ROOM_ART[st.room])timg('r_'+st.room,V()+ROOM_ART[st.room]+'.webp');
  if(st.intro&&!solved('_intro'))talk(st.intro,st.who,()=>{mark('_intro');placeHot()})}
 
+/* ===================== MÓDULO 3 · ESCENA FINAL: la melodía revela el mapa ===================== */
+const M3_MAP_ART=null;/* cuando llegue el arte: 'm3/mapa_isla' */
+const M3_PTS=[[96,132],[122,108],[150,118],[178,96],[196,104],[208,110]];
+function m3MapSvg(o={}){const path='M'+M3_PTS.map(p=>p.join(' ')).join(' L');
+ return `<svg class="m3-map2 ${o.cls||''}" viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="pg2" cx="50%" cy="45%"><stop offset="0" stop-color="#ecd7a6"/><stop offset="1" stop-color="#a97f45"/></radialGradient></defs>
+  ${M3_MAP_ART?`<image href="${V()}${M3_MAP_ART}.webp" x="0" y="0" width="300" height="220" preserveAspectRatio="xMidYMid slice"/>`:`<rect x="4" y="4" width="292" height="212" rx="8" fill="url(#pg2)"/><path d="M60 120 C50 70 110 40 150 52 C200 30 260 70 240 120 C255 160 200 190 150 176 C100 196 55 165 60 120Z" fill="#c9a36a" stroke="#5a3a18" stroke-width="2"/><path d="M90 110 l10 -14 l10 14z M120 90 l8 -12 l8 12z M200 140 l9 -12 l9 12z M230 118 l7 -10 l7 10z" fill="#6a4a24"/><circle cx="150" cy="128" r="4" fill="#5a3a18"/><text x="150" y="146" text-anchor="middle" font-size="8" fill="#5a3a18" font-family="Cinzel,serif">Firenze</text><g transform="translate(262 34)" stroke="#5a3a18" fill="none"><circle r="12"/><path d="M0 -16 L3 0 L0 16 L-3 0Z" fill="#5a3a18"/></g><text x="150" y="208" text-anchor="middle" font-size="11" fill="#5a3a18" font-family="Cinzel,serif">INSULA MUSICAE</text>`}
+  <path class="m3-route" d="${path}" pathLength="1" stroke="#ffd56e" stroke-width="2.4" stroke-dasharray="1" stroke-dashoffset="${o.route?0:1}" fill="none" stroke-linecap="round"/>
+  <circle class="m3-reg" cx="210" cy="110" r="${o.region?18:0}" fill="rgba(255,210,90,.75)"/><circle class="m3-reg2" cx="210" cy="110" r="${o.region?34:0}" fill="rgba(255,210,90,.22)"/></svg>`}
+function stepFinale(st,box){const mel=CODEX.m3_partitura.notes;let phase=0,li=0;
+ box.innerHTML=`<div class="m3 fin" id="fin"><div class="m3-vig"></div><div class="m3-dust"></div>
+  <div class="fin-stage" id="finS"><div class="fin-map" id="finMap">${m3MapSvg()}</div><div class="fin-staff" id="finStaff"><div class="dstaff">${m3Staff({notes:mel,clef:true,w:330,h:150})}</div></div><div class="fin-fly" id="finFly"></div><div class="m3-ink fin-ink" id="finInk"></div></div>
+  <div class="m3-say" id="finSay" hidden><span class="m3-who">${portrait('isabella')}<span>Isabella</span></span><p id="finT"></p></div>
+  <div class="fin-codex" id="finCx" hidden><div class="fin-book">📜</div><b>Códice del Compositor</b><small>Nuevas páginas: la primera pista y un fragmento del mapa</small></div></div>`;
+ foot('…',()=>{},{disabled:true});const F=$('#fin'),live=()=>F.isConnected;
+ /* 1 · la melodía suena y cada nota brilla */
+ const beat=.55;let t0=ac().currentTime+.6;const els=()=>[...$('#finStaff').querySelectorAll('.nt')];
+ mel.forEach((n,i)=>{const d=({w:4,h:2,q:1}[n.r||n.d]||1)*beat;if(!n.r){tone(n.p,.6,d*.95,'piano',t0);setTimeout(()=>{if(!live())return;const g=els()[i];if(g)g.classList.add('sing','ok')},(t0-ac().currentTime)*1000)}t0+=d});
+ const playMs=(t0-ac().currentTime)*1000+500;
+ /* 2 · las notas se desprenden y vuelan al mapa, dibujando un camino */
+ setTimeout(()=>{if(!live())return;const S0=$('#finS').getBoundingClientRect(),map=$('#finMap').querySelector('svg'),mb=map.getBoundingClientRect(),fly=$('#finFly');F.classList.add('mapon');
+  const real=els().filter((_,i)=>!mel[i].r);real.forEach((g,i)=>{const b=g.getBoundingClientRect(),s=document.createElement('i');s.className='fin-note';s.textContent='♪';s.style.left=(b.left-S0.left+b.width/2)+'px';s.style.top=(b.top-S0.top+b.height/2)+'px';fly.appendChild(s);g.style.opacity=0;
+   const p=M3_PTS[Math.min(i,M3_PTS.length-1)];setTimeout(()=>{if(!live())return;s.style.left=(mb.left-S0.left+p[0]/300*mb.width)+'px';s.style.top=(mb.top-S0.top+p[1]/220*mb.height)+'px';s.classList.add('go')},120+i*260)});
+  {const t=ac().currentTime+.3;[64,67,69,71,76].forEach((q,i)=>tone(q,.3,.8,'flute',t+i*.26))}
+  setTimeout(()=>{if(!live())return;F.classList.add('route');$('#finMap').innerHTML=m3MapSvg({route:1,region:1,cls:'drawn'});fly.innerHTML=''},real.length*260+1100);
+  /* 3 · la inscripción se escribe sola */
+  setTimeout(()=>{if(!live())return;const ink=$('#finInk');ink.innerHTML='<span>«Cuando la música pierda su voz, buscad aquello que fue olvidado»</span>';ink.classList.add('on');tone(48,.3,2.5,'strings');tone(55,.25,2.5,'strings')},real.length*260+2600);
+  setTimeout(()=>{if(live())talk()},real.length*260+5200)},playMs);
+ /* 4 · Isabella */
+ const lines=st.lines;const talk=()=>{$('#finSay').hidden=false;const sh=()=>{const p=$('#finT');p.textContent=lines[li];typeIn(p,null,{noClick:true});foot(li<lines.length-1?'Continuar ▸':'Ver el Códice ▸',()=>{li++;if(li<lines.length)sh();else codex()})};sh()};
+ /* 5 · el Códice */
+ const codex=()=>{(st.codex||[]).forEach(codexAdd);$('#finSay').hidden=true;$('#finCx').hidden=false;F.classList.add('cx');{const t=ac().currentTime+.1;[72,76,79,84].forEach((p,i)=>tone(p,.4,1,'piano',t+i*.12))}
+  $('#finCx').onclick=()=>openBook('codice');
+  foot(st.accept||'Completar el módulo',()=>{if(S.m3){S.m3={}}S.badges=S.badges||[];if(!S.badges.includes(LS.L.id))S.badges.push(LS.L.id);save();if(st.reward)toast(st.reward);next()},{gold:true});
+  setTimeout(()=>{if(live())openBook('codice')},1200)}}
+
 /* ===================== CÓDICE DEL COMPOSITOR ===================== */
 const CODEX={m3_partitura:{t:'La melodía de medianoche',k:'Partitura recuperada',d:'La melodía que sonaba cada noche en el scriptorium. Estaba incompleta: el Maestro la dejó cifrada para que solo un lector de música pudiera terminarla.',notes:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},
  m3_frag1:{t:'Fragmento de la biblioteca',k:'Fragmento',d:'Un trozo de partitura escondido entre libros antiguos. Alguien copió estas notas con prisa.'},
+ m3_mapa:{t:'Mapa antiguo de la isla',k:'Fragmento de mapa',map:1,d:'Las notas del manuscrito trazaron un camino hasta una región que brilla al este de Florencia. Allí espera algo que fue olvidado.'},
  m3_pista:{t:'Primera pista del Maestro',k:'Pista',d:'«Cuando la música pierda su voz, buscad aquello que fue olvidado.» Las notas del manuscrito dibujan un camino en un mapa antiguo de la isla.'}};
 function codexAdd(id){S.codex=S.codex||[];if(S.codex.includes(id))return;S.codex.push(id);S.bookNew='codice';save();setTimeout(bookBadge,50);setTimeout(()=>toast(`📜 Nuevo en el Códice del Compositor: ${CODEX[id].t}`),500)}
-function codexHTML(){const have=(S.codex||[]).filter(id=>CODEX[id]);if(!have.length)return '<p class="small">El Códice está vacío. Las partituras y pistas del Maestro Compositor aparecerán aquí.</p>';
- return have.map(id=>{const c=CODEX[id];return `<div class="bk-item cx"><div><small class="cx-k">${esc(c.k)}</small><h3>${esc(c.t)}</h3>${c.notes?`<div class="dstaff">${m3Staff({notes:c.notes,clef:true,w:330,h:150})}</div><button class="chipb" type="button" data-cx="${id}">▶ Escuchar</button>`:''}<p class="small">${esc(c.d)}</p></div></div>`}).join('')}
+function codexHTML(){const have=(S.codex||[]).filter(id=>CODEX[id]);const ic={'Partitura recuperada':'🎼','Fragmento':'📄','Pista':'🗝️','Fragmento de mapa':'🗺️'};
+ const items=have.map(id=>{const c=CODEX[id];return `<div class="bk-item cx"><small class="cx-k">${ic[c.k]||'📜'} ${esc(c.k)}</small><h3>${esc(c.t)}</h3>${c.notes?`<div class="dstaff">${m3Staff({notes:c.notes,clef:true,w:330,h:150})}</div><button class="chipb" type="button" data-cx="${id}">▶ Escuchar</button>`:''}${c.map?`<div class="cx-map">${m3MapSvg({route:1,region:1})}</div>`:''}<p class="small">${esc(c.d)}</p></div>`}).join('');
+ const locked=Array.from({length:3},(_,i)=>`<div class="bk-item cx lock"><small class="cx-k">Página por descubrir</small><h3>· · ·</h3><p class="small">Una pista del Maestro Compositor espera en otro lugar de la isla.</p></div>`).join('');
+ return `<div class="cx-book"><p class="cx-intro">Partituras, fragmentos y pistas del Maestro Compositor desaparecido.</p>${have.length?items:'<p class="small">Todavía está vacío.</p>'}${locked}</div>`}
 
 /* ===================== ENCUENTRO MUSICAL CON UN ESPÍRITU ===================== */
 const ENC_PCS={C:[0,4,7],F:[5,9,0],G:[7,11,2],Am:[9,0,4],Dm:[2,5,9],Em:[4,7,11]};
@@ -2046,6 +2093,7 @@ const STEP={
  spirit(st,box){return stepSpirit(st,box)},
  mystery(st,box){return stepMystery(st,box)},
  room(st,box){return stepRoom(st,box)},
+ finale(st,box){return stepFinale(st,box)},
  forest(st,box){return stepForest(st,box)},
  citymap(st,box){/* Florencia en mosaico: el héroe camina libre (sin atravesar edificios); la cámara lo sigue */
   townAssets();LS.mapDone=LS.mapDone||[];TOWN_TRIO=st.go==='escenario'||LS.mapDone.includes('escenario')||LS.L.id!=='w1m01';if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
