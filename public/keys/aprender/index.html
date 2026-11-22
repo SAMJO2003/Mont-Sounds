@@ -516,6 +516,7 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .room-talk{position:absolute;left:10px;right:10px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:12;background:rgba(14,9,5,.92);border:1px solid rgba(232,194,122,.45);border-radius:14px;padding:12px 14px;color:#f3e2c0;animation:m3up .4s both}.room-talk p{margin:6px 0 4px;font:600 15px/1.4 'Special Elite','Courier New',monospace}.room-talk small{color:#c9a46a}
 .room-ov{position:absolute;inset:0;z-index:30;background:#070403;overflow:auto;opacity:0;transition:opacity .45s}.room-ov.in{opacity:1}.room-ov.out{opacity:0}
 .room-q{z-index:4}
+.enc-phase{position:absolute;left:0;right:0;top:34%;z-index:20;display:flex;justify-content:center;pointer-events:none;animation:encph 2.2s ease-in-out forwards}.enc-phase b{font:700 22px Cinzel,serif;color:#ffd98c;padding:10px 22px;border-radius:14px;background:rgba(10,6,3,.85);border:1px solid rgba(255,215,120,.6);text-shadow:0 0 16px rgba(255,200,100,.8);box-shadow:0 0 40px rgba(255,200,100,.35)}@keyframes encph{0%{opacity:0;transform:scale(.8)}15%,75%{opacity:1;transform:none}100%{opacity:0;transform:scale(1.05)}}
 </style>
 
 <div id="sky"></div>
@@ -702,18 +703,19 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
     exit:{x:180,y:110,label:'Pasillo de los ecos',ic:'⬆️',need:['fr'],locked:'Primero salva el fragmento.',hint:'Sigue hacia el Pasillo de los ecos.'}},
    {type:'room',room:'pasillo',act:'Archivo · Pasillo de los ecos',start:[180,525],
     intro:['Un pasillo de piedra cubierto de inscripciones musicales. Algo se mueve entre las sombras…','¡Devoradores de Tinta! Se alimentan de las notas escritas. Si te tocan, invoca tu piano.'],
-    enemies:[{x:150,y:420,zone:[90,360,270,500],f:{name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',battle:true,heroHP:5,winText:'El Devorador recupera su forma: ahora es un pequeño espíritu dorado.',
+    enemies:[{x:150,y:420,zone:[90,360,270,500],f:{name:'Devorador de Tinta',battle:true,heroHP:5,winText:'El Devorador recupera su forma: ahora es un pequeño espíritu dorado.',
     intro:['El Devorador se tragó las notas de la pared.','Lee cada nota en el pentagrama y tócala para devolverla.'],
-    tasks:[{t:'read',ps:[67],names:true,hint:true,say:'Lee la nota y tócala'},{t:'read',ps:[64],names:true,hint:true,say:'Otra nota'}]}},{x:220,y:300,zone:[90,240,270,380],f:{name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',battle:true,heroHP:5,winText:'Otro Devorador vuelve a ser un espíritu dorado.',
-    tasks:[{t:'read',ps:[69],say:'Lee la nota: sin nombre'},{t:'read',ps:[65],say:'¿Y esta?'},{t:'read',ps:[71],say:'La última'}]}},{x:170,y:180,zone:[90,120,270,260],f:{name:'Gran Devorador de Tinta',tint:'grayscale(1) brightness(.3) contrast(1.8)',battle:true,heroHP:5,winText:'El Gran Devorador se transforma en luz dorada. El pasillo queda libre.',
+    tasks:[{t:'read',ps:[67],names:true,hint:true,say:'Lee la nota y tócala'},{t:'read',ps:[64],names:true,hint:true,say:'Otra nota'}]}},{x:220,y:300,zone:[90,240,270,380],f:{name:'Devorador de Tinta',battle:true,heroHP:5,winText:'Otro Devorador vuelve a ser un espíritu dorado.',
+    tasks:[{t:'read',ps:[69],say:'Lee la nota: sin nombre'},{t:'read',ps:[65],say:'¿Y esta?'},{t:'read',ps:[71],say:'La última'}]}},{x:170,y:180,zone:[90,120,270,260],f:{name:'Gran Devorador de Tinta',battle:true,heroHP:5,winText:'El Gran Devorador se transforma en luz dorada. El pasillo queda libre.',
     tasks:[{t:'read',ps:[64,67],say:'Dos notas seguidas'},{t:'read',ps:[67,69,71],say:'Tres notas subiendo'},{t:'read',ps:[71,69,67],say:'Tres notas bajando'}]}}],
     exit:{x:180,y:105,label:'Cámara del manuscrito',ic:'⬆️',locked:'Los Devoradores bloquean el paso.',hint:'Devuelve la calma a los tres Devoradores.'}},
-   {type:'room',room:'camara',act:'Archivo · Cámara del manuscrito',start:[180,520],
+   {type:'room',room:'camara',act:'Archivo · Cámara del manuscrito',start:[180,520],guardian:[180,185],
     intro:['En una cámara circular, un espíritu de pergamino y tinta custodia una gran partitura.'],
-    hot:[{id:'gd',kind:'fight',ic:'guardian',label:'Guardián',x:180,y:200,hint:'Ayuda al Guardián a recordar.',who:'guardian',lines:['—Recuerdo las líneas… pero he olvidado las notas.','—Si conoces su lenguaje, ayúdame a recordar.'],f:{name:'Guardián de la Última Nota',tint:'sepia(1) saturate(.5) brightness(.9)',battle:true,heroHP:6,winText:'El Guardián recupera su memoria y su brillo dorado. Se aparta y te deja ver el manuscrito.',
-    intro:['Fase 1 · Reconocer: devuélvele sus notas una a una.','Fase 2 · Recordar: subidas y bajadas. Fase 3 · Completar: su frase.'],
-    tasks:[{t:'read',ps:[69],say:'Reconocer'},{t:'read',ps:[64],say:'Reconocer'},{t:'read',ps:[64,65,67,69],say:'Recordar: sube'},{t:'read',ps:[71,69,67,65],say:'Recordar: baja'},{t:'read',ps:[67,69,71,69,67],say:'Completar su frase'}]}},
-     {id:'a7',kind:'mystery',label:'Manuscrito',x:180,y:300,need:['gd'],locked:'El Guardián protege el manuscrito.',hint:'Toca la melodía del manuscrito.',m:{type:'mystery',n:7,title:'La melodía incompleta',obj:'manuscrito',mode:'melody',codex:'m3_partitura',
+    hot:[{id:'gd',kind:'fight',ic:'guardian',label:'Guardián',x:180,y:215,hint:'Ayuda al Guardián a recordar.',who:'guardian',lines:['—Recuerdo las líneas… pero he olvidado las notas.','—Si conoces su lenguaje, ayúdame a recordar.'],f:{draw:'guardian',name:'Guardián de la Última Nota',heroHP:6,winText:'El Guardián recupera su memoria y su brillo dorado. Se aparta y te deja ver el manuscrito.',winBtn:'Continuar',
+      tasks:[{t:'read',ps:[69],phase:'Fase 1 · Reconocer',say:'¿Qué nota es? Devuélvesela'},{t:'read',ps:[64],say:'Otra nota olvidada'},{t:'read',ps:[71],say:'La última de esta fase'},
+       {t:'read',ps:[64,65,67,69],phase:'Fase 2 · Recordar',say:'Sube con él, paso a paso'},{t:'read',ps:[71,69,67,65],say:'Ahora baja'},
+       {t:'phrase',phase:'Fase 3 · Completar',say:'Su frase: notas, figuras y un silencio',seq:[{p:67,d:'q'},{p:69,d:'q'},{p:71,d:'h'},{r:'q'},{p:69,d:'q'},{p:67,d:'h'}]}]}},
+     {id:'a7',kind:'mystery',label:'Manuscrito',x:180,y:330,need:['gd'],locked:'El Guardián protege el manuscrito.',hint:'Toca la melodía del manuscrito.',m:{type:'mystery',n:7,title:'La melodía incompleta',obj:'manuscrito',mode:'melody',codex:'m3_partitura',
     intro:['—El Guardián te deja tocar la melodía completa.','—Léela con calma: notas, figuras y un silencio.'],
     rounds:[{aid:1,say:'Primero con nombres.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},{aid:2,say:'Ahora solo con la tecla.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},{aid:3,say:'Y ahora, solo leyendo.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]}],
     reveal:'El manuscrito recupera su melodía original.',revealSub:'Las notas brillan… y sobre la mesa aparece un mapa antiguo.'}}],
@@ -1871,6 +1873,49 @@ function stepMystery(st,box,onDone){if(onDone)$('#lFoot').classList.remove('hide
  const adv=()=>{if(intro.length){say(intro.shift());if(!intro.length)foot('¡A tocar! ▸',()=>startPlay())}else startPlay()};
  draw();foot('Continuar ▸',()=>adv());foot('…',()=>{},{disabled:true});setTimeout(()=>{foot('Continuar ▸',()=>adv());adv()},1700)}
 
+/* ===================== MÓDULO 3 · DEVORADORES DE TINTA Y GUARDIÁN DE LA ÚLTIMA NOTA (dibujados en código hasta que llegue el arte) ===================== */
+const M3_ENEMY_ART={};/* cuando llegue el arte: M3_ENEMY_ART.devorador='m3/devorador', .devorador_paz, .guardian_nota, .guardian_restaurado */
+function m3ArtDraw(g,k,x,y,t,h){const src=M3_ENEMY_ART[k];if(!src)return false;const im=timg('e_'+k,V()+src+'.webp');if(!im.complete||!im.width)return false;const w=im.width*h/im.height,b=Math.sin(t*2.2)*4;g.drawImage(im,x-w/2,y-h-8+b,w,h);return true}
+/* calm: 0 = tinta oscura · 1 = espíritu dorado pacificado */
+function drawInk(g,x,y,t,calm){calm=calm>=1?1:0;
+ if(calm){if(m3ArtDraw(g,'devorador_paz',x,y,t,60))return;g.save();g.translate(x,y);g.scale(.8,.8);drawSpirit(g,0,0,t,true);g.restore();return}
+ g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(x,y,22,6,0,0,6.3);g.fill();
+ if(m3ArtDraw(g,'devorador',x,y,t,64))return;
+ const cy=y-32+Math.sin(t*2.6)*4,R=22;g.save();
+ /* púas: fragmentos de notas y pentagrama */
+ g.strokeStyle='rgba(30,26,46,.95)';g.fillStyle='rgba(20,18,34,.95)';g.lineWidth=2;
+ for(let i=0;i<6;i++){const a=i/6*6.283+t*.4,px=x+Math.cos(a)*(R+6),py=cy+Math.sin(a)*(R+4);g.beginPath();g.ellipse(px,py,4.2,3,a,0,6.3);g.fill();g.beginPath();g.moveTo(px+3,py);g.lineTo(px+3+Math.cos(a)*8,py-10);g.stroke()}
+ /* cuerpo de tinta ondulante */
+ const gr=g.createRadialGradient(x-6,cy-8,4,x,cy,R+6);gr.addColorStop(0,'#2c2742');gr.addColorStop(1,'#07060c');g.fillStyle=gr;g.beginPath();
+ for(let k=0;k<=40;k++){const a=k/40*6.283,j=1+.09*Math.sin(a*5+t*4)+.05*Math.sin(a*9-t*3),px=x+Math.cos(a)*R*j,py=cy+Math.sin(a)*R*j*.92;k?g.lineTo(px,py):g.moveTo(px,py)}g.closePath();g.fill();
+ g.strokeStyle='rgba(150,120,255,.45)';g.lineWidth=1.5;g.stroke();
+ /* gotas que caen */
+ for(let i=0;i<3;i++){const q=((t*.8)+i/3)%1;g.fillStyle=`rgba(10,8,18,${1-q})`;g.beginPath();g.ellipse(x-10+i*10,cy+R*.8+q*18,2.2,3.2,0,0,6.3);g.fill()}
+ /* ojos y sonrisa */
+ g.fillStyle='#fff';g.shadowColor='#c9b8ff';g.shadowBlur=8;g.beginPath();g.ellipse(x-8,cy-4,4,5,0,0,6.3);g.ellipse(x+8,cy-4,4,5,0,0,6.3);g.fill();g.shadowBlur=0;
+ g.fillStyle='#07060c';g.beginPath();g.arc(x-7,cy-3,1.8,0,6.3);g.arc(x+9,cy-3,1.8,0,6.3);g.fill();g.strokeStyle='rgba(220,210,255,.8)';g.lineWidth=1.4;g.beginPath();g.arc(x,cy+4,7,.2,2.9);g.stroke();g.restore()}
+/* restore: 0 = olvidado (gris) · 1 = restaurado (dorado) */
+function drawGuardian(g,x,y,t,restore){restore=Math.max(0,Math.min(1,restore||0));
+ g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(x,y,30,8,0,0,6.3);g.fill();
+ if(m3ArtDraw(g,restore>=1?'guardian_restaurado':'guardian_nota',x,y,t,118))return;
+ const lerp=(a,b)=>Math.round(a+(b-a)*restore),col=(a,b,c,al)=>`rgba(${lerp(a[0],b[0])},${lerp(a[1],b[1])},${lerp(a[2],b[2])},${al})`;
+ const fl=Math.sin(t*1.6)*4,top=y-112+fl;g.save();
+ /* aura */
+ if(restore>0){const gr=g.createRadialGradient(x,top+50,10,x,top+50,90);gr.addColorStop(0,`rgba(255,210,110,${.35*restore})`);gr.addColorStop(1,'rgba(255,210,110,0)');g.fillStyle=gr;g.fillRect(x-90,top-40,180,180)}
+ /* túnica de páginas */
+ for(let i=0;i<7;i++){const a=(i-3)*.12+Math.sin(t*1.2+i)*.04,w=22,h=70-Math.abs(i-3)*6;g.save();g.translate(x+(i-3)*7,top+40);g.rotate(a);g.fillStyle=col([120,110,96],[240,214,150],.95);g.strokeStyle=col([60,52,44],[150,110,40],1);g.lineWidth=1;g.fillRect(-w/2,0,w,h);g.strokeRect(-w/2,0,w,h);
+  g.strokeStyle=col([70,64,58],[170,120,40],.6);for(let l=0;l<4;l++){g.beginPath();g.moveTo(-w/2+3,12+l*6);g.lineTo(w/2-3,12+l*6);g.stroke()}g.restore()}
+ /* cabeza y capucha de pergamino */
+ g.fillStyle=col([110,100,88],[245,222,160],1);g.beginPath();g.ellipse(x,top+22,20,24,0,0,6.3);g.fill();g.strokeStyle=col([60,52,44],[160,120,50],1);g.lineWidth=1.5;g.stroke();
+ g.fillStyle='rgba(15,12,10,.85)';g.beginPath();g.ellipse(x,top+26,13,15,0,0,6.3);g.fill();
+ g.fillStyle=restore>.5?'#fff3c0':'rgba(200,200,220,.55)';g.shadowColor='#ffd98c';g.shadowBlur=restore*12;g.beginPath();g.ellipse(x-5,top+24,2.4,3.2,0,0,6.3);g.ellipse(x+5,top+24,2.4,3.2,0,0,6.3);g.fill();g.shadowBlur=0;
+ /* clave de Sol en el pecho */
+ g.font='34px "Noto Music","Apple Symbols","Segoe UI Symbol",serif';g.textAlign='center';g.fillStyle=`rgba(255,215,120,${.25+.75*restore})`;g.shadowColor='#ffd98c';g.shadowBlur=4+18*restore;g.fillText('𝄞',x,top+86);g.shadowBlur=0;
+ /* tinta que gotea (desaparece al restaurarse) y notas que vuelven */
+ for(let i=0;i<4;i++){const q=((t*.6)+i/4)%1;g.fillStyle=`rgba(12,10,8,${(1-q)*(1-restore)})`;g.beginPath();g.ellipse(x-14+i*9,top+112+q*14,2.4,3.6,0,0,6.3);g.fill()}
+ const nn=Math.round(restore*6);for(let i=0;i<nn;i++){const a=t*.9+i*1.05,px=x+Math.cos(a)*44,py=top+60+Math.sin(a)*30;g.fillStyle='rgba(255,220,130,.9)';g.font='14px serif';g.fillText(i%2?'♪':'♩',px,py)}
+ g.restore()}
+
 /* ===================== MÓDULO 3 · SALAS EXPLORABLES ===================== */
 /* Cada sala cabe en una pantalla (coordenadas lógicas 360×560). Objetos con brillo dorado abren acertijos, diálogos o combates; la puerta se abre al resolver lo necesario. */
 const ROOM_W=360,ROOM_H=560;
@@ -1913,12 +1958,12 @@ function stepRoom(st,box){townAssets();const RM=ROOMS[st.room];S.m3=S.m3||{};S.m
   if(h.kind==='talk'){talk(h.lines,h.who||'isabella',()=>{mark(h.id);placeHot()});return}
   if(h.kind==='mystery'){busy=true;const ov=document.createElement('div');ov.className='room-ov';wrap.appendChild(ov);requestAnimationFrame(()=>ov.classList.add('in'));
    stepMystery(h.m,ov,()=>{ov.classList.add('out');setTimeout(()=>ov.remove(),500);busy=false;last=performance.now();foot('…',()=>{},{disabled:true});done()});return}
-  if(h.kind==='fight'){busy=true;const go=()=>townEncounter(Object.assign({battle:true,heroHP:5,winBtn:'Continuar'},h.f),()=>{busy=false;last=performance.now();done()});if(h.lines)talk(h.lines,h.who,()=>{busy=true;go()});else go()}};
+  if(h.kind==='fight'){busy=true;const go=()=>townEncounter(Object.assign({battle:true,heroHP:5,winBtn:'Continuar'},h.f,h.f.draw==='guardian'?{drawFn:drawGuardian,tint:null}:{}),()=>{busy=false;last=performance.now();done()});if(h.lines)talk(h.lines,h.who,()=>{busy=true;go()});else go()}};
  /* Devoradores de Tinta que vagan por la sala */
  let sps=(st.enemies||[]).map((e,i)=>Object.assign({x:e.x,y:e.y,tx:e.x,ty:e.y,wait:Math.random(),good:solved('en'+i),i},e));
  const free=(x,y)=>x>8&&y>8&&x<ROOM_W-8&&y<ROOM_H-8&&!b[Math.floor(y/C)*gw+Math.floor(x/C)];
  const pick=s=>{for(let j=0;j<20;j++){const x=s.zone[0]+Math.random()*(s.zone[2]-s.zone[0]),y=s.zone[1]+Math.random()*(s.zone[3]-s.zone[1]);if(free(x,y)){s.tx=x;s.ty=y;return}}};
- const fight=s=>{busy=true;moving=false;path=[];townEncounter(Object.assign({battle:true,heroHP:5,winBtn:'Continuar',name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',winText:'El Devorador recupera su forma: ahora es un pequeño espíritu dorado.'},s.f),()=>{s.good=true;mark('en'+s.i);busy=false;last=performance.now();placeHot()})};
+ const fight=s=>{busy=true;moving=false;path=[];townEncounter(Object.assign({battle:true,heroHP:5,winBtn:'Continuar',name:'Devorador de Tinta',winText:'El Devorador recupera su forma: ahora es un pequeño espíritu dorado.'},s.f,{drawFn:drawInk,tint:null}),()=>{s.good=true;mark('en'+s.i);busy=false;last=performance.now();placeHot()})};
  cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),x=(e.clientX-r.left-ox)/sc,y=(e.clientY-r.top-oy)/sc;ping=[x,y];pingT=performance.now();walkTo([x,y])});
  const ro=new ResizeObserver(fit);ro.observe(wrap);fit();
  const drawRoom=t=>{const art=ROOM_ART[st.room]&&TIMG['r_'+st.room];g.save();g.translate(ox,oy);g.scale(sc,sc);
@@ -1934,7 +1979,8 @@ function stepRoom(st,box){townAssets();const RM=ROOMS[st.room];S.m3=S.m3||{};S.m
    sps.forEach(s=>{const dh=Math.hypot(H[0]-s.x,H[1]-s.y);if(!s.good&&dh<120){s.tx=H[0];s.ty=H[1]}if(s.wait>0){s.wait-=dt;return}const dx=s.tx-s.x,dy=s.ty-s.y,d=Math.hypot(dx,dy);if(d<3){s.wait=.5+Math.random()*1.4;pick(s);return}const v=(s.good?18:dh<120?44:26)*dt,nx=s.x+dx/d*v,ny=s.y+dy/d*v;if(free(nx,ny)){s.x=nx;s.y=ny}else pick(s)});
    const hit=sps.find(s=>!s.good&&Math.hypot(H[0]-s.x,H[1]-s.y)<26);if(hit)fight(hit)}
   g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);drawRoom(t);g.save();g.translate(ox,oy);g.scale(sc,sc);
-  const list=[];sps.forEach(s=>list.push({y:s.y,d:()=>{g.save();if(!s.good)g.filter='grayscale(1) brightness(.4) contrast(1.6)';g.translate(s.x,s.y);g.scale(.75,.75);drawSpirit(g,0,0,t/1000+s.i,s.good);g.restore()}}));
+  const list=[];sps.forEach(s=>list.push({y:s.y,d:()=>{g.save();g.translate(s.x,s.y);g.scale(.8,.8);drawInk(g,0,0,t/1000+s.i,s.good?1:0);g.restore()}}));
+  if(st.guardian)list.push({y:st.guardian[1],d:()=>{g.save();g.translate(st.guardian[0],st.guardian[1]);g.scale(.7,.7);drawGuardian(g,0,0,t/1000,solved('gd')?1:0);g.restore()}});
   const fi=[1,2,3,2][Math.floor(walkT/.16)%4],hk=moving?(hdir==='front'?'h_frente_'+fi:'h_lado_'+fi):'h_quieto_'+(Math.floor(t/1300)%2+1),hi=TIMG[hk];
   list.push({y:H[1],d:()=>{g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(H[0],H[1],12,4,0,0,6.3);g.fill();if(hi&&hi.complete&&hi.naturalWidth){const k=82/144,w=hi.width*k,h=hi.height*k;g.save();g.translate(H[0],H[1]+(moving&&fi===2?-1.5:0));if(moving&&hdir==='side'&&facing<0)g.scale(-1,1);g.drawImage(hi,-w/2,-h+2,w,h);g.restore()}}});
   list.sort((a,b2)=>a.y-b2.y).forEach(o=>o.d());
@@ -1960,20 +2006,23 @@ function townEncounter(sp,onWin){const tasks=sp.tasks||[{t:'high',say:'Toca una 
   <div class="enc-mid"><div class="enc-staff"></div><div class="g-say" id="encsay"></div><div class="enc-dots"></div><div class="fb" id="encfb"></div></div>
   <div class="enc-kb" id="enckb"></div></div>`;$('#vLesson').appendChild(ov);
  const sc=ov.querySelector('.enc-sp'),sg=sc.getContext('2d');let calm=0,alive=true;const t0=performance.now();
- const anim=t=>{if(!alive||!ov.isConnected)return;requestAnimationFrame(anim);sg.clearRect(0,0,220,200);sg.save();if(sp.tint)sg.filter=sp.tint;sg.translate(110,196);sg.scale(1.75,1.75);drawSpirit(sg,0,0,(t-t0)/1000*(1-calm*.7),calm>=1);sg.restore()};requestAnimationFrame(anim);
+ const anim=t=>{if(!alive||!ov.isConnected)return;requestAnimationFrame(anim);sg.clearRect(0,0,220,200);sg.save();if(sp.tint)sg.filter=sp.tint;sg.translate(110,196);if(sp.drawFn===drawGuardian){sg.scale(1.5,1.5);drawGuardian(sg,0,0,(t-t0)/1000,calm)}else if(sp.drawFn){sg.scale(1.75,1.75);sp.drawFn(sg,0,0,(t-t0)/1000,calm>=1?1:0)}else{sg.scale(1.75,1.75);drawSpirit(sg,0,0,(t-t0)/1000*(1-calm*.7),calm>=1)}sg.restore()};requestAnimationFrame(anim);
  const bar=ov.querySelector('.enc-bar i'),dots=ov.querySelector('.enc-dots'),stf=ov.querySelector('.enc-staff');let kb=null;const hp=heroPlayer(ov.querySelector('#ehero'));let life=sp.heroHP||3;const hpEl=ov.querySelector('.enc-hp');const drawHP=()=>{if(hpEl)hpEl.innerHTML='<small>Tu vida</small>'+Array.from({length:sp.heroHP||3},(_,i)=>`<i class="${i<life?'on':''}">♥</i>`).join('')};drawHP();
  const pop=(txt,cls,host)=>{const e=document.createElement('b');e.className='dmg '+cls;e.textContent=txt;(host||ov.querySelector('.enc-top')).appendChild(e);setTimeout(()=>e.remove(),1100)};
  const hurt=()=>{if(!sp.battle)return;life--;drawHP();pop('−1 ♥','bad',ov.querySelector('.enc-hero'));ov.classList.remove('hit');void ov.offsetWidth;ov.classList.add('hit');if(navigator.vibrate)navigator.vibrate([60,40,60]);
   if(life<=0&&sp.onLose){k=tasks.length;setTimeout(()=>{const f=$('#encfb');f.className='fb on bad';f.innerHTML='<b>El ruido te aturdió</b>Pierdes este enfrentamiento, pero no tus materiales ni tu progreso.';const b=document.createElement('button');b.className='cta';b.type='button';b.textContent='Continuar';b.onclick=()=>{alive=false;ov.classList.add('out');setTimeout(()=>{ov.remove();sp.onLose()},450)};ov.querySelector('.enc-mid').appendChild(b)},500);return}
   if(life<=0){setTimeout(()=>{life=sp.heroHP||3;k=0;calm=0;drawHP();const f=$('#encfb');f.className='fb on bad';f.innerHTML='<b>El ruido te aturdió</b>Respira y vuelve a intentarlo: recuperas toda tu vida.';setTimeout(show,1400)},500)}};
  const chordOf=T=>ENC_PCS[T.ch].map(pc=>[60,48,72].map(o=>o+pc).find(q=>q>=60&&q<=79)).sort((a,b)=>a-b);
- const show=()=>{const T=tasks[k];bar.style.width=(100-k/tasks.length*100)+'%';dots.innerHTML=tasks.map((x,i)=>`<i class="${i<k?'ok':i===k?'cur':''}"></i>`).join('');const say=$('#encsay');say.classList.remove('tw-seen');say.innerHTML=`<b class="g-q">${k+1}/${tasks.length} · ${esc(T.say)}</b>`;typeIn(say);seq=[];got=[];arp=[];
+ let lastPhase='';const show=()=>{const T=tasks[k];if(T.phase&&T.phase!==lastPhase){lastPhase=T.phase;const pb=document.createElement('div');pb.className='enc-phase';pb.innerHTML=`<b>${esc(T.phase)}</b>`;ov.querySelector('.enc-box').appendChild(pb);setTimeout(()=>pb.remove(),2200)}bar.style.width=(100-k/tasks.length*100)+'%';dots.innerHTML=tasks.map((x,i)=>`<i class="${i<k?'ok':i===k?'cur':''}"></i>`).join('');const say=$('#encsay');say.classList.remove('tw-seen');say.innerHTML=`<b class="g-q">${k+1}/${tasks.length} · ${esc(T.say)}</b>`;typeIn(say);seq=[];got=[];arp=[];
   const fb=$('#encfb');fb.className='fb';
-  if(T.t==='read'){const drawR=()=>{stf.innerHTML=`<div class="dstaff">${m3Staff({notes:T.ps.map((p,i)=>({p,d:'q',name:T.names,st:i<seq.length?'ok':i===seq.length?'cur':''})),clef:true,w:300,h:150})}</div>`};T._draw=drawR;drawR();kb.wantChord=null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));if(T.hint)T.ps.forEach(p=>kb.hint(p,true))}else if(T.t==='trill'){stf.innerHTML=mStaff({notes:[{p:T.ps[0],d:'q',tr:true},{p:T.ps[1],d:'q'}],names:true,w:200,cap:'Trino: dos notas vecinas alternadas muy rápido'});kb.wantChord=null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));T.ps.forEach(p=>kb.hint(p,true))}else if(T.t==='chord'||T.t==='arp'){const ps=chordOf(T);stf.innerHTML=mStaff(T.t==='chord'?{notes:[{ps,d:'w'}],names:true,w:170,cap:`${CHORD_BOOK[T.ch].n}: las notas apiladas suenan a la vez`}:{notes:ps.map(p=>({p,d:'q'})),names:true,w:240,cap:'Arpegio: las notas del acorde, una tras otra'});kb.wantChord=T.t==='chord'?ENC_PCS[T.ch]:null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));if(T.hint)ps.forEach(p=>kb.hint(p,true))}else{stf.innerHTML='';kb.wantChord=null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'))}};
+  if(T.t==='phrase'){T._i=0;if(T._rt){clearTimeout(T._rt);T._rt=null}const drawP=()=>{stf.innerHTML=`<div class="dstaff">${m3Staff({notes:T.seq.map((n,i)=>Object.assign({},n,{st:i<T._i?'ok':i===T._i?'cur':''})),clef:true,w:330,h:150})}</div>`};T._draw=drawP;drawP();kb.wantChord=null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'))}else if(T.t==='read'){const drawR=()=>{stf.innerHTML=`<div class="dstaff">${m3Staff({notes:T.ps.map((p,i)=>({p,d:'q',name:T.names,st:i<seq.length?'ok':i===seq.length?'cur':''})),clef:true,w:300,h:150})}</div>`};T._draw=drawR;drawR();kb.wantChord=null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));if(T.hint)T.ps.forEach(p=>kb.hint(p,true))}else if(T.t==='trill'){stf.innerHTML=mStaff({notes:[{p:T.ps[0],d:'q',tr:true},{p:T.ps[1],d:'q'}],names:true,w:200,cap:'Trino: dos notas vecinas alternadas muy rápido'});kb.wantChord=null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));T.ps.forEach(p=>kb.hint(p,true))}else if(T.t==='chord'||T.t==='arp'){const ps=chordOf(T);stf.innerHTML=mStaff(T.t==='chord'?{notes:[{ps,d:'w'}],names:true,w:170,cap:`${CHORD_BOOK[T.ch].n}: las notas apiladas suenan a la vez`}:{notes:ps.map(p=>({p,d:'q'})),names:true,w:240,cap:'Arpegio: las notas del acorde, una tras otra'});kb.wantChord=T.t==='chord'?ENC_PCS[T.ch]:null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));if(T.hint)ps.forEach(p=>kb.hint(p,true))}else{stf.innerHTML='';kb.wantChord=null;Object.values(kb.els).forEach(e=>e.classList.remove('hint'))}};
  const zone=p=>p<=55?'low':p>=67?'high':'mid';
  kb=keyboard($('#enckb'),{lo:48,hi:79,labels:aidsOn(),onKey:(p)=>{hp.hit();if(intro||k>=tasks.length)return;const T=tasks[k],z=zone(p),fb=$('#encfb');
    if(T.t==='high'||T.t==='low'){if(z===T.t){kb.flash(p,'good');win()}else{kb.flash(p,'wrong');fb.className='fb on bad';fb.innerHTML=`<b>${z==='mid'?'Esa está en el medio':z==='low'?'Esa es grave':'Esa es aguda'}</b>${T.hint}`}return}
    if(T.t==='alt'){if(z==='mid'){kb.flash(p,'wrong');fb.className='fb on bad';fb.innerHTML='<b>Esa está en el medio</b>Usa notas claramente graves o agudas.';return}const want=seq.length?(seq[seq.length-1]==='low'?'high':'low'):z;if(z!==want){kb.flash(p,'wrong');seq=[];fb.className='fb on bad';fb.innerHTML='<b>Se repitió el lado</b>Alterna: una grave, una aguda… Empieza otra vez.';return}kb.flash(p,'good');seq.push(z);fb.className='fb on ok';fb.innerHTML=`<b>${seq.length}/${T.n}</b>`;if(seq.length>=T.n)win();return}
+   if(T.t==='phrase'){if(T._rt){clearTimeout(T._rt);T._rt=null;T._i=0;T._draw();kb.flash(p,'wrong');hurt();fb.className='fb on bad';fb.innerHTML='<b>¡Era un silencio!</b>Durante el silencio no se toca. Empieza la frase otra vez.';return}
+    const n=T.seq[T._i];if(!n||n.r)return;if(p%12!==n.p%12){kb.flash(p,'wrong');T._i=0;T._draw();hurt();fb.className='fb on bad';fb.innerHTML=`<b>Esa es ${NAMES[p%12]}</b>Lee la nota con calma y empieza la frase otra vez.`;return}
+    kb.flash(p,'good');T._i++;T._draw();const adv=()=>{const m=T.seq[T._i];if(!m){win();return}if(m.r){const bt=m.r==='w'?4:m.r==='h'?2:1;fb.className='fb on';fb.innerHTML=`<b>🤫 Silencio: espera ${bt} pulso${bt>1?'s':''}</b>`;T._rt=setTimeout(()=>{T._rt=null;T._i++;T._draw();fb.className='fb';adv()},bt*800)}else{fb.className='fb on ok';fb.innerHTML=`<b>${T._i}/${T.seq.length}</b>`}};adv();return}
    if(T.t==='read'){const want=T.ps[seq.length];if(p%12===want%12){kb.flash(p,'good');seq.push(p);T._draw&&T._draw();if(seq.length>=T.ps.length)win();else{fb.className='fb on ok';fb.innerHTML=`<b>${seq.length}/${T.ps.length}</b>`}}else{kb.flash(p,'wrong');seq=[];T._draw&&T._draw();hurt();fb.className='fb on bad';fb.innerHTML=`<b>Esa es ${NAMES[p%12]}</b>${T.names?`Busca ${NAMES[want%12]}.`:'Mira en qué línea o espacio está la nota.'}`}return}
    if(T.t==='trill'){const pc=p%12,a=T.ps[0]%12,b=T.ps[1]%12,now=performance.now(),lp=seq[seq.length-1];if(pc!==a&&pc!==b){kb.flash(p,'wrong');seq=[];hurt();fb.className='fb on bad';fb.innerHTML=`<b>${NAMES[pc]} no es parte del trino</b>Alterna solo ${NAMES[a]} y ${NAMES[b]}.`;return}
     kb.flash(p,'good');if(lp&&(lp.pc===pc||now-lp.t>650)){seq=[{pc,t:now}];fb.className='fb on bad';fb.innerHTML=lp.pc===pc?'<b>Alterna</b>Una y otra, sin repetir la misma.':'<b>¡Más rápido!</b>El trino es un temblor: las notas casi se tocan.';return}seq.push({pc,t:now});fb.className='fb on ok';fb.innerHTML=`<b>Trino ${seq.length}/${T.n}</b>`;if(seq.length>=T.n)win();return}
