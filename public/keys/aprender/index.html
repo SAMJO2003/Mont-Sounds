@@ -507,6 +507,15 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .m3.solved .m3st{animation:m3float 3s ease-in-out infinite}@keyframes m3float{50%{transform:translateY(-6px)}}
 .m3.unlock .m3st .clef{animation:m3spin 1.6s cubic-bezier(.4,0,.2,1) both}
 .m3-o-perg .m3-staff,.m3-o-frag .m3-staff,.m3-o-manuscrito .m3-staff{left:11%;right:11%}.m3-o-reloj .m3-staff{top:62%}
+#lFoot.hide-foot{display:none}
+.room{position:absolute;inset:0;z-index:2;overflow:hidden;background:#070403}.room canvas{position:absolute;inset:0}
+.room-hot{position:absolute;inset:0;pointer-events:none;z-index:3}.rh{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;color:#ffe2a8;font:600 10px Cinzel,serif;text-shadow:0 1px 3px #000}
+.rh i{font-style:normal;font-size:22px;width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(rgba(255,215,110,.35),rgba(255,215,110,0) 70%);animation:rhg 1.8s ease-in-out infinite}@keyframes rhg{50%{box-shadow:0 0 22px 6px rgba(255,210,110,.55)}}
+.rh span{background:rgba(10,6,3,.7);padding:1px 7px;border-radius:8px;white-space:nowrap}.rh.off{opacity:.45}.rh.off i{animation:none;filter:grayscale(.7)}.rh.done i{animation:none;background:none;filter:grayscale(.3) brightness(.8)}.rh.done span::after{content:' ✓'}
+.rh.exit i{background:radial-gradient(rgba(150,200,255,.35),transparent 70%)}
+.room-talk{position:absolute;left:10px;right:10px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:12;background:rgba(14,9,5,.92);border:1px solid rgba(232,194,122,.45);border-radius:14px;padding:12px 14px;color:#f3e2c0;animation:m3up .4s both}.room-talk p{margin:6px 0 4px;font:600 15px/1.4 'Special Elite','Courier New',monospace}.room-talk small{color:#c9a46a}
+.room-ov{position:absolute;inset:0;z-index:30;background:#070403;overflow:auto;opacity:0;transition:opacity .45s}.room-ov.in{opacity:1}.room-ov.out{opacity:0}
+.room-q{z-index:4}
 </style>
 
 <div id="sky"></div>
@@ -649,64 +658,67 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
  {id:'w1m03',t:'El lenguaje escrito',d:'El manuscrito de las voces perdidas: cada medianoche suena una melodía en el scriptorium. Con Isabella, aprende a leer música para resolver sus acertijos y descubrir la primera pista del Maestro Compositor.',scene:true,game:true,
   disc:{id:'a-guido',name:'Guido d’Arezzo',per:'Monje italiano · nacido hacia el año 991',text:'Maestro de música que ideó un sistema de líneas separadas por terceras para escribir la altura exacta de las notas, la base de nuestro pentagrama, y un método con sílabas para aprender a cantar. Lo explicó en su tratado «Micrologus», escrito hacia 1025.',sig:'Gracias a su sistema, un cantante podía aprender una melodía nueva leyendo, sin oírla antes.'},
   steps:[
-   /* APERTURA */
    {type:'scene',act:['Módulo 3','El manuscrito de las voces perdidas'],img:'plaza_on',move:'zoom',lines:['Florencia vuelve a sonar. Pero cada medianoche ocurre algo extraño…','Desde el scriptorium sale una melodía que siempre se corta en el mismo punto.']},
    {type:'citymap',from:'puerta',go:'campanario',act:'Misión 1',mission:'Es medianoche. Matteo quiere verte en el campanario.'},
    {type:'scene',img:'matteo',who:'matteo',move:'zoom',lines:['—Desde que volvió el Guardián, una melodía se escucha cada noche en el scriptorium.','—Ve a hablar con Isabella. Quizá ella sepa qué está ocurriendo.']},
    {type:'citymap',go:'scriptorium',act:'Misión 1',mission:'Ve al scriptorium, al noroeste de la ciudad. Busca a Isabella.'},
-   /* EL SCRIPTORIUM */
-   {type:'scene',img:'m3_scrip',who:'isabella',move:'zoom',lines:['—Durante quince años, esa habitación permaneció en silencio.','—Pero ahora alguien toca una melodía dentro… y nadie tiene la llave.','—Creo que esta partitura puede abrirla. Pero primero tendrás que aprender a leerla.']},
-   {type:'mystery',n:1,title:'Las cinco líneas perdidas',obj:'perg',mode:'lines',clef:false,
+   {type:'room',room:'scrip',who:'isabella',act:'El scriptorium',start:[180,520],
+    intro:['—Durante quince años, esa habitación permaneció en silencio.','—Pero ahora alguien toca una melodía dentro… y nadie tiene la llave.','—Creo que esta partitura puede abrirla. Pero primero tendrás que aprender a leerla.'],
+    hot:[{id:'isa',kind:'talk',ic:'isabella',label:'Isabella',x:300,y:250,opt:1,lines:['—Investiga lo que brilla. Cada objeto guarda una parte del secreto.']},
+     {id:'a1',kind:'mystery',label:'Pergamino',x:85,y:200,hint:'Investiga el pergamino del escritorio.',m:{type:'mystery',n:1,title:'Las cinco líneas perdidas',obj:'perg',mode:'lines',clef:false,
     intro:['—Este pergamino perdió sus líneas. La música se escribe sobre cinco.','—Toca cada nota que brilla: cada una dibujará una línea, de abajo hacia arriba.'],
     rounds:[{aid:1,say:'Mi, Sol, Si, Re, Fa: una línea por nota.',seq:[{p:64},{p:67},{p:71},{p:74},{p:77}]}],
-    ink:'La música se escribe donde el sonido sube y baja',reveal:'Cinco líneas y cuatro espacios: el pentagrama.',revealSub:'En el pergamino aparece una inscripción: «La música se escribe donde el sonido sube y baja».'},
-   {type:'mystery',n:2,title:'Entre líneas y espacios',obj:'libro',mode:'place',
+    reveal:'Cinco líneas y cuatro espacios: el pentagrama.',revealSub:'En el pergamino aparece una inscripción: «La música se escribe donde el sonido sube y baja».'}},
+     {id:'a2',kind:'mystery',label:'Libro',x:275,y:200,need:['a1'],locked:'Primero el pergamino.',hint:'Ahora el libro abierto del otro escritorio.',m:{type:'mystery',n:2,title:'Entre líneas y espacios',obj:'libro',mode:'place',
     intro:['—Mira: algunas notas se apoyan sobre una línea. Otras viven en el espacio entre dos.','—Estas notas se escaparon del libro. Tócalas y volverán a su sitio.'],
     rounds:[{aid:1,say:'Primero con ayuda: Mi, Fa, Sol, La, Si.',seq:[{p:64},{p:65},{p:67},{p:69},{p:71}]},{aid:2,say:'Ahora sin nombres: la tecla te guía.',seq:[{p:71},{p:69},{p:65},{p:67},{p:64}]}],
-    reveal:'Las notas vuelven a su lugar.',revealSub:'Entre las páginas aparece un dibujo de la habitación prohibida: su puerta tiene una gran clave grabada.'},
-   {type:'mystery',n:3,title:'La llave de Sol',obj:'puerta',mode:'key',
+    reveal:'Las notas vuelven a su lugar.',revealSub:'Entre las páginas aparece un dibujo de la habitación prohibida: su puerta tiene una gran clave grabada.'}},
+     {id:'a3',kind:'mystery',label:'Puerta de la clave',x:240,y:400,need:['a2'],locked:'Todavía no sabes leer la clave.',hint:'Abre la puerta de la clave de Sol.',m:{type:'mystery',n:3,title:'La llave de Sol',obj:'puerta',mode:'key',
     intro:['—Este signo es la clave de Sol. Su espiral abraza la segunda línea.','—Ahí vive Sol. Encuéntralo y la cerradura despertará.'],
     rounds:[{aid:2,say:'Toca Sol: la nota de la segunda línea.',seq:[{p:67}]},{aid:2,say:'Ahora la frase de la llave.',seq:[{p:67},{p:69},{p:71},{p:69},{p:67}]}],
-    reveal:'La clave gira… ¡la cerradura se abre!',revealSub:'Detrás de la puerta hay una sala de copia y una escalera que se pierde en la oscuridad.'},
-   /* LA SALA DE COPIA */
-   {type:'scene',img:'m3_copia',who:'isabella',move:'zoom',lines:['—Nadie había entrado aquí en quince años.','—Esa escalera lleva al viejo reloj. Pero le faltan escalones.']},
-   {type:'mystery',n:4,title:'La escalera invisible',obj:'escalera',mode:'stairs',
+    reveal:'La clave gira… ¡la cerradura se abre!',revealSub:'Detrás de la puerta hay una sala de copia y una escalera que se pierde en la oscuridad.'}}],
+    exit:{x:240,y:452,label:'Sala de copia',ic:'🚪',need:['a3'],locked:'La puerta está cerrada con una clave de Sol.',hint:'La puerta está abierta: entra en la sala de copia.'}},
+   {type:'room',room:'copia',who:'isabella',act:'La sala de copia',start:[180,520],
+    intro:['—Nadie había entrado aquí en quince años.','—Esa escalera lleva al viejo reloj. Pero le faltan escalones.'],
+    hot:[{id:'a4',kind:'mystery',label:'Escalera',x:60,y:220,hint:'Completa la escalera invisible.',m:{type:'mystery',n:4,title:'La escalera invisible',obj:'escalera',mode:'stairs',
     intro:['—Cada escalón es una nota. Cuanto más arriba en el pentagrama, más aguda suena.'],
     rounds:[{aid:2,say:'Sube: Mi, Fa, Sol, La, Si.',seq:[{p:64},{p:65},{p:67},{p:69},{p:71}]},{aid:3,say:'Ahora baja… y esta vez solo leyendo.',seq:[{p:71},{p:69},{p:67},{p:65},{p:64}]}],
-    reveal:'La escalera queda firme.',revealSub:'Arriba espera un reloj antiguo, detenido desde hace quince años.'},
-   {type:'mystery',n:5,title:'El reloj detenido',obj:'reloj',mode:'hold',beat:800,
+    reveal:'La escalera queda firme.',revealSub:'Arriba espera un reloj antiguo, detenido desde hace quince años.'}},
+     {id:'a5',kind:'mystery',label:'Reloj',x:180,y:175,need:['a4'],locked:'No llegas al reloj: faltan escalones.',hint:'Haz que el reloj vuelva a andar.',m:{type:'mystery',n:5,title:'El reloj detenido',obj:'reloj',mode:'hold',beat:800,
     intro:['—Las notas también tienen duración. Fíjate en su forma.','—Negra: 1 pulso. Blanca: 2. Redonda: 4. Mantén la tecla hasta llenar el anillo.'],
     rounds:[{aid:1,say:'Negra: mantén 1 pulso.',seq:[{p:67,d:'q'}]},{aid:1,say:'Blanca (hueca, con plica): 2 pulsos.',seq:[{p:69,d:'h'}]},{aid:1,say:'Redonda (hueca, sin plica): 4 pulsos.',seq:[{p:71,d:'w'}]},{aid:2,say:'Ahora mezcladas.',seq:[{p:67,d:'q'},{p:69,d:'h'},{p:67,d:'q'},{p:64,d:'w'}]}],
-    reveal:'El reloj vuelve a andar… y marca la medianoche.',revealSub:'Se oye la melodía de la habitación prohibida. Viene de abajo, detrás de una puerta de piedra.'},
-   {type:'mystery',n:6,title:'El silencio necesario',obj:'puerta2',mode:'silence',beat:800,
+    reveal:'El reloj vuelve a andar… y marca la medianoche.',revealSub:'Se oye la melodía de la habitación prohibida. Viene de abajo, detrás de una puerta de piedra.'}},
+     {id:'a6',kind:'mystery',label:'Puerta de piedra',x:230,y:400,need:['a5'],locked:'La puerta de piedra no responde… todavía.',hint:'La melodía viene de detrás de la puerta de piedra.',m:{type:'mystery',n:6,title:'El silencio necesario',obj:'puerta2',mode:'silence',beat:800,
     intro:['—Esta puerta escucha. En la música, el silencio también se escribe.','—Cuando aparezca un silencio, espera sin tocar.'],
     rounds:[{aid:2,say:'Toca y respeta los silencios.',seq:[{p:67,d:'q'},{r:'q'},{p:69,d:'q'},{r:'q'},{p:71,d:'q'}]},{aid:3,say:'Ahora con un silencio largo (2 pulsos).',seq:[{p:71,d:'q'},{p:69,d:'q'},{r:'h'},{p:67,d:'q'}]}],
-    reveal:'La puerta de piedra se abre.',revealSub:'Una escalera baja hacia el Archivo Subterráneo.'},
-   /* EL ARCHIVO SUBTERRÁNEO */
-   {type:'scene',img:'m3_archivo',who:'isabella',move:'zoom',lines:['—El Archivo Subterráneo… Mi maestra decía que era solo una leyenda.','—Mira: hay fragmentos de partituras por todas partes.']},
-   {type:'mystery',title:'Fragmento de la biblioteca',obj:'frag',mode:'melody',codex:'m3_frag1',
+    reveal:'La puerta de piedra se abre.',revealSub:'Una escalera baja hacia el Archivo Subterráneo.'}}],
+    exit:{x:230,y:452,label:'Bajar al archivo',ic:'⬇️',need:['a6'],locked:'La puerta de piedra está cerrada.',hint:'Baja al Archivo Subterráneo.'}},
+   {type:'room',room:'biblio',who:'isabella',act:'Archivo · Biblioteca olvidada',start:[180,520],
+    intro:['—El Archivo Subterráneo… Mi maestra decía que era solo una leyenda.','—Mira: hay fragmentos de partituras por todas partes.'],
+    hot:[{id:'fr',kind:'mystery',label:'Fragmento',x:95,y:350,hint:'Salva el fragmento de partitura.',m:{type:'mystery',title:'Fragmento de la biblioteca',obj:'frag',mode:'melody',codex:'m3_frag1',
     intro:['—Este fragmento está casi borrado. Léelo y tócalo para salvarlo.'],
     rounds:[{aid:2,say:'Lee el fragmento.',seq:[{p:64},{p:67},{p:69},{p:67}]},{aid:3,say:'Y este, solo leyendo.',seq:[{p:71},{p:69},{p:67},{p:64}]}],
-    reveal:'Fragmento recuperado.',revealSub:'Lo guardas en el Códice del Compositor.'},
-   {type:'scene',img:'m3_pasillo',move:'zoom',lines:['Un pasillo de piedra cubierto de inscripciones musicales. Algo se mueve entre las sombras…','¡Devoradores de Tinta! Se alimentan de las notas escritas.']},
-   {type:'spirit',bg:'m3_pasillo',name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',battle:true,hp:5,winText:'El Devorador recupera su forma: ahora es un pequeño espíritu dorado.',
+    reveal:'Fragmento recuperado.',revealSub:'Lo guardas en el Códice del Compositor.'},after:['—Este fragmento… alguien lo copió con prisa. Sigamos.']}],
+    exit:{x:180,y:110,label:'Pasillo de los ecos',ic:'⬆️',need:['fr'],locked:'Primero salva el fragmento.',hint:'Sigue hacia el Pasillo de los ecos.'}},
+   {type:'room',room:'pasillo',act:'Archivo · Pasillo de los ecos',start:[180,525],
+    intro:['Un pasillo de piedra cubierto de inscripciones musicales. Algo se mueve entre las sombras…','¡Devoradores de Tinta! Se alimentan de las notas escritas. Si te tocan, invoca tu piano.'],
+    enemies:[{x:150,y:420,zone:[90,360,270,500],f:{name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',battle:true,heroHP:5,winText:'El Devorador recupera su forma: ahora es un pequeño espíritu dorado.',
     intro:['El Devorador se tragó las notas de la pared.','Lee cada nota en el pentagrama y tócala para devolverla.'],
-    tasks:[{t:'read',ps:[67],names:true,hint:true,say:'Lee la nota y tócala'},{t:'read',ps:[64],names:true,hint:true,say:'Otra nota'}]},
-   {type:'spirit',bg:'m3_pasillo',name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',battle:true,hp:5,winText:'Otro Devorador vuelve a ser un espíritu dorado.',
-    tasks:[{t:'read',ps:[69],say:'Lee la nota: sin nombre'},{t:'read',ps:[65],say:'¿Y esta?'},{t:'read',ps:[71],say:'La última'}]},
-   {type:'spirit',bg:'m3_pasillo',name:'Gran Devorador de Tinta',tint:'grayscale(1) brightness(.3) contrast(1.8)',battle:true,hp:5,winText:'El Gran Devorador se transforma en luz dorada. El pasillo queda libre.',
-    tasks:[{t:'read',ps:[64,67],say:'Dos notas seguidas'},{t:'read',ps:[67,69,71],say:'Tres notas subiendo'},{t:'read',ps:[71,69,67],say:'Tres notas bajando'}]},
-   /* LA CÁMARA DEL MANUSCRITO */
-   {type:'scene',img:'m3_camara',move:'zoom',lines:['En una cámara circular, un espíritu de pergamino y tinta custodia una gran partitura.','—Recuerdo las líneas… pero he olvidado las notas. Si conoces su lenguaje, ayúdame a recordar.']},
-   {type:'spirit',bg:'m3_camara',name:'Guardián de la Última Nota',tint:'sepia(1) saturate(.5) brightness(.9)',battle:true,hp:6,winText:'El Guardián recupera su memoria y su brillo dorado. Se aparta y te deja ver el manuscrito.',
+    tasks:[{t:'read',ps:[67],names:true,hint:true,say:'Lee la nota y tócala'},{t:'read',ps:[64],names:true,hint:true,say:'Otra nota'}]}},{x:220,y:300,zone:[90,240,270,380],f:{name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',battle:true,heroHP:5,winText:'Otro Devorador vuelve a ser un espíritu dorado.',
+    tasks:[{t:'read',ps:[69],say:'Lee la nota: sin nombre'},{t:'read',ps:[65],say:'¿Y esta?'},{t:'read',ps:[71],say:'La última'}]}},{x:170,y:180,zone:[90,120,270,260],f:{name:'Gran Devorador de Tinta',tint:'grayscale(1) brightness(.3) contrast(1.8)',battle:true,heroHP:5,winText:'El Gran Devorador se transforma en luz dorada. El pasillo queda libre.',
+    tasks:[{t:'read',ps:[64,67],say:'Dos notas seguidas'},{t:'read',ps:[67,69,71],say:'Tres notas subiendo'},{t:'read',ps:[71,69,67],say:'Tres notas bajando'}]}}],
+    exit:{x:180,y:105,label:'Cámara del manuscrito',ic:'⬆️',locked:'Los Devoradores bloquean el paso.',hint:'Devuelve la calma a los tres Devoradores.'}},
+   {type:'room',room:'camara',act:'Archivo · Cámara del manuscrito',start:[180,520],
+    intro:['En una cámara circular, un espíritu de pergamino y tinta custodia una gran partitura.'],
+    hot:[{id:'gd',kind:'fight',ic:'guardian',label:'Guardián',x:180,y:200,hint:'Ayuda al Guardián a recordar.',who:'guardian',lines:['—Recuerdo las líneas… pero he olvidado las notas.','—Si conoces su lenguaje, ayúdame a recordar.'],f:{name:'Guardián de la Última Nota',tint:'sepia(1) saturate(.5) brightness(.9)',battle:true,heroHP:6,winText:'El Guardián recupera su memoria y su brillo dorado. Se aparta y te deja ver el manuscrito.',
     intro:['Fase 1 · Reconocer: devuélvele sus notas una a una.','Fase 2 · Recordar: subidas y bajadas. Fase 3 · Completar: su frase.'],
-    tasks:[{t:'read',ps:[69],say:'Reconocer'},{t:'read',ps:[64],say:'Reconocer'},{t:'read',ps:[64,65,67,69],say:'Recordar: sube'},{t:'read',ps:[71,69,67,65],say:'Recordar: baja'},{t:'read',ps:[67,69,71,69,67],say:'Completar su frase'}]},
-   {type:'mystery',n:7,title:'La melodía incompleta',obj:'manuscrito',mode:'melody',codex:'m3_partitura',
+    tasks:[{t:'read',ps:[69],say:'Reconocer'},{t:'read',ps:[64],say:'Reconocer'},{t:'read',ps:[64,65,67,69],say:'Recordar: sube'},{t:'read',ps:[71,69,67,65],say:'Recordar: baja'},{t:'read',ps:[67,69,71,69,67],say:'Completar su frase'}]}},
+     {id:'a7',kind:'mystery',label:'Manuscrito',x:180,y:300,need:['gd'],locked:'El Guardián protege el manuscrito.',hint:'Toca la melodía del manuscrito.',m:{type:'mystery',n:7,title:'La melodía incompleta',obj:'manuscrito',mode:'melody',codex:'m3_partitura',
     intro:['—El Guardián te deja tocar la melodía completa.','—Léela con calma: notas, figuras y un silencio.'],
     rounds:[{aid:1,say:'Primero con nombres.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},{aid:2,say:'Ahora solo con la tecla.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},{aid:3,say:'Y ahora, solo leyendo.',seq:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]}],
-    ink:'Cuando la música pierda su voz…',reveal:'El manuscrito recupera su melodía original.',revealSub:'Las notas brillan… y sobre la mesa aparece un mapa antiguo.'},
-   /* CIERRE */
-   {type:'scene',img:'m3_mapa',who:'isabella',move:'zoom',codex:'m3_pista',lines:['—¡Estas notas no forman solamente una melodía!','—El Maestro escondió un camino dentro de su propia música.','En el mapa aparece una inscripción: «Cuando la música pierda su voz, buscad aquello que fue olvidado».','—Quizá esta sea la primera pista de lo que ocurrió con él.'],accept:'Completar el módulo',reward:'🏅 Módulo 3 completado: El lenguaje escrito'}
+    reveal:'El manuscrito recupera su melodía original.',revealSub:'Las notas brillan… y sobre la mesa aparece un mapa antiguo.'}}],
+    exit:{x:180,y:470,label:'Ver el mapa',ic:'🗺️',need:['a7'],locked:'El manuscrito aún está incompleto.',hint:'Algo aparece sobre la mesa…'}},
+   {type:'scene',ckClear:1,img:'m3_mapa',who:'isabella',move:'zoom',codex:'m3_pista',lines:['—¡Estas notas no forman solamente una melodía!','—El Maestro escondió un camino dentro de su propia música.','En el mapa aparece una inscripción: «Cuando la música pierda su voz, buscad aquello que fue olvidado».','—Quizá esta sea la primera pista de lo que ocurrió con él.'],accept:'Completar el módulo',reward:'🏅 Módulo 3 completado: El lenguaje escrito'}
   ]},
  /* ---------------- 04 ---------------- */
  {id:'w1m04',t:'Los instrumentos olvidados',d:'El clavecín y el clavicordio: cómo suenan, cómo funcionan y de qué época son.',
@@ -1275,7 +1287,7 @@ function micRow(host){if(!LS)return;let row=host.nextElementSibling;if(!row||!ro
  row.querySelector('.micbtn').onclick=async()=>{S.input=inputMode()==='mic'?'touch':'mic';save();await applyInput();document.querySelectorAll('.microw').forEach(r=>micRow(r.previousElementSibling));if(inputMode()==='mic')toast('Toca en tu piano: la app te escucha. Mira el indicador verde arriba.')};
  const c=row.querySelector('[data-cal]');if(c)c.onclick=()=>earCalibrate()}
 function syncLessonBar(){const c=$('#lCalm');if(c){c.textContent=S.calm?'🕊':'⏳';c.setAttribute('aria-pressed',!!S.calm)}const b=$('#lInput');if(b)b.textContent=({touch:'🎹',mic:'🎤',midi:'🎛'})[inputMode()];const a=$('#lAids');if(a){a.setAttribute('aria-pressed',aidsOn());a.style.opacity=aidsOn()?1:.45}}
-const STEP_NAMES={scene:'Escena',citymap:'Mapa',bells:'Campanas',water:'Fuente',lights:'Faroles',seqperf:'Fuente musical',spirit:'Espíritu',musico:'Músicos',melody:'Melodía',create:'Crear',story:'Historia',forest:'Bosque',mystery:'Acertijo',sort:'Clasificar',timbre:'Timbre'};
+const STEP_NAMES={scene:'Escena',citymap:'Mapa',bells:'Campanas',water:'Fuente',lights:'Faroles',seqperf:'Fuente musical',spirit:'Espíritu',musico:'Músicos',melody:'Melodía',create:'Crear',story:'Historia',forest:'Bosque',mystery:'Acertijo',room:'Sala',sort:'Clasificar',timbre:'Timbre'};
 function jumpMenu(){if(!LS)return;const st=LS.L.steps;sheet(`<span class="eyebrow">Revisión</span><h2>Ir a un ejercicio</h2><div class="jlist">${st.map((x,i)=>{const t=x.mission||x.q||x.sub||(x.lines&&x.lines[0])||x.title||x.name||'';return `<button type="button" class="jrow${i===LS.i?' on':''}" data-j="${i}"><b>${i+1}</b><span><small>${esc(STEP_NAMES[x.type]||x.type)}${x.mode?' · '+esc(({low:'la más grave',high:'la más aguda',rush:'relámpago',order:'ordenar',broken:'escalera',repeat:'repetir',odd:'nota distinta',tune:'afinar',contour:'contorno',rhythm:'ritmo'})[x.mode]||x.mode):''}</small>${esc(t.replace(/^—/,'').slice(0,80))}</span></button>`}).join('')}</div><button class="ghost" type="button" id="jClose">Cerrar</button>`);
  $('#jClose').onclick=closeSheet;$$('.jrow').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;closeSheet();LOOPMEL.on=false;const prev=st.slice(0,j);
   LS.mapDone=prev.filter(x=>x.type==='citymap').map(x=>x.go);LS.mapPrev=null;LS.scene={};if(prev.some(x=>x.type==='bells'))LS.scene.bells=true;if(prev.some(x=>x.type==='water'||x.fx==='water'))LS.scene.water=true;if(prev.some(x=>x.type==='lights'))LS.scene.lights=true;if(prev.some(x=>x.type==='seqperf'))LS.scene.fountain=true;
@@ -1334,8 +1346,8 @@ function plazaLights(){const total=LS.lightsTotal||9,done=LS.lightsDone||0,n=Mat
 let LS=null;
 /* los músicos repiten tu melodía en bucle hasta que sales del capítulo */
 const LOOPMEL={on:false,id:0};function loopMelody(mel){LOOPMEL.on=true;const id=++LOOPMEL.id;const play=()=>{if(!LOOPMEL.on||LOOPMEL.id!==id||!LS)return;const a=ac();let t=a.currentTime+.1,tot=0;mel.forEach(n=>{const d=n.d*.5;tone(n.p,n.v,d*.95,'trio',t);t+=d;tot+=d});setTimeout(play,(tot+1.6)*1000)};setTimeout(play,1200)}
-function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';gameInit();gameFS(true);TW_LAST='';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();renderStep()}
-function exitLesson(){LOOPMEL.on=false;gameFS(false);micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;drawMap()}
+function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';gameInit();gameFS(true);TW_LAST='';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();if(L.id==='w1m03'&&S.m3&&S.m3.ck>0&&S.m3.ck<L.steps.length){LS.i=S.m3.ck;setTimeout(()=>toast('Continúas donde lo dejaste en el scriptorium.'),800)}renderStep()}
+function exitLesson(){$('#lFoot').classList.remove('hide-foot');LOOPMEL.on=false;gameFS(false);micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;drawMap()}
 $('#lClose').onclick=()=>{if(!LS)return;sheet(`<h2>¿Salir de la lección?</h2><p>Perderás el avance de esta lección.</p><button class="cta" id="q1" type="button">Salir</button><button class="ghost" id="q2" type="button">Seguir aprendiendo</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet};
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
 function next(){if(!micGlobal)micOff();EAR.chordDown=[];EAR.cj=null;EAR.heard=null;LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
@@ -1804,7 +1816,7 @@ const M3_OBJ={perg:'Pergamino olvidado',libro:'Libro de las notas errantes',puer
 const M3_ART={};/* cuando llegue el arte: M3_ART.perg='m3/perg_vacio' … */
 function m3ObjHTML(k){const a=M3_ART[k];return a?`<img class="m3-art" src="${V()}${a}.webp" alt="">`:`<div class="m3-obj m3-${k}">${k==='reloj'?'<div class="m3-face"><i class="h1"></i><i class="h2"></i></div><div class="m3-pend"></div>':k==='escalera'?Array.from({length:5},(_,i)=>`<i class="stp" style="--i:${i}"></i>`).join(''):k==='puerta'||k==='puerta2'?'<i class="m3-knob"></i>':''}</div>`}
 /* paso: acertijo */
-function stepMystery(st,box){const rounds=st.rounds,beat=st.beat||900;let r=0,k=0,miss=0,intro=(st.intro||[]).slice(),busy=false,restT=null,holdP=null,holdT=0,kb=null,ringRAF=0,turns=0;
+function stepMystery(st,box,onDone){if(onDone)$('#lFoot').classList.remove('hide-foot');const rounds=st.rounds,beat=st.beat||900;let r=0,k=0,miss=0,intro=(st.intro||[]).slice(),busy=false,restT=null,holdP=null,holdT=0,kb=null,ringRAF=0,turns=0;
  box.innerHTML=`<div class="m3 m3-in m3-o-${st.obj} m3-m-${st.mode}" id="m3"><div class="m3-vig"></div><div class="m3-dust"></div>
   <div class="m3-head"><small>${st.n?'Acertijo '+st.n:'Hallazgo'}</small><b>${esc(st.title)}</b></div>
   <div class="m3-stage" id="m3stg"><i class="m3-cand c1"></i><i class="m3-cand c2"></i>${m3ObjHTML(st.obj)}<div class="m3-staff" id="m3s"></div><div class="m3-ink" id="m3ink"></div><div class="m3-pulse" id="m3p" hidden><i></i></div><div class="m3-ring" id="m3r" hidden><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" pathLength="1"/></svg><b></b></div><div class="m3-fx" id="m3fx"></div></div>
@@ -1855,9 +1867,82 @@ function stepMystery(st,box){const rounds=st.rounds,beat=st.beat||900;let r=0,k=
   if(st.ink){const ink=$('#m3ink');ink.innerHTML=`<span>${esc(st.ink)}</span>`;ink.classList.add('on')}
   $('#m3say').innerHTML=`<p class="m3-rev"><b>${esc(st.reveal||'¡Resuelto!')}</b>${st.revealSub?`<span>${esc(st.revealSub)}</span>`:''}</p>`;
   {const t=ac().currentTime+.1;[60,64,67,72,76,79].forEach((p,j)=>tone(p,.42,1.4,'piano',t+j*.11));tone(48,.3,2.5,'strings',t)}
-  if(st.codex)codexAdd(st.codex);setTimeout(()=>foot('Continuar ▸',next,{gold:true}),900)};
+  if(st.codex)codexAdd(st.codex);setTimeout(()=>foot('Continuar ▸',()=>{if(onDone){$('#lFoot').classList.add('hide-foot');onDone()}else next()},{gold:true}),900)};
  const adv=()=>{if(intro.length){say(intro.shift());if(!intro.length)foot('¡A tocar! ▸',()=>startPlay())}else startPlay()};
  draw();foot('Continuar ▸',()=>adv());foot('…',()=>{},{disabled:true});setTimeout(()=>{foot('Continuar ▸',()=>adv());adv()},1700)}
+
+/* ===================== MÓDULO 3 · SALAS EXPLORABLES ===================== */
+/* Cada sala cabe en una pantalla (coordenadas lógicas 360×560). Objetos con brillo dorado abren acertijos, diálogos o combates; la puerta se abre al resolver lo necesario. */
+const ROOM_W=360,ROOM_H=560;
+const ROOMS={
+ scrip:{n:'Scriptorium',floor:'#5a3a20',wall:'#2a1a0e',furn:[[40,150,90,40,'Escritorio'],[230,150,90,40,'Escritorio'],[130,300,100,46,'Mesa central'],[20,96,60,30,'Estantería'],[280,96,60,30,'Estantería']]},
+ copia:{n:'Sala de copia',floor:'#4a3a2c',wall:'#221a12',furn:[[150,110,60,40,'Reloj'],[30,330,70,40,'Atril']]},
+ biblio:{n:'Biblioteca olvidada',floor:'#3a342c',wall:'#16130f',furn:[[20,110,80,34,'Estantería'],[140,110,80,34,'Estantería'],[260,110,80,34,'Estantería'],[60,300,70,30,'Libros caídos']]},
+ pasillo:{n:'Pasillo de los ecos',floor:'#34343e',wall:'#121218',furn:[[0,90,70,470,''],[290,90,70,470,'']]},
+ camara:{n:'Cámara del manuscrito',floor:'#3a3530',wall:'#141210',furn:[[130,250,100,60,'Mesa del manuscrito']]}};
+const ROOM_IC={perg:'📜',libro:'📖',puerta:'🚪',escalera:'🪜',reloj:'🕰️',puerta2:'🚪',frag:'📄',manuscrito:'📜',guardian:'👻',isabella:'🪶',talk:'💬'};
+const ROOM_ART={};/* cuando llegue el arte: ROOM_ART.scrip='m3/int_scriptorium' */
+function stepRoom(st,box){townAssets();const RM=ROOMS[st.room];S.m3=S.m3||{};S.m3.ck=LS.i;S.m3.solved=S.m3.solved||{};save();const SV=S.m3.solved;
+ const solved=id=>!!SV[st.room+':'+id],mark=id=>{SV[st.room+':'+id]=1;save()};
+ box.innerHTML=`<div class="room" id="room"><canvas id="rcv"></canvas><div class="room-hot" id="rhot"></div>
+  <div class="cm-quest room-q"><small>${esc(st.act||RM.n)}</small><b id="rmis"></b></div>
+  <div class="cm-hint">Toca el suelo para caminar. Los objetos con brillo dorado esconden algo.</div>${booksHTML()}</div>`;
+ bindBooks(box);foot('…',()=>{},{disabled:true});$('#lFoot').classList.add('hide-foot');
+ const wrap=$('#room'),cv=$('#rcv'),g=cv.getContext('2d');let VW=0,VH=0,dpr=1,sc=1,ox=0,oy=0;
+ const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px';sc=Math.min(VW/ROOM_W,VH/ROOM_H);ox=(VW-ROOM_W*sc)/2;oy=(VH-ROOM_H*sc)/2;placeHot()};
+ /* cuadrícula de paso (celdas de 20) */
+ const C=20,gw=ROOM_W/C,gh=ROOM_H/C,b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
+ block(0,0,ROOM_W,88);RM.furn.forEach(([x,y,w,h])=>block(x,y,x+w,y+h));const G={b,gw,gh};
+ const H=LS.rhero&&LS.rroom===st.room?LS.rhero:(LS.rhero=(st.start||[180,520]).slice());LS.rroom=st.room;
+ let path=[],moving=false,arriving=null,facing=1,hdir='front',walkT=0,last=performance.now(),alive=true,busy=false,ping=null,pingT=0;
+ const hots=(st.hot||[]).map(h=>Object.assign({},h));
+ const avail=h=>(h.need||[]).every(solved);
+ const mission=()=>{const nx=hots.find(h=>!solved(h.id)&&avail(h)&&!h.opt);$('#rmis').textContent=nx?(nx.hint||'Investiga lo que brilla.'):st.exit&&exitOpen()?(st.exit.hint||'El camino está abierto.'):st.enemies?'Devuelve la calma a los Devoradores de Tinta ('+sps.filter(x=>x.good).length+'/'+sps.length+'). Si te tocan, lucharás.':'Explora la sala.'};
+ const exitOpen=()=>st.exit&&(st.exit.need||[]).every(solved)&&(!st.enemies||sps.every(s=>s.good));
+ function placeHot(){const host=$('#rhot');if(!host)return;host.innerHTML=hots.map((h,i)=>{const on=avail(h),done=solved(h.id);return `<button class="rh ${done?'done':''} ${on?'':'off'}" data-i="${i}" style="left:${ox+h.x*sc}px;top:${oy+h.y*sc}px" type="button"><i>${ROOM_IC[h.ic||h.kind==='mystery'&&h.m.obj||h.kind]||'✦'}</i><span>${esc(h.label)}</span></button>`}).join('')+(st.exit?`<button class="rh exit ${exitOpen()?'':'off'}" data-exit="1" style="left:${ox+st.exit.x*sc}px;top:${oy+st.exit.y*sc}px" type="button"><i>${st.exit.ic||'⬇️'}</i><span>${esc(st.exit.label)}</span></button>`:'');
+  host.querySelectorAll('[data-i]').forEach(bn=>bn.onclick=e=>{e.stopPropagation();if(busy)return;const h=hots[+bn.dataset.i];if(!avail(h)){toast(h.locked||'Todavía no puedes investigar esto.');return}walkTo([h.x,Math.min(ROOM_H-20,h.y+34)],()=>use(h))});
+  const ex=host.querySelector('[data-exit]');if(ex)ex.onclick=e=>{e.stopPropagation();if(busy)return;if(!exitOpen()){toast(st.exit.locked||'El camino está cerrado.');return}walkTo([st.exit.x,Math.min(ROOM_H-20,st.exit.y+30)],leave)};mission()}
+ const walkTo=(p,cb)=>{const pth=townPath(G,H,p);if(!pth||!pth.length){if(cb&&Math.hypot(H[0]-p[0],H[1]-p[1])<40){cb();return}ping=p;pingT=performance.now();return}path=pth;moving=true;arriving=cb||null};
+ const leave=()=>{alive=false;LS.rhero=null;$('#lFoot').classList.remove('hide-foot');next()};
+ /* diálogo breve dentro de la sala */
+ const talk=(lines,who,cb)=>{busy=true;let i=0;const d=document.createElement('div');d.className='room-talk';wrap.appendChild(d);
+  const show=()=>{if(i>=lines.length){d.remove();busy=false;last=performance.now();cb&&cb();return}const L=lines[i++],dlg=L.startsWith('—');d.innerHTML=`${dlg&&who?`<span class="m3-who">${portrait(who)}<span>${esc(WHO[who]||'')}</span></span>`:''}<p>${esc(L)}</p><small>Toca para seguir ▸</small>`;typeIn(d.querySelector('p'),null,{noClick:true})};d.onclick=show;show()};
+ /* usar un objeto: acertijo, diálogo o combate */
+ const use=h=>{if(solved(h.id)&&!h.repeat){if(h.after)talk(h.after,h.who||'isabella');else toast('Ya lo resolviste.');return}
+  const done=()=>{mark(h.id);placeHot();if(h.after)talk(h.after,h.who||'isabella');if(h.kind==='mystery'){const s2=$('#m3stg');}};
+  if(h.kind==='talk'){talk(h.lines,h.who||'isabella',()=>{mark(h.id);placeHot()});return}
+  if(h.kind==='mystery'){busy=true;const ov=document.createElement('div');ov.className='room-ov';wrap.appendChild(ov);requestAnimationFrame(()=>ov.classList.add('in'));
+   stepMystery(h.m,ov,()=>{ov.classList.add('out');setTimeout(()=>ov.remove(),500);busy=false;last=performance.now();foot('…',()=>{},{disabled:true});done()});return}
+  if(h.kind==='fight'){busy=true;const go=()=>townEncounter(Object.assign({battle:true,heroHP:5,winBtn:'Continuar'},h.f),()=>{busy=false;last=performance.now();done()});if(h.lines)talk(h.lines,h.who,()=>{busy=true;go()});else go()}};
+ /* Devoradores de Tinta que vagan por la sala */
+ let sps=(st.enemies||[]).map((e,i)=>Object.assign({x:e.x,y:e.y,tx:e.x,ty:e.y,wait:Math.random(),good:solved('en'+i),i},e));
+ const free=(x,y)=>x>8&&y>8&&x<ROOM_W-8&&y<ROOM_H-8&&!b[Math.floor(y/C)*gw+Math.floor(x/C)];
+ const pick=s=>{for(let j=0;j<20;j++){const x=s.zone[0]+Math.random()*(s.zone[2]-s.zone[0]),y=s.zone[1]+Math.random()*(s.zone[3]-s.zone[1]);if(free(x,y)){s.tx=x;s.ty=y;return}}};
+ const fight=s=>{busy=true;moving=false;path=[];townEncounter(Object.assign({battle:true,heroHP:5,winBtn:'Continuar',name:'Devorador de Tinta',tint:'grayscale(1) brightness(.4) contrast(1.6)',winText:'El Devorador recupera su forma: ahora es un pequeño espíritu dorado.'},s.f),()=>{s.good=true;mark('en'+s.i);busy=false;last=performance.now();placeHot()})};
+ cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),x=(e.clientX-r.left-ox)/sc,y=(e.clientY-r.top-oy)/sc;ping=[x,y];pingT=performance.now();walkTo([x,y])});
+ const ro=new ResizeObserver(fit);ro.observe(wrap);fit();
+ const drawRoom=t=>{const art=ROOM_ART[st.room]&&TIMG['r_'+st.room];g.save();g.translate(ox,oy);g.scale(sc,sc);
+  if(art&&art.complete&&art.width){g.drawImage(art,0,0,ROOM_W,ROOM_H)}else{
+   const fl=g.createLinearGradient(0,88,0,ROOM_H);fl.addColorStop(0,RM.floor);fl.addColorStop(1,'#120a05');g.fillStyle=fl;g.fillRect(0,88,ROOM_W,ROOM_H-88);
+   g.strokeStyle='rgba(0,0,0,.25)';g.lineWidth=1;for(let y=100;y<ROOM_H;y+=22){g.beginPath();g.moveTo(0,y);g.lineTo(ROOM_W,y);g.stroke()}
+   const wl=g.createLinearGradient(0,0,0,88);wl.addColorStop(0,'#0a0604');wl.addColorStop(1,RM.wall);g.fillStyle=wl;g.fillRect(0,0,ROOM_W,88);g.fillStyle='rgba(255,220,150,.06)';g.fillRect(0,84,ROOM_W,4);
+   RM.furn.forEach(([x,y,w,h,l])=>{g.fillStyle='rgba(0,0,0,.35)';g.fillRect(x+4,y+h-4,w,10);const fg=g.createLinearGradient(0,y,0,y+h);fg.addColorStop(0,'#6b4524');fg.addColorStop(1,'#2e1b0c');g.fillStyle=st.room==='pasillo'?'#1e1e26':fg;g.fillRect(x,y,w,h);if(l){g.fillStyle='rgba(255,230,180,.45)';g.font='9px Cinzel, serif';g.textAlign='center';g.fillText(l,x+w/2,y+h/2+3)}});
+   [[40,70],[180,60],[320,70]].forEach(([x,y],i)=>{const a=.18+.06*Math.sin(t/300+i*2),gr=g.createRadialGradient(x,y,2,x,y,120);gr.addColorStop(0,`rgba(255,190,90,${a+.2})`);gr.addColorStop(1,'rgba(255,190,90,0)');g.fillStyle=gr;g.fillRect(x-120,y-120,240,240);g.fillStyle='#fff1c0';g.beginPath();g.ellipse(x,y,2.5,5,0,0,6.3);g.fill()})}
+  g.restore()};
+ const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
+  if(!busy){if(moving&&path.length){const p=path[0],dx=p[0]-H[0],dy=p[1]-H[1],d=Math.hypot(dx,dy),v=120*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';if(d<=v){H[0]=p[0];H[1]=p[1];path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;a&&a()}}else{H[0]+=dx/d*v;H[1]+=dy/d*v}walkT+=dt}
+   sps.forEach(s=>{const dh=Math.hypot(H[0]-s.x,H[1]-s.y);if(!s.good&&dh<120){s.tx=H[0];s.ty=H[1]}if(s.wait>0){s.wait-=dt;return}const dx=s.tx-s.x,dy=s.ty-s.y,d=Math.hypot(dx,dy);if(d<3){s.wait=.5+Math.random()*1.4;pick(s);return}const v=(s.good?18:dh<120?44:26)*dt,nx=s.x+dx/d*v,ny=s.y+dy/d*v;if(free(nx,ny)){s.x=nx;s.y=ny}else pick(s)});
+   const hit=sps.find(s=>!s.good&&Math.hypot(H[0]-s.x,H[1]-s.y)<26);if(hit)fight(hit)}
+  g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);drawRoom(t);g.save();g.translate(ox,oy);g.scale(sc,sc);
+  const list=[];sps.forEach(s=>list.push({y:s.y,d:()=>{g.save();if(!s.good)g.filter='grayscale(1) brightness(.4) contrast(1.6)';g.translate(s.x,s.y);g.scale(.75,.75);drawSpirit(g,0,0,t/1000+s.i,s.good);g.restore()}}));
+  const fi=[1,2,3,2][Math.floor(walkT/.16)%4],hk=moving?(hdir==='front'?'h_frente_'+fi:'h_lado_'+fi):'h_quieto_'+(Math.floor(t/1300)%2+1),hi=TIMG[hk];
+  list.push({y:H[1],d:()=>{g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(H[0],H[1],12,4,0,0,6.3);g.fill();if(hi&&hi.complete&&hi.naturalWidth){const k=82/144,w=hi.width*k,h=hi.height*k;g.save();g.translate(H[0],H[1]+(moving&&fi===2?-1.5:0));if(moving&&hdir==='side'&&facing<0)g.scale(-1,1);g.drawImage(hi,-w/2,-h+2,w,h);g.restore()}}});
+  list.sort((a,b2)=>a.y-b2.y).forEach(o=>o.d());
+  if(ping&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(ping[0],ping[1],5+k*12,0,6.3);g.stroke()}
+  g.restore();const vg=g.createRadialGradient(VW/2,VH*.45,VH*.2,VW/2,VH*.45,VH*.8);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.55)');g.fillStyle=vg;g.fillRect(0,0,VW,VH)};
+ requestAnimationFrame(frame);
+ if(ROOM_ART[st.room])timg('r_'+st.room,V()+ROOM_ART[st.room]+'.webp');
+ if(st.intro&&!solved('_intro'))talk(st.intro,st.who,()=>{mark('_intro');placeHot()})}
 
 /* ===================== CÓDICE DEL COMPOSITOR ===================== */
 const CODEX={m3_partitura:{t:'La melodía de medianoche',k:'Partitura recuperada',d:'La melodía que sonaba cada noche en el scriptorium. Estaba incompleta: el Maestro la dejó cifrada para que solo un lector de música pudiera terminarla.',notes:[{p:64,d:'q'},{p:67,d:'q'},{p:69,d:'h'},{r:'q'},{p:71,d:'q'},{p:69,d:'q'},{p:67,d:'h'}]},
@@ -1911,6 +1996,7 @@ const FAM_IMG={'Violín':'m2/fam_violin','Flauta':'m2/fam_flauta','Tambor':'m2/f
 const STEP={
  spirit(st,box){return stepSpirit(st,box)},
  mystery(st,box){return stepMystery(st,box)},
+ room(st,box){return stepRoom(st,box)},
  forest(st,box){return stepForest(st,box)},
  citymap(st,box){/* Florencia en mosaico: el héroe camina libre (sin atravesar edificios); la cámara lo sigue */
   townAssets();LS.mapDone=LS.mapDone||[];TOWN_TRIO=st.go==='escenario'||LS.mapDone.includes('escenario')||LS.L.id!=='w1m01';if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
@@ -1979,7 +2065,7 @@ const STEP={
   if(st.fx==='lights'){const order=[2,3,4,5,0,1];box.querySelectorAll('.luz').forEach(e=>e.classList.remove('on'));order.forEach((i,j)=>setTimeout(()=>{box.querySelectorAll(`.luz[data-luz="${i}"]`).forEach(e=>e.classList.add('on'))},900+j*650))}
   if(st.fx==='bells'){const t=ac().currentTime+.4;[60,64,67,72].forEach((p,i)=>bell(p,.6,t+i*.45))}
   if(st.playKeep&&LS.keep[st.playKeep]){const mel=LS.keep[st.playKeep];if(st.loop)loopMelody(mel);else setTimeout(()=>{const a=ac();let t=a.currentTime+.1;mel.forEach(n=>{tone(n.p,n.v,n.d*.5*.95,'trio',t);t+=n.d*.5})},1200)}
-  if(st.give&&st.giveAt==null)giveInstr(st.give);if(st.codex)codexAdd(st.codex);if(st.chords)st.chords.forEach(unlockChord);
+  if(st.ckClear&&S.m3){S.m3={};save()}if(st.give&&st.giveAt==null)giveInstr(st.give);if(st.codex)codexAdd(st.codex);if(st.chords)st.chords.forEach(unlockChord);
   const floatUpd=i=>{const h=box.querySelector('.cut-float'),fl=st.fl&&st.fl[i];if(h)h.innerHTML=fl?fl.map((f,j)=>`<img src="${V()}${f}.webp" style="--j:${j};--n:${fl.length}" alt="">`).join(''):'';if(st.give&&st.giveAt===i)giveInstr(st.give)};
   if(st.coins&&!st._paid){st._paid=1;S.coins=(S.coins||0)+st.coins;save();setTimeout(()=>toast(`🪙 +${st.coins} florines`),900)}
   const show=()=>{li++;floatUpd(li);if(li>=lines.length){if(st.accept){acc.hidden=false;nx.hidden=true;return}if(FWc)FWc.stop();next();return}
