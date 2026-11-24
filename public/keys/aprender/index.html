@@ -1484,7 +1484,7 @@ function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];c
 /* ===================== FLORENCIA EN MOSAICO: mundo cerrado, la cámara sigue al héroe ===================== */
 const TW={W:1500,H:2400,CELL:20};
 /* objetos: x,y = base (pie) del dibujo en coordenadas del mundo; s = escala de dibujo; fp = huella que bloquea [ancho,alto] */
-let TOWN_TRIO=false;const TOWN_V='?v=9';
+let TOWN_TRIO=false;const TOWN_V='?v=10';
 const TOWN_SMALLSH=new Set(['estandarte','puesto','puesto_telas','banco','pozo','cipres_1','cipres_2','olivo_1','olivo_2','arbol_redondo','arbusto','limonero','farol_doble','farol_simple','cajas','seto']);
 const TOWN_BUILD=new Set(['scriptorium_dia','armero','palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','campanario']);
 /* la ciudad es un fragmento de la isla: plaza central (fuente, escenario delante, faroles alrededor, campanario detrás),
@@ -1498,7 +1498,7 @@ const TOWN_OBJ=[
  ...[150,450,1050,1350].map((x,i)=>({k:i%2?'muro_b':'muro_a',x,y:2400,fp:[300,70]})),
  {k:'puerta_sur',x:750,y:2402,fp:[0,0]},{k:'torre_alta',x:82,y:2400,fp:[90,40]},{k:'torre_alta',x:1418,y:2400,fp:[90,40],flip:1},
  /* plaza central */
- {k:'campanario',x:520,y:1010,fp:[90,40],loc:'campanario'},
+ {k:'campanario',x:520,y:1010,fp:[135,55],loc:'campanario'},
  {k:'fuente_leones',x:750,y:1250,fp:[205,80],loc:'fuente'},
  {k:'escenario_vacio',alt:'escenario_trio',x:750,y:1490,fp:[220,60],loc:'escenario'},
  {k:'farol_doble',x:555,y:1170,fp:[18,10]},{k:'farol_doble',x:945,y:1170,fp:[18,10],flip:1},{k:'farol_doble',x:555,y:1395,fp:[18,10]},{k:'farol_doble',x:945,y:1395,fp:[18,10],flip:1},
@@ -1523,7 +1523,7 @@ const TOWN_OBJ=[
  ...[[130,1700],[200,1745],[170,2245],[230,2290],[120,320],[1380,1270]].map(([x,y])=>({k:'flores',x,y,fp:[0,0]})),
  ...[[115,800],[1390,2345],[1400,1350],[460,1640],[1045,1640]].map(([x,y])=>({k:'pasto_alto',x,y,fp:[0,0]})),
  {k:'cajas',x:425,y:1990,fp:[36,16]},{k:'cajas',x:1075,y:2010,fp:[36,16]},{k:'cajas',x:640,y:2165,fp:[36,16]}].filter(o=>!TOWN_HIDE.has(o.k));
-const TOWN_BSCALE={casa_a:1.5,casa_c:1.5,casa_b:1.45,casa_d:1.45,casa_e:1.45,scriptorium_dia:1.35,palazzo_est:1.2,armero:1.12,panaderia:1.15,carpinteria:1.15,forja:1.22,cobertizo:1.18,campanario:1.5};
+const TOWN_BSCALE={casa_a:1.5,casa_c:1.5,casa_b:1.45,casa_d:1.45,casa_e:1.45,scriptorium_dia:1.35,palazzo_est:1.2,armero:1.12,panaderia:1.15,carpinteria:1.15,forja:1.22,cobertizo:1.18};
 TOWN_OBJ.forEach(o=>{const k=TOWN_BSCALE[o.k];if(k&&!o.s){o.s=k;if(o.fp&&o.fp[0])o.fp=[Math.round(o.fp[0]*k),Math.round(o.fp[1]*k)]}});
 /* lugares: punto de llegada (delante de la puerta) y etiqueta */
 const TOWN_LOC={
