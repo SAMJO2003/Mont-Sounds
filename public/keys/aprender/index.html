@@ -1853,7 +1853,7 @@ function m3Staff(o){const W=o.w||330,H=o.h||170,gap=13,bot=o.bot||112,x0=o.clef?
  return s+'</svg>'}
 /* objetos provisionales (dibujados en código) hasta que llegue el arte */
 const M3_OBJ={perg:'Pergamino olvidado',libro:'Libro de las notas errantes',puerta:'La puerta de la clave',escalera:'La escalera invisible',reloj:'El reloj detenido',puerta2:'La puerta del silencio',frag:'Fragmento de partitura',manuscrito:'El manuscrito'};
-const M3_ART={libro:'m3/libro_notas',puerta:'m3/puerta_clave',escalera:'m3/escalera',reloj:'m3/reloj',puerta2:'m3/puerta_silencio'};/* cuando llegue el arte: M3_ART.perg='m3/perg_vacio' … */
+const M3_ART={libro:'m3/libro_notas',puerta:'m3/puerta_clave',escalera:'m3/escalera',reloj:'m3/reloj_cerrado',puerta2:'m3/puerta_silencio'};/* cuando llegue el arte: M3_ART.perg='m3/perg_vacio' … */
 function m3ObjHTML(k){const a=M3_ART[k];return a?`<img class="m3-art" src="${V()}${a}.webp" alt="">`:`<div class="m3-obj m3-${k}">${k==='reloj'?'<div class="rj-foliot"><i></i><i></i></div><div class="rj-frame"><div class="m3-face"><i class="h2"></i></div></div><div class="rj-rope r1"><b></b></div><div class="rj-rope r2"><b></b></div>':k==='escalera'?Array.from({length:5},(_,i)=>`<i class="stp" style="--i:${i}"></i>`).join(''):k==='puerta'||k==='puerta2'?'<i class="m3-knob"></i>':''}</div>`}
 /* paso: acertijo */
 function stepMystery(st,box,onDone){if(onDone)$('#lFoot').classList.remove('hide-foot');const rounds=st.rounds,beat=st.beat||900;let r=0,k=0,miss=0,intro=(st.intro||[]).slice(),busy=false,restT=null,holdP=null,holdT=0,kb=null,ringRAF=0,turns=0;
@@ -1903,7 +1903,7 @@ function stepMystery(st,box,onDone){if(onDone)$('#lFoot').classList.remove('hide
   it.forEach((n,i)=>{const d=({w:4,h:2,q:1}[n.r||n.d||'q']||1)*d1;if(!n.r){tone(n.p,.6,d*.95,'piano',tt);setTimeout(()=>{const g=$('#m3s').querySelectorAll('.nt')[i];if(g){g.classList.add('sing');burst(g,6)}},(tt-ac().currentTime)*1000)}tt+=d});
   if(st.mode==='key'&&r===rounds.length-1)M.classList.add('unlock');
   setTimeout(()=>{busy=false;r++;k=0;miss=0;$('#fb').className='fb';if(r<rounds.length){M.classList.add('fadeaid');setTimeout(()=>M.classList.remove('fadeaid'),900);say(R().say);mkKB();skipRests();return}finish()},Math.max(1300,(tt-t0)*1000+500))};
- const finish=()=>{M.classList.add('solved');M.classList.remove('playing');burst(null,40,'big');$('#m3kb').innerHTML='';const mr=box.querySelector('.microw');if(mr)mr.remove();ACTIVE_KB=null;$('#fb').className='fb';$('#m3say').classList.remove('mini');
+ const finish=()=>{M.classList.add('solved');if(st.obj==='reloj'){const im=box.querySelector('.m3-art');if(im)setTimeout(()=>{im.src=V()+'m3/reloj.webp'},700)}M.classList.remove('playing');burst(null,40,'big');$('#m3kb').innerHTML='';const mr=box.querySelector('.microw');if(mr)mr.remove();ACTIVE_KB=null;$('#fb').className='fb';$('#m3say').classList.remove('mini');
   if(st.ink){const ink=$('#m3ink');ink.innerHTML=`<span>${esc(st.ink)}</span>`;ink.classList.add('on')}
   $('#m3say').innerHTML=`<p class="m3-rev"><b>${esc(st.reveal||'¡Resuelto!')}</b>${st.revealSub?`<span>${esc(st.revealSub)}</span>`:''}</p>`;
   {const t=ac().currentTime+.1;[60,64,67,72,76,79].forEach((p,j)=>tone(p,.42,1.4,'piano',t+j*.11));tone(48,.3,2.5,'strings',t)}
