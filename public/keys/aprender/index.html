@@ -1481,7 +1481,7 @@ function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];c
 /* ===================== FLORENCIA EN MOSAICO: mundo cerrado, la cámara sigue al héroe ===================== */
 const TW={W:1500,H:2400,CELL:20};
 /* objetos: x,y = base (pie) del dibujo en coordenadas del mundo; s = escala de dibujo; fp = huella que bloquea [ancho,alto] */
-let TOWN_TRIO=false;const TOWN_V='?v=7';
+let TOWN_TRIO=false;const TOWN_V='?v=8';
 const TOWN_SMALLSH=new Set(['estandarte','puesto','banco','pozo','cipres_1','cipres_2','olivo_1','olivo_2','arbol_redondo','arbusto','limonero','farol_doble','farol_simple','cajas','seto']);
 const TOWN_BUILD=new Set(['scriptorium_dia','armero','palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','capilla','palazzo','gremio','campanario']);
 /* la ciudad es un fragmento de la isla: plaza central (fuente, escenario delante, faroles alrededor, campanario detrás),
@@ -1533,15 +1533,15 @@ const TOWN_LOC={
 const TOWN_SPIRITS=[{id:'ruido-1',x:430,y:1830,need:'taller',name:'Espíritu del Ruido',reward:{coins:10,item:'resina',itemName:'resina de abeto'},
  tasks:[{t:'chord',ch:'C',say:'Recuerda el acorde: toca Do mayor'},{t:'arp',ch:'C',say:'Ahora en arpegio: Do, Mi, Sol, subiendo'},{t:'alt',n:4,say:'Remata: grave, aguda, grave, aguda',hint:'Salta de un lado al otro del teclado.'}]}];
 const TIMG={},TOWN_USE_TEX=false;function timg(k,src){if(!TIMG[k]){const i=new Image();i.src=src;TIMG[k]=i}return TIMG[k]}
-function townAssets(){TEX.forEach(k=>timg(k,V()+'town/'+(k==='pasto'?'pasto':'t_'+k)+'.webp'));DEC.forEach(k=>timg(k,V()+'town/'+k+'.webp'));[...new Set(TOWN_OBJ.map(o=>o.k).concat(TOWN_OBJ.filter(o=>o.alt).map(o=>o.alt))),'espiritu_ruido','espiritu_calmo','scriptorium_noche'].forEach(k=>timg(k,V()+'town/p_'+k+'.webp'+TOWN_V));['frente_1','frente_2','frente_3','lado_1','lado_2','lado_3','quieto_1','quieto_2'].forEach(k=>timg('h_'+k,V()+'h_'+k+'.webp'+TOWN_V))}
+function townAssets(){TEX.forEach(k=>timg(k,V()+'town/'+(k==='pasto'?'pasto':'t_'+k)+'.webp'+TOWN_V));DEC.forEach(k=>timg(k,V()+'town/'+k+'.webp'));[...new Set(TOWN_OBJ.map(o=>o.k).concat(TOWN_OBJ.filter(o=>o.alt).map(o=>o.alt))),'espiritu_ruido','espiritu_calmo','scriptorium_noche'].forEach(k=>timg(k,V()+'town/p_'+k+'.webp'+TOWN_V));['frente_1','frente_2','frente_3','lado_1','lado_2','lado_3','quieto_1','quieto_2'].forEach(k=>timg('h_'+k,V()+'h_'+k+'.webp'+TOWN_V))}
 function townRng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
 let TOWN_GROUND=null;
 const DEC=['d_pasto_tira','d_pasto_mancha','d_losa_musgo','d_hojas','d_piedritas'];
-const TEX=['adoquin34','adoquin_oscuro34','adoquin_calle34','tierra_camino','cesped','pradera_flores','tierra_jardin','muralla','pasto'];
+const TEX=['adoquin34','adoquin_oscuro34','adoquin_calle34','losas_plaza34','tierra_camino','cesped','pradera_flores','tierra_jardin','muralla','pasto'];
 let TOWN_GROUND_TMP=null;function townGround(){if(TOWN_GROUND)return TOWN_GROUND;const ready=TEX.concat(DEC,[...TOWN_BUILD]).every(k=>{const i=TIMG[k];return i&&i.complete&&i.width});if(!ready&&TOWN_GROUND_TMP)return TOWN_GROUND_TMP;
  const mk=()=>{const c=document.createElement('canvas');c.width=TW.W;c.height=TW.H;return c};const c=mk(),g=c.getContext('2d'),r=townRng(7);
  if(!ready){g.fillStyle='#b99a6e';g.fillRect(0,0,TW.W,TW.H);TOWN_GROUND_TMP=c;return c}
- const TILT=.7,pat=(k,cx)=>{const p=(cx||g).createPattern(TIMG[k],'repeat');if(p.setTransform&&k!=='muralla'&&!k.endsWith('34'))p.setTransform(new DOMMatrix().scale(1,TILT));return p};
+ const TILT=1,pat=(k,cx)=>{const p=(cx||g).createPattern(TIMG[k],'repeat');if(p.setTransform&&k!=='muralla'&&!k.endsWith('34'))p.setTransform(new DOMMatrix().scale(1,TILT));return p};
  /* capa suave: la forma se dibuja en una máscara con desenfoque (sombra desplazada) y la textura solo aparece dentro: bordes difuminados, sin bordillos ni círculos */
  const M=mk(),m=M.getContext('2d'),T=mk(),tc=T.getContext('2d'),OFF=TW.W+400;
  const soft=(draw,k,blur,alpha)=>{m.setTransform(1,0,0,1,0,0);m.clearRect(0,0,TW.W,TW.H);m.save();m.translate(-OFF,0);m.shadowColor='#fff';m.shadowBlur=blur;m.shadowOffsetX=OFF;m.fillStyle='#fff';m.strokeStyle='#fff';m.lineCap='round';m.lineJoin='round';draw(m);m.restore();
@@ -1559,8 +1559,9 @@ let TOWN_GROUND_TMP=null;function townGround(){if(TOWN_GROUND)return TOWN_GROUND
  /* 4 · calles de adoquín pequeño y la gran plaza: todo con bordes difuminados */
  const AV=[[[750,2330],[750,1540]],[[750,1000],[750,230]],[[130,1300],[1370,1300]],[[130,780],[1370,780]],[[330,780],[330,2070]],[[1170,780],[1170,2070]],[[330,2070],[1170,2070]]];
  const nearestAV=(x,y)=>{let best=null;AV.forEach(([a,b])=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/L)),q=[a[0]+dx*t,a[1]+dy*t],d=Math.hypot(x-q[0],y-q[1]);if(!best||d<best.d)best={d,q}});return best.q};
- soft(c=>{AV.forEach(p=>line(c,p,62));blobP(c,750,1290,330,255,5);c.fill();
+ soft(c=>{AV.forEach(p=>line(c,p,62));
   BLD.forEach(({o,w})=>{const door=[o.x+(o.flip?w*.12:-w*.12),o.y+10],q=nearestAV(door[0],door[1]);if(Math.hypot(q[0]-door[0],q[1]-door[1])>20)line(c,[door,q],34)})},'adoquin_calle34',26);
+ soft(c=>{blobP(c,750,1290,330,255,5);c.fill()},'losas_plaza34',30);
  /* 5 · cada edificio se asienta sobre adoquín oscuro con una sombra de contacto suave */
  soft(c=>BLD.forEach(({o,w},i)=>{blobP(c,o.x,o.y-8,w*.6,34,40+i);c.fill()}),'adoquin_oscuro34',22,.9);
  BLD.forEach(({o,w})=>{const gr=g.createRadialGradient(o.x,o.y-6,4,o.x,o.y-6,w*.62);gr.addColorStop(0,'rgba(40,28,14,.28)');gr.addColorStop(1,'rgba(40,28,14,0)');g.save();g.translate(o.x,o.y-6);g.scale(1,.3);g.translate(-o.x,-(o.y-6));g.fillStyle=gr;g.fillRect(o.x-w,o.y-6-w,w*2,w*2);g.restore()});
