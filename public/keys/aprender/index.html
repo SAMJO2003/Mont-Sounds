@@ -1958,13 +1958,13 @@ function drawGuardian(g,x,y,t,restore){restore=Math.max(0,Math.min(1,restore||0)
 /* Cada sala cabe en una pantalla (coordenadas lógicas 360×560). Objetos con brillo dorado abren acertijos, diálogos o combates; la puerta se abre al resolver lo necesario. */
 const ROOM_W=360,ROOM_H=560;
 const ROOMS={
- scrip:{n:'Scriptorium',w:1200,h:800,hero:150,art:sv=>sv('a3')?'m3/int_scrip_3':'m3/int_scrip_1',
+ scrip:{n:'Scriptorium',w:1200,h:800,hero:150,art:sv=>sv('a3')?'m3/int_scrip_3':sv('a1')?'m3/int_scrip_2':'m3/int_scrip_1',
   walk:[[90,640],[300,610],[380,560],[470,480],[940,470],[1150,478],[1165,600],[1040,712],[880,750],[500,752],[300,705]],
   block:[[520,430,870,640],[1045,430,1160,610],[950,555,1095,665],[900,620,1035,740],[240,560,335,618],[60,500,150,620]],
   layout:{start:[640,720],hot:{isa:{x:880,y:440,at:[860,560]},a1:{x:225,y:440,at:[300,640]},a2:{x:1095,y:430,at:[990,520]},a3:{x:1040,y:260,at:[1000,490]},exit:{x:1040,y:380,at:[1010,485]}}},
   npc:sv=>({k:'m3/isabella_pie',x:900,y:560,h:160,flip:1}),
   fx:(g,t,sv)=>{const glow=(x,y,r,a)=>{const gr=g.createRadialGradient(x,y,2,x,y,r);gr.addColorStop(0,`rgba(255,215,120,${a})`);gr.addColorStop(1,'rgba(255,215,120,0)');g.fillStyle=gr;g.fillRect(x-r,y-r,r*2,r*2)};
-   if(sv('a1')){glow(232,455,70,.35+.08*Math.sin(t/500));glow(398,345,60,.3+.08*Math.sin(t/600))}
+   if(sv('a1')&&!sv('a3')){glow(232,455,50,.18+.08*Math.sin(t/500));glow(398,345,45,.15+.08*Math.sin(t/600))}
    if(sv('a2')&&!sv('a3')){glow(700,200,230,.22+.06*Math.sin(t/700));for(let i=0;i<6;i++){const q=((t/2600)+i/6)%1;g.fillStyle=`rgba(255,225,140,${(1-q)*.9})`;g.font='22px serif';g.fillText(i%2?'♪':'♩',560+i*55,330-q*160)}}
    if(sv('a3')){glow(1045,320,150,.3+.08*Math.sin(t/450))}}},
  copia:{n:'Sala de copia',w:1200,h:800,hero:150,art:sv=>'m3/int_copia',
