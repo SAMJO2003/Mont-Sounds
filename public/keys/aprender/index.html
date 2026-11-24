@@ -1985,7 +1985,7 @@ const ROOMS={
   layout:{start:[190,640],hot:{exit:{x:1060,y:320,at:[1050,530]}}},
   enemies:[{x:420,y:600,zone:[260,520,600,690]},{x:820,y:570,zone:[620,505,960,690]}],
   fx:(g,t,sv)=>{const gaps=[[268,330],[600,322],[838,292]];gaps.forEach(([x,y],i)=>{const on=i<2?sv('en0'):sv('en1');if(!on)return;const gr=g.createRadialGradient(x,y,2,x,y,40);gr.addColorStop(0,'rgba(255,220,130,.7)');gr.addColorStop(1,'rgba(255,220,130,0)');g.fillStyle=gr;g.fillRect(x-40,y-40,80,80);g.fillStyle='#fff3c0';g.font='34px serif';g.textAlign='center';g.fillText('♪',x,y+12)})}},
- camara:{n:'Cámara del manuscrito',w:1200,h:800,hero:150,art:sv=>'m3/int_camara',
+ camara:{n:'Cámara del manuscrito',w:1200,h:800,hero:150,art:sv=>sv('gd')?'m3/int_camara':'m3/int_camara_oscura',
   walk:[[80,560],[230,485],[970,485],[1120,560],[1110,612],[1000,705],[280,725],[90,612]],
   block:[[420,430,780,600],[900,540,1040,625]],
   guardian:[970,610],
