@@ -1486,6 +1486,8 @@ const TOWN_SMALLSH=new Set(['estandarte','puesto','banco','pozo','cipres_1','cip
 const TOWN_BUILD=new Set(['scriptorium_dia','armero','palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','campanario']);
 /* la ciudad es un fragmento de la isla: plaza central (fuente, escenario delante, faroles alrededor, campanario detrás),
    barrios bajo la niebla y una puerta norte cerrada que lleva a zonas más peligrosas en módulos futuros */
+/* decoraciones del estilo viejo ocultas hasta que llegue el arte nuevo (para volver a mostrarlas, quítalas de esta lista) */
+const TOWN_HIDE=new Set(['puesto','farol_doble','farol_simple','seto','limonero','arbusto','cajas','banco','estandarte','geranios','flores','pasto_alto','pozo']);
 const TOWN_OBJ=[
  /* murallas, puerta sur (entrada) y puerta norte (cerrada) */
  ...[150,450,1050,1350].map((x,i)=>({k:i%2?'muro_b':'muro_a',x,y:132,fp:[300,64]})),{k:'puerta_norte',x:750,y:205,fp:[250,85],loc:'norte'},
@@ -1517,7 +1519,7 @@ const TOWN_OBJ=[
  ...[[252,1003],[565,2172],[1300,2178],[265,1532],[1235,1532],[948,1012]].map(([x,y])=>({k:'geranios',x,y,fp:[0,0]})),
  ...[[130,1700],[200,1745],[170,2245],[230,2290],[120,320],[1380,1270]].map(([x,y])=>({k:'flores',x,y,fp:[0,0]})),
  ...[[115,800],[1390,2345],[1400,1350],[460,1640],[1045,1640]].map(([x,y])=>({k:'pasto_alto',x,y,fp:[0,0]})),
- {k:'cajas',x:425,y:1990,fp:[36,16]},{k:'cajas',x:1075,y:2010,fp:[36,16]},{k:'cajas',x:640,y:2165,fp:[36,16]}];
+ {k:'cajas',x:425,y:1990,fp:[36,16]},{k:'cajas',x:1075,y:2010,fp:[36,16]},{k:'cajas',x:640,y:2165,fp:[36,16]}].filter(o=>!TOWN_HIDE.has(o.k));
 /* lugares: punto de llegada (delante de la puerta) y etiqueta */
 const TOWN_LOC={
  campanario:{n:'El campanario',ic:'🔔',at:[560,1045]},
