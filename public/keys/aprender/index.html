@@ -1481,7 +1481,7 @@ function chunkText(t){const s=(t||'').match(/[^.!?]+[.!?]+["»”]?\s*/g)||[t];c
 /* ===================== FLORENCIA EN MOSAICO: mundo cerrado, la cámara sigue al héroe ===================== */
 const TW={W:1500,H:2400,CELL:20};
 /* objetos: x,y = base (pie) del dibujo en coordenadas del mundo; s = escala de dibujo; fp = huella que bloquea [ancho,alto] */
-let TOWN_TRIO=false;const TOWN_V='?v=6';
+let TOWN_TRIO=false;const TOWN_V='?v=7';
 const TOWN_SMALLSH=new Set(['estandarte','puesto','banco','pozo','cipres_1','cipres_2','olivo_1','olivo_2','arbol_redondo','arbusto','limonero','farol_doble','farol_simple','cajas','seto']);
 const TOWN_BUILD=new Set(['scriptorium_dia','armero','palazzo_est','carpinteria','forja','cobertizo','casa_a','casa_b','casa_c','casa_d','casa_e','panaderia','capilla','palazzo','gremio','campanario']);
 /* la ciudad es un fragmento de la isla: plaza central (fuente, escenario delante, faroles alrededor, campanario detrás),
@@ -1499,14 +1499,14 @@ const TOWN_OBJ=[
  {k:'farol_doble',x:555,y:1170,fp:[18,10]},{k:'farol_doble',x:945,y:1170,fp:[18,10],flip:1},{k:'farol_doble',x:555,y:1395,fp:[18,10]},{k:'farol_doble',x:945,y:1395,fp:[18,10],flip:1},
  ...[[690,1690],[810,1690],[690,1960],[810,1960],[690,880],[810,880],[330,1330],[1170,1330]].map(([x,y],i)=>({k:'farol_simple',x,y,fp:[16,10],flip:i%2})),
  {k:'palazzo',x:1190,y:1200,fp:[165,66],flip:1},{k:'palazzo_est',x:290,y:1215,fp:[150,60]},
- {k:'casa_d',x:230,y:1520,fp:[140,60]},{k:'casa_e',x:1270,y:1520,fp:[140,60],flip:1},
- {k:'casa_a',x:200,y:990,fp:[140,60]},{k:'casa_c',x:985,y:1000,fp:[140,60],flip:1},
+ {k:'casa_d',x:230,y:1525,fp:[130,56]},{k:'casa_e',x:1270,y:1525,fp:[130,56],flip:1},
+ {k:'casa_a',x:200,y:990,fp:[170,60]},{k:'casa_c',x:985,y:1000,fp:[170,60],flip:1},
  /* barrios que se abren con la niebla */
  {k:'armero',x:330,y:1975,fp:[170,56],loc:'taller'},{k:'gremio',x:1170,y:1995,fp:[160,64],flip:1,loc:'gremio'},{k:'scriptorium_dia',x:330,y:620,fp:[165,60],loc:'scriptorium'},
- {k:'casa_e',x:990,y:1965,fp:[140,60],flip:1},{k:'panaderia',x:540,y:2160,fp:[140,60]},{k:'casa_a',x:1345,y:2165,fp:[140,60],flip:1},
- {k:'casa_b',x:140,y:520,fp:[118,56]},{k:'casa_c',x:545,y:575,fp:[140,60]},
+ {k:'casa_e',x:990,y:1965,fp:[130,56]},{k:'panaderia',x:540,y:2160,fp:[180,60],flip:1},{k:'casa_a',x:1345,y:2165,fp:[170,60],flip:1},
+ {k:'casa_b',x:140,y:525,fp:[130,56],flip:1},{k:'casa_c',x:545,y:575,fp:[170,60]},
  /* barrio de los artesanos (Módulo 2, bajo la niebla) */
- {k:'capilla',x:1170,y:650,fp:[160,64]},{k:'casa_d',x:1360,y:690,fp:[140,60],flip:1},{k:'carpinteria',x:990,y:480,fp:[150,60]},{k:'cobertizo',x:1290,y:440,fp:[150,50]},{k:'forja',x:975,y:745,fp:[150,60]},
+ {k:'capilla',x:1170,y:650,fp:[160,64]},{k:'casa_d',x:1360,y:695,fp:[130,56],flip:1},{k:'carpinteria',x:990,y:480,fp:[150,60]},{k:'cobertizo',x:1290,y:440,fp:[150,50]},{k:'forja',x:975,y:745,fp:[150,60]},
  /* árboles */
  ...[[650,1075],[850,1075],[600,1790],[900,1790],[455,1320]].map(([x,y])=>({k:'cipres_1',x,y,fp:[24,16]})),
  ...[[1425,1010],[90,1185],[90,2010],[1425,2290],[90,2290],[1425,1500]].map(([x,y])=>({k:'cipres_2',x,y,fp:[30,18]})),
