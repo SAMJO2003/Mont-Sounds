@@ -538,6 +538,7 @@ html,body,button,#vLesson,.bellb,.cm-loc,.chipb,.opt{touch-action:manipulation}
 .rt-img{display:block;max-height:150px;max-width:70%;margin:0 auto 6px;filter:drop-shadow(0 0 14px rgba(255,210,110,.6))}.fin-book img{width:120px}
 .enc-pick{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.enc-pick button{width:104px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 6px;border-radius:14px;border:1px solid rgba(255,215,120,.6);background:rgba(30,20,10,.85);color:#f3e2c0;box-shadow:0 0 16px rgba(255,200,100,.25)}.enc-pick button img{height:62px;object-fit:contain}.enc-pick b{font:700 12px Cinzel,serif}.enc-pick small{font-size:11px;color:#c9f0c0}.enc-pick button.off{opacity:.45;border-color:rgba(200,200,200,.3)}.enc-pick button.off small{color:#f3c0b0}
 .inv-flute{width:200px!important}.pulse1{animation:pul1 .25s}@keyframes pul1{50%{transform:scale(1.04);filter:brightness(1.25) drop-shadow(0 0 14px rgba(255,210,120,.9))}}
+.cm-quest{cursor:pointer;pointer-events:auto!important}.cm-quest::after{content:'▴';position:absolute;right:12px;top:8px;font-size:12px;color:#e8c27a;opacity:.8}.cm-quest.mini::after{content:'▾'}.cm-quest.mini b,.cm-quest.mini em{display:none}.cm-quest.mini{padding-bottom:6px}
 </style>
 
 <div id="sky"></div>
@@ -1502,15 +1503,15 @@ const TOWN_OBJ=[
  {k:'escenario_vacio',alt:'escenario_trio',x:750,y:1490,fp:[220,60],loc:'escenario'},
  {k:'farol_doble',x:555,y:1170,fp:[18,10]},{k:'farol_doble',x:945,y:1170,fp:[18,10],flip:1},{k:'farol_doble',x:555,y:1395,fp:[18,10]},{k:'farol_doble',x:945,y:1395,fp:[18,10],flip:1},
  ...[[690,1690],[810,1690],[690,1960],[810,1960],[690,880],[810,880],[330,1330],[1170,1330]].map(([x,y],i)=>({k:'farol_simple',x,y,fp:[16,10],flip:i%2})),
- {k:'casa_b',x:1190,y:1205,fp:[130,56],flip:1},{k:'palazzo_est',x:290,y:1215,fp:[150,60]},
- {k:'casa_d',x:230,y:1525,fp:[130,56]},{k:'casa_e',x:1270,y:1525,fp:[130,56],flip:1},
- {k:'casa_a',x:200,y:990,fp:[170,60]},{k:'casa_c',x:985,y:1000,fp:[170,60],flip:1},
+ {k:'palazzo_est',x:300,y:1265,fp:[150,60]},
+ {k:'casa_d',x:230,y:1610,fp:[130,56]},{k:'casa_e',x:1270,y:1525,fp:[130,56],flip:1},
+ {k:'casa_a',x:200,y:965,fp:[170,60]},{k:'casa_c',x:1180,y:1010,fp:[170,60],flip:1},
  /* barrios que se abren con la niebla */
- {k:'armero',x:330,y:1975,fp:[170,56],loc:'taller'},{k:'casa_c',x:1170,y:1995,fp:[170,60],flip:1,loc:'gremio'},{k:'scriptorium_dia',x:330,y:620,fp:[165,60],loc:'scriptorium'},
- {k:'casa_e',x:990,y:1965,fp:[130,56]},{k:'panaderia',x:540,y:2160,fp:[180,60],flip:1},{k:'casa_a',x:1345,y:2165,fp:[170,60],flip:1},
- {k:'casa_b',x:140,y:525,fp:[130,56],flip:1},{k:'casa_c',x:545,y:575,fp:[170,60]},
+ {k:'armero',x:330,y:1975,fp:[170,56],loc:'taller'},{k:'casa_c',x:1165,y:1945,fp:[170,60],flip:1,loc:'gremio'},{k:'scriptorium_dia',x:265,y:640,fp:[165,60],loc:'scriptorium'},
+ {k:'panaderia',x:610,y:2185,fp:[180,60],flip:1},{k:'casa_a',x:1290,y:2265,fp:[170,60],flip:1},
+ {k:'casa_b',x:125,y:345,fp:[130,56],flip:1},
  /* barrio de los artesanos (Módulo 2, bajo la niebla) */
- {k:'casa_d',x:1170,y:655,fp:[130,56]},{k:'casa_d',x:1360,y:695,fp:[130,56],flip:1},{k:'carpinteria',x:990,y:480,fp:[150,60]},{k:'cobertizo',x:1290,y:440,fp:[150,50]},{k:'forja',x:975,y:745,fp:[150,60]},
+ {k:'casa_d',x:1335,y:725,fp:[130,56],flip:1},{k:'carpinteria',x:990,y:480,fp:[150,60]},{k:'cobertizo',x:1300,y:335,fp:[150,50]},{k:'forja',x:960,y:725,fp:[150,60]},
  /* árboles */
  ...[[650,1075],[850,1075],[600,1790],[900,1790],[455,1320]].map(([x,y])=>({k:'cipres_1',x,y,fp:[24,16]})),
  ...[[1425,1010],[90,1185],[90,2010],[1425,2290],[90,2290],[1425,1500]].map(([x,y])=>({k:'cipres_2',x,y,fp:[30,18]})),
@@ -1522,6 +1523,8 @@ const TOWN_OBJ=[
  ...[[130,1700],[200,1745],[170,2245],[230,2290],[120,320],[1380,1270]].map(([x,y])=>({k:'flores',x,y,fp:[0,0]})),
  ...[[115,800],[1390,2345],[1400,1350],[460,1640],[1045,1640]].map(([x,y])=>({k:'pasto_alto',x,y,fp:[0,0]})),
  {k:'cajas',x:425,y:1990,fp:[36,16]},{k:'cajas',x:1075,y:2010,fp:[36,16]},{k:'cajas',x:640,y:2165,fp:[36,16]}].filter(o=>!TOWN_HIDE.has(o.k));
+const TOWN_BSCALE={casa_a:1.5,casa_c:1.5,casa_b:1.45,casa_d:1.45,casa_e:1.45,scriptorium_dia:1.35,palazzo_est:1.2,armero:1.12,panaderia:1.15,carpinteria:1.15,forja:1.22,cobertizo:1.18,campanario:1.5};
+TOWN_OBJ.forEach(o=>{const k=TOWN_BSCALE[o.k];if(k&&!o.s){o.s=k;if(o.fp&&o.fp[0])o.fp=[Math.round(o.fp[0]*k),Math.round(o.fp[1]*k)]}});
 /* lugares: punto de llegada (delante de la puerta) y etiqueta */
 const TOWN_LOC={
  campanario:{n:'El campanario',ic:'🔔',at:[560,1045]},
@@ -1532,7 +1535,7 @@ const TOWN_LOC={
  norte:{n:'Puerta norte',ic:'🔒',at:[750,255],locked:'La puerta norte está cerrada. Se abrirá cuando completes más módulos: al otro lado espera un lugar más peligroso.'},
  taller:{n:'Armero de instrumentos',ic:'🪕',at:[330,2010],fog:[90,1700,600,2180],need:'campanario',msg:'el campanario despierte'},
  gremio:{n:'El gremio',ic:'📜',at:[1170,2040],fog:[900,1760,1430,2200],need:'fuente',msg:'la fuente vuelva a fluir'},
- scriptorium:{n:'El scriptorium',ic:'✒️',at:[330,660],fog:[80,380,620,760],need:'plaza',msg:'la plaza recupere su luz'},
+ scriptorium:{n:'El scriptorium',ic:'✒️',at:[265,690],fog:[80,380,620,760],need:'plaza',msg:'la plaza recupere su luz'},
  artesanos:{n:'Barrio de los artesanos',ic:'🔨',at:[1170,830],fog:[880,330,1440,790],need:'modulo2',msg:'empiece el Módulo 2'}};
 const TOWN_SPIRITS=[{id:'ruido-1',x:430,y:1830,need:'taller',name:'Espíritu del Ruido',reward:{coins:10,item:'resina',itemName:'resina de abeto'},
  tasks:[{t:'chord',ch:'C',say:'Recuerda el acorde: toca Do mayor'},{t:'arp',ch:'C',say:'Ahora en arpegio: Do, Mi, Sol, subiendo'},{t:'alt',n:4,say:'Remata: grave, aguda, grave, aguda',hint:'Salta de un lado al otro del teclado.'}]}];
@@ -1619,6 +1622,14 @@ function townWater(g,x0,y0,k,t,im){const P=(px,py)=>[x0+px*k,y0+py*k];g.save();
   g.setLineDash([4*k,6*k]);g.lineDashOffset=-t/40;g.strokeStyle='rgba(255,255,255,.9)';g.lineWidth=1.3*k;g.stroke();g.setLineDash([]);
   g.fillStyle='rgba(240,250,255,.7)';for(let i=0;i<3;i++){g.beginPath();g.arc(b[0]+(Math.sin(t/120+i*2)*4)*k,b[1]-2*k,1.5*k,0,6.3);g.fill()}});
  g.restore()}
+/* flecha dorada en el borde de la pantalla que señala hacia el destino cuando está fuera de vista */
+function edgeArrow(g,dpr,VW,VH,sx,sy,t){const top=150,bot=VH-70,m=34;if(sx>m&&sx<VW-m&&sy>top&&sy<bot)return;g.setTransform(dpr,0,0,dpr,0,0);
+ const cx=VW/2,cy=(top+bot)/2,dx=sx-cx,dy=sy-cy,k=Math.min((VW/2-m)/Math.abs(dx||1e-6),((bot-top)/2)/Math.abs(dy||1e-6)),x=cx+dx*k,y=cy+dy*k,a=Math.atan2(dy,dx),p=Math.sin(t/220)*4;
+ g.save();g.translate(x-Math.cos(a)*p,y-Math.sin(a)*p);g.fillStyle='rgba(20,12,6,.75)';g.beginPath();g.arc(0,0,22,0,6.3);g.fill();g.strokeStyle='#ffd56e';g.lineWidth=2;g.stroke();
+ g.rotate(a);g.fillStyle='#ffd56e';g.shadowColor='#ffb340';g.shadowBlur=12;g.beginPath();g.moveTo(14,0);g.lineTo(-7,-10);g.lineTo(-2,0);g.lineTo(-7,10);g.closePath();g.fill();g.restore()}
+/* cuadro de misión plegable (se recuerda la preferencia) */
+const QMINI=()=>{try{return localStorage.mkQuestMini?'mini':''}catch(e){return ''}};
+document.addEventListener('click',e=>{const q=e.target.closest&&e.target.closest('.cm-quest');if(!q)return;q.classList.toggle('mini');try{localStorage.mkQuestMini=q.classList.contains('mini')?'1':''}catch(_){}});
 /* espíritu del ruido (dibujo en canvas) */
 function drawSpirit(g,x,y,t,calm,ck){const im=TIMG[calm?(ck&&TIMG[ck]&&TIMG[ck].width?ck:'espiritu_calmo'):'espiritu_ruido'];if(im&&im.complete&&im.width){const b=Math.sin(t*2.2)*5,sh=calm?0:Math.sin(t*31)*1.6;g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(x,y,26,7,0,0,6.3);g.fill();g.drawImage(im,x-im.width/2+sh,y-im.height-14+b,im.width,im.height);return}
  drawSpiritOld(g,x,y,t,calm)}
@@ -1759,7 +1770,7 @@ function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC|
  const ready=()=>M.savia+RN.savia>=need&&M.common+RN.common>=needC;
  const bank=()=>{S.inv=S.inv||{};M.savia+=RN.savia;M.common+=RN.common;S.inv.savia_magica=(S.inv.savia_magica||0)+RN.savia;S.inv.madera_comun=(S.inv.madera_comun||0)+RN.common;const got=[RN.savia,RN.common];RN.savia=0;RN.common=0;save();return got};
  box.innerHTML=`<div class="cmap tmap fmap" id="cmap"><canvas id="tcv"></canvas>
-  <div class="cm-quest"><small>${esc(st.act||'Misión')} · ${esc(Z.n)}</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
+  <div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')} · ${esc(Z.n)}</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
   <div class="cm-hint">${esc(Z.n)} · ${esc(Z.dif)}. Toca cualquier árbol para invocar el piccolo y recoger madera. ¡Cuidado con los espíritus!</div>${booksHTML()}</div>`;
  bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
  const hud=()=>{$('#fmis').textContent=ready()?'¡Ya tienes lo necesario! Sal por el sendero del sur para guardarlo y llevarlo al taller (o sigue recolectando).':(st.mission||'Recoge madera.');
@@ -1842,6 +1853,7 @@ function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC|
   const bobY=Math.sin(t/260)*4;g.textAlign='center';g.font='700 11px Cinzel, serif';const lbl='Salida · guardar mochila',tw=g.measureText(lbl).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(700-tw/2,FW.H-62,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(lbl,700,FW.H-49);
   if(ready()){g.fillStyle='#ffd56e';g.beginPath();g.arc(700,FW.H-90+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',700,FW.H-84+bobY)}
   if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}
+  if(ready())edgeArrow(g,dpr,VW,VH,700-cam.x,FW.H-60-cam.y,t);
  };requestAnimationFrame(frame)}
 
 /* ===================== MÓDULO 3 · ACERTIJOS DE LECTURA (cuadro de misterio cinematográfico) ===================== */
@@ -2011,7 +2023,7 @@ function stepRoom(st,box){townAssets();const RM=ROOMS[st.room];S.m3=S.m3||{};S.m
  const RW=RM.w||ROOM_W,RH=RM.h||ROOM_H,ART=!!RM.art,HS=(RM.hero||82)/82;
  const L=ART?RM.layout:{start:st.start,hot:{}};
  box.innerHTML=`<div class="room" id="room"><canvas id="rcv"></canvas><div class="room-hot" id="rhot"></div>
-  <div class="cm-quest room-q"><small>${esc(st.act||RM.n)}</small><b id="rmis"></b></div>
+  <div class="cm-quest ${QMINI()} room-q"><small>${esc(st.act||RM.n)}</small><b id="rmis"></b></div>
   <div class="cm-hint">Toca el suelo para caminar. Los objetos con brillo dorado esconden algo.</div>${booksHTML()}</div>`;
  bindBooks(box);foot('…',()=>{},{disabled:true});$('#lFoot').classList.add('hide-foot');
  const wrap=$('#room'),cv=$('#rcv'),g=cv.getContext('2d');let VW=0,VH=0,dpr=1,sc=1,ox=0,oy=0;
@@ -2202,7 +2214,7 @@ const STEP={
   let G=townGrid(k=>open(k)&&!newly.includes(k)||W.fog[k]==='open');
   if(!LS.hero||LS.townV!==2){LS.hero=TOWN_LOC[st.from||'puerta'].at.slice();LS.townV=2}const night=isNight(),lampsOn=!night||LS.L.id!=='w1m01'||LS.mapDone.includes('plaza')||!!(LS.scene&&LS.scene.lights&&st.go!=='plaza');
   box.innerHTML=`<div class="cmap tmap" id="cmap"><canvas id="tcv"></canvas>
-   <div class="cm-quest"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b><em class="cm-frags">🪙 ${S.coins||0} florines${(S.inv&&Object.keys(S.inv).length)?' · 🎒 '+Object.values(S.inv).reduce((a,b)=>a+b,0):''}</em></div>
+   <div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b><em class="cm-frags">🪙 ${S.coins||0} florines${(S.inv&&Object.keys(S.inv).length)?' · 🎒 '+Object.values(S.inv).reduce((a,b)=>a+b,0):''}</em></div>
    <div class="cm-hint">${st.hunt?'Toca el suelo para caminar. Sigue el ruido: busca las ondas moradas.':'Toca el suelo para caminar. Ve al lugar marcado con <b>!</b>'}</div>${booksHTML()}</div>`;
   bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
   const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
@@ -2252,6 +2264,7 @@ const STEP={
     g.font='700 11px Cinzel, serif';const tw=g.measureText(l.n).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(lx-tw/2,l.at[1]+12,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(l.n,lx,l.at[1]+25);
     if(k===st.go){g.fillStyle='#ffd56e';g.beginPath();g.arc(lx,top-22+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',lx,top-16+bobY)}});
    if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}
+   if(!st.hunt&&goalAt)edgeArrow(g,dpr,VW,VH,goalAt[0]-cam.x,goalAt[1]-cam.y-30,t);
   };requestAnimationFrame(frame)},
  scene(st,box){/* escena de historia a pantalla completa: imagen + narración letra a letra; tocar para avanzar */
   const lines=(st.lines||[]).filter(Boolean);let li=-1,tw=null,actOn=!!st.act,FWc=null;
