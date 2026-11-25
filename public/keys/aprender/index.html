@@ -802,12 +802,13 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
   steps:[
    {type:'scene',act:['Módulo 4','El nacimiento de una nueva voz'],img:'taller_fuera',move:'zoom',lines:['Cuando el Maestro Compositor desapareció, hace quince años, algunos instrumentos de Florencia empezaron a perder su voz.','Uno a uno se quedaron mudos. La gente dejó de tocarlos… y casi todos los olvidaron.','En tu bolsillo llevas el trozo de mapa del Maestro. En su borde hay un dibujo diminuto: un clavecín.']},
    {type:'citymap',from:'puerta',go:'taller',ck:1,act:'Misión 1 · El secreto de las cuerdas',mission:'Lleva el trozo de mapa al taller del maestro Bernardo.'},
-   {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',fl:{0:['m3/mapa_trozo'],4:['m2/instr_laud'],5:['m2/ic_madera_comun','m2/ic_resina','m2/ic_madera_rara','m2/ic_cuerdas']},lines:['—Ese dibujo… es un clavecín. Conozco a quien sabría leerlo: Beatrice, una antigua constructora de instrumentos que vive en las afueras.','—Cuando los instrumentos empezaron a callar, ella decidió guardarlos. Nadie sabe por qué se apagaron.','—Has aprendido a utilizar la fuerza de la música y a escuchar la naturaleza.','—Pero todavía desconoces uno de sus poderes más extraordinarios: devolver la vida a aquello que la ha perdido.','—Mira este laúd. Al pellizcar una cuerda, vibra; sola suena débil. La caja de resonancia, hueca y de madera fina, recoge esa vibración y la hace crecer.','—Construiremos el tuyo. Esta vez no hay regalos: también las cuerdas tendrás que ganártelas.']},
+   {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',fl:{0:['m3/mapa_trozo'],4:['m2/instr_laud'],5:['m2/ic_madera_comun','m2/ic_resina','m2/ic_madera_rara','m2/ic_cuerdas']},lines:['—Ese dibujo… es un clavecín. Conozco a quien sabría leerlo: Beatrice, una antigua constructora de instrumentos que vive en las afueras.','—Cuando los instrumentos empezaron a callar, ella decidió guardarlos. Nadie sabe por qué se apagaron.','—Has aprendido a utilizar la fuerza de la música y a escuchar la naturaleza.','—Pero todavía desconoces uno de sus poderes más extraordinarios: devolver la vida a aquello que la ha perdido.','—Mira este laúd. Al pellizcar una cuerda, vibra; sola suena débil. La caja de resonancia, hueca y de madera fina, recoge esa vibración y la hace crecer.','—📜 Antiguamente, las cuerdas de los laúdes se hacían sobre todo con tripa de oveja.','—✨ Las tuyas serán mágicas: de la fibra de los carneros resonantes. Esta vez no hay regalos: también las cuerdas tendrás que ganártelas.']},
    {type:'recipe',ck:1,ph:'Receta del maestro Bernardo',title:'Laúd común',img:'m2/instr_laud',give:'laud',recipe:{madera_comun:16,savia_magica:6,madera_rara:3,fibra_resonante:4},okText:'Fabricar el laúd',goText:'Buscar los materiales',missing:'La madera y la savia están en el bosque; la madera rara, en los tocones dorados (con tu Piccolo resonante). La fibra resonante la dan los carneros de los pastizales, más allá del bosque.'},
    {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',skipMats:{madera_comun:16,savia_magica:6,madera_rara:3},fl:{0:['bosque/abeto_1'],1:['m2/ic_madera_comun'],2:['m2/ic_resina'],3:['m2/ic_madera_rara']},lines:['—📜 Historia real: la tapa de un laúd suele ser de abeto, una madera ligera y elástica que vibra con facilidad.','—📜 La caja se arma con costillas finas y curvas de madera más dura, como el arce, el tejo o el ciprés.','—✨ En Mont Keys, la savia mágica hace que las cuerdas vibren más tiempo, y la madera rara guarda una vibración muy antigua.','—Tráeme 16 de madera común, 6 de savia mágica y 3 de madera rara.']},
    {type:'citymap',go:'norte',skipMats:{madera_comun:16,savia_magica:6,madera_rara:3},act:'Misión 2 · La madera que canta',mission:'Sal por la puerta norte hacia el bosque.'},
    {type:'forest',act:'Misión 2 · La madera que canta',skipMats:{madera_comun:16,savia_magica:6,madera_rara:3},recipe:{madera_comun:16,savia_magica:6,madera_rara:3},what:'la madera del laúd',mission:'Para el laúd: 16 de madera común, 6 de savia mágica y 3 de madera rara (tocones dorados, con el Piccolo resonante).'},
-   {type:'wip',ck:1,bg:'m2/taller_int',ph:'Misión 3 · Muy pronto',title:'Más allá del bosque',text:'Detrás de los abetos se extienden los Pastizales del eco, donde pastan los carneros resonantes. Su fibra hará las cuerdas de tu laúd. Esta región se abrirá en la próxima actualización.'},
+   {type:'scene',ck:1,img:'bosque',act:['Misión 3','Más allá del bosque'],skipMats:{fibra_resonante:4},fl:{2:['m4/carnero_idle']},lines:['Detrás de los últimos abetos, el bosque se abre a unas colinas de hierba alta, encendidas por el atardecer.','Los Pastizales del eco. Dicen que allí pastan criaturas con cuerpo, no espíritus: los carneros resonantes.','Su fibra hará las cuerdas de tu laúd. Pero cuidado: defienden su territorio y se esconden en la hierba.']},
+   {type:'meadow',ck:1,act:'Misión 4 · El carnero resonante',skipMats:{fibra_resonante:4},recipe:{fibra_resonante:4},mission:'Calma a 2 carneros resonantes: cada uno da 2 de fibra resonante.'},
    {type:'citymap',from:'norte',go:'taller',act:'Misión 6 · El nacimiento del laúd',mission:'Lleva todos los materiales al taller del maestro Bernardo.'},
    {type:'craft',ph:'Taller del maestro Bernardo',img:'m2/instr_laud',give:'laud',pay:{madera_comun:16,savia_magica:6,madera_rara:3,fibra_resonante:4},okText:'Tomar el laúd',lines:['Bernardo une la madera, la savia mágica y la madera rara…','Talla la caja de resonancia, ajusta el mástil y convierte la fibra en cuerdas.','¡Tu Laúd común está listo!']},
    {type:'scene',img:'taller_m2',who:'maestro',move:'zoom',ck:1,act:['Misión 7','La música que devuelve la vida'],fl:{0:['m2/instr_laud']},lines:['—Las cuerdas poseen una cualidad diferente. Pueden devolver aquello que el silencio nos ha arrebatado.','—Observa estas notas. No necesitas tocarlas con fuerza, sino comprender su melodía.']},
@@ -1890,6 +1891,128 @@ let FOREST_GROUND=null;function forestGround(){if(FOREST_GROUND)return FOREST_GR
 function forestGrid(zk){const C=TW.CELL,gw=Math.ceil(FW.W/C),gh=Math.ceil(FW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
  block(0,0,FW.W,170);block(0,0,40,FW.H);block(FW.W-40,0,FW.W,FW.H);block(0,FW.H-20,FW.W,FW.H);forestLayout(zk).forEach(o=>{if(o.fp)block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});return {b,gw,gh}}
 
+/* ===================== MÓDULO 4 · PASTIZALES DEL ECO (criaturas físicas) ===================== */
+const MW={W:1400,H:2000},M_ENTRY=[700,1900];
+const M_PATH=[[700,2000],[700,1760],[560,1520],[640,1240],[880,1020],[820,760],[600,560],[640,300]];
+const M_PIECES=['pastizal_alto','pasto_alto_pastizal','pasto_alto_tira','rastro_pasto','roca_musgo','corral_esquina','ruina_arco','entrada_pastizales','circulo_ancestral'];
+/* objetos fijos: x,y = base. tall = hierba alta que se cruza (no bloquea) */
+const M_OBJ=[
+ {k:'entrada_pastizales',x:520,y:1965,s:.55,fp:[60,16]},{k:'entrada_pastizales',x:900,y:1965,s:.55,fp:[60,16],flip:1},
+ {k:'pastizal_alto',x:330,y:1700,s:.6,tall:1},{k:'pastizal_alto',x:1050,y:1560,s:.62,tall:1,flip:1},{k:'pastizal_alto',x:300,y:1260,s:.58,tall:1},
+ {k:'pastizal_alto',x:1080,y:1180,s:.6,tall:1},{k:'pastizal_alto',x:420,y:880,s:.62,tall:1,flip:1},{k:'pastizal_alto',x:1110,y:760,s:.58,tall:1},{k:'pastizal_alto',x:300,y:480,s:.6,tall:1},
+ {k:'pasto_alto_tira',x:180,y:1880,s:.55,tall:1},{k:'pasto_alto_tira',x:1230,y:1860,s:.55,tall:1,flip:1},{k:'pasto_alto_tira',x:760,y:640,s:.5,tall:1},{k:'pasto_alto_tira',x:1000,y:420,s:.55,tall:1,flip:1},
+ {k:'pasto_alto_pastizal',x:820,y:1640,s:.5,tall:1},{k:'pasto_alto_pastizal',x:470,y:1430,s:.5,tall:1,flip:1},{k:'pasto_alto_pastizal',x:930,y:1320,s:.5,tall:1},{k:'pasto_alto_pastizal',x:640,y:1060,s:.48,tall:1},{k:'pasto_alto_pastizal',x:220,y:1060,s:.5,tall:1,flip:1},{k:'pasto_alto_pastizal',x:520,y:700,s:.5,tall:1},{k:'pasto_alto_pastizal',x:1240,y:1000,s:.5,tall:1},
+ {k:'roca_musgo',x:560,y:1820,s:.5,fp:[90,24]},{k:'roca_musgo',x:1180,y:1400,s:.55,fp:[96,26],flip:1},{k:'roca_musgo',x:160,y:740,s:.5,fp:[90,24]},{k:'roca_musgo',x:700,y:420,s:.45,fp:[80,22],flip:1},
+ {k:'corral_esquina',x:860,y:1460,s:.55,fp:[220,30]},{k:'corral_esquina',x:330,y:1050,s:.5,fp:[200,28],flip:1},
+ {k:'ruina_arco',x:1000,y:930,s:.6,fp:[150,26]},{k:'ruina_arco',x:250,y:330,s:.55,fp:[140,24],flip:1},
+ {k:'circulo_ancestral',x:1080,y:330,s:.62,fp:[300,90],anc:1},
+ {k:'olivo_1',x:140,y:1500,s:1.3,fp:[40,14]},{k:'olivo_2',x:1280,y:620,s:1.3,fp:[40,14]},{k:'cipres_1',x:1270,y:1720,s:1,fp:[24,12]},{k:'cipres_2',x:120,y:960,s:1,fp:[24,12]},{k:'cipres_1',x:900,y:240,s:1,fp:[24,12]}];
+/* un mar de hierba alta generado (siempre igual) alrededor de los objetos fijos */
+let M_ALL_C=null;const mAll=()=>M_ALL_C||(M_ALL_C=(()=>{const r=townRng(44),out=M_OBJ.slice(),near=(x,y,d)=>M_OBJ.some(o=>Math.hypot(o.x-x,o.y-y)<d);
+ for(let y=230;y<MW.H-120;y+=78)for(let x=60;x<MW.W-40;x+=96){const px=x+(r()-.5)*60,py=y+(r()-.5)*40,dp=mDistPath(px,py);if(dp<85||near(px,py,95)||Math.hypot(px-1080,py-330)<260)continue;if(r()>(dp>220?.82:.55))continue;
+  const q=r();out.push(q<.62?{k:'pasto_alto_pastizal',x:px,y:py,s:.36+r()*.16,tall:1,flip:r()<.5}:q<.88?{k:'pasto_alto_tira',x:px,y:py,s:.3+r()*.12,tall:1,flip:r()<.5}:{k:'pastizal_alto',x:px,y:py,s:.38+r()*.12,tall:1,flip:r()<.5})}
+ return out})());
+const M_DECAL=[{x:760,y:1380,s:.5,r:-.3},{x:520,y:990,s:.45,r:.5},{x:940,y:640,s:.5,r:-.1}];
+/* hábitats de los carneros (zona donde pastan) */
+const M_RAMS=[{id:'r1',zone:[860,1060,1260,1300]},{id:'r2',zone:[180,780,560,980]},{id:'r3',zone:[880,560,1260,800]}];
+const M_ANC=[1080,300];
+function meadowAssets(){townAssets();forestAssets();M_PIECES.forEach(k=>timg('m_'+k,V()+'m4/'+k+'.webp'));['olivo_1','olivo_2','cipres_1','cipres_2'].forEach(k=>timg('m_'+k,V()+'town/p_'+k+'.webp'));timg('m_seco',V()+'m4/t_pastizal_seco.webp');
+ Object.entries(CREATURES.carnero.art).forEach(([k,v])=>[].concat(v).forEach((p,i)=>timg('c_carnero_'+k+(Array.isArray(v)?i:''),V()+p+'.webp')));timg('c_carnero_idle',V()+'m4/carnero_idle.webp');timg('c_carnero_calm',V()+'m4/carnero_tranquilo.webp');timg('c_carnero_alerta',V()+'m4/carnero_alerta.webp');timg('c_carnero_res',V()+'m4/carnero_resonancia.webp');timg('c_carnero_walk0',V()+'m4/carnero_walk_01.webp');timg('c_carnero_walk1',V()+'m4/carnero_walk_02.webp')}
+const mimg=o=>TIMG['m_'+o.k];
+function mDistPath(x,y){let best=1e9;for(let i=0;i<M_PATH.length-1;i++){const a=M_PATH[i],b=M_PATH[i+1],dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/L));best=Math.min(best,Math.hypot(x-a[0]-dx*t,y-a[1]-dy*t))}return best}
+let MEADOW_GROUND=null;
+function meadowGround(){if(MEADOW_GROUND)return MEADOW_GROUND;const ok=k=>TIMG[k]&&TIMG[k].complete&&TIMG[k].width,c=document.createElement('canvas');c.width=MW.W;c.height=MW.H;const g=c.getContext('2d');
+ if(!['cesped','pradera_flores','m_seco','m_rastro_pasto'].every(ok)){g.fillStyle='#3d4a26';g.fillRect(0,0,MW.W,MW.H);return c}
+ g.fillStyle=g.createPattern(TIMG.cesped,'repeat');g.fillRect(0,0,MW.W,MW.H);
+ {const F=document.createElement('canvas');F.width=MW.W;F.height=MW.H;const f=F.getContext('2d');f.fillStyle=f.createPattern(TIMG.pradera_flores,'repeat');f.fillRect(0,0,MW.W,MW.H);const r=townRng(9);f.globalCompositeOperation='destination-in';f.filter='blur(40px)';for(let i=0;i<14;i++){f.beginPath();f.ellipse(r()*MW.W,r()*MW.H,120+r()*160,80+r()*100,0,0,6.3);f.fill()}g.globalAlpha=.7;g.drawImage(F,0,0);g.globalAlpha=1}
+ g.save();g.globalCompositeOperation='multiply';g.fillStyle='rgb(200,205,170)';g.fillRect(0,0,MW.W,MW.H);g.restore();
+ const T=document.createElement('canvas');T.width=MW.W;T.height=MW.H;const t=T.getContext('2d');t.fillStyle=t.createPattern(TIMG.m_seco,'repeat');t.fillRect(0,0,MW.W,MW.H);
+ const M=document.createElement('canvas');M.width=MW.W;M.height=MW.H;const m=M.getContext('2d');m.filter='blur(16px)';m.strokeStyle='#fff';m.lineWidth=74;m.lineCap='round';m.lineJoin='round';m.beginPath();M_PATH.forEach((p,i)=>i?m.lineTo(p[0],p[1]):m.moveTo(p[0],p[1]));m.stroke();
+ [[700,1900,170,90],[1080,380,220,110]].forEach(([x,y,rx,ry])=>{m.beginPath();m.ellipse(x,y,rx,ry,0,0,6.3);m.fillStyle='#fff';m.fill()});
+ t.globalCompositeOperation='destination-in';t.drawImage(M,0,0);g.globalAlpha=.92;g.drawImage(T,0,0);g.globalAlpha=1;
+ const dc=TIMG.m_rastro_pasto;M_DECAL.forEach(d=>{g.save();g.translate(d.x,d.y);g.rotate(d.r);g.globalAlpha=.85;g.drawImage(dc,-dc.width*d.s/2,-dc.height*d.s/2,dc.width*d.s,dc.height*d.s);g.restore()});
+ MEADOW_GROUND=c;return c}
+function meadowGrid(){const C=TW.CELL,gw=Math.ceil(MW.W/C),gh=Math.ceil(MW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
+ block(0,0,MW.W,150);block(0,0,40,MW.H);block(MW.W-40,0,MW.W,MW.H);M_OBJ.forEach(o=>{if(o.fp)block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});
+ /* el círculo ancestral está cerrado: nadie entra todavía */
+ block(M_ANC[0]-200,M_ANC[1]-140,M_ANC[0]+200,M_ANC[1]+110);return {b,gw,gh}}
+function stepMeadow(st,box){meadowAssets();const REC=st.recipe||{fibra_resonante:4};
+ if(!LS.mrun){LS.mrun={bag:{},calm:[]};LS.mhero=M_ENTRY.slice()}
+ const RN=LS.mrun,H=LS.mhero,G=meadowGrid(),C=CREATURES.carnero;const have=k=>((S.inv||{})[k]||0)+(RN.bag[k]||0);
+ const ready=()=>Object.keys(REC).every(k=>have(k)>=REC[k]);let alive=true;
+ box.innerHTML=`<div class="cmap tmap fmap" id="cmap"><canvas id="tcv"></canvas>
+  <div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')} · Pastizales del eco</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
+  <div class="cm-hint">Los carneros resonantes pastan en la hierba alta. Si te ven, embisten: calma su resonancia con tu piano.</div>${booksHTML()}</div>`;
+ bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;matArt();
+ const hud=()=>{$('#fmis').textContent=ready()?'¡Ya tienes la fibra! Vuelve por la entrada del sur para guardarla (o sigue explorando).':(st.mission||'Calma a los carneros resonantes para conseguir su fibra.');
+  const bag=Object.entries(RN.bag).filter(([k,v])=>v>0&&!REC[k]).map(([k,v])=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""><b class="bag">+${v}</b>`).join(' ');
+  $('#fhud').innerHTML=Object.keys(REC).map(k=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""> ${Math.min(have(k),REC[k])}/${REC[k]}${RN.bag[k]?` <b class="bag">+${RN.bag[k]}</b>`:''}`).join(' · ')+(bag?' · '+bag:'')+` · 🪙 ${S.coins||0}`};hud();
+ const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
+ const cam={x:H[0]-VW/2,y:H[1]-VH*.55},clampCam=()=>{cam.x=Math.max(0,Math.min(MW.W-VW,cam.x));cam.y=Math.max(0,Math.min(MW.H-VH,cam.y))};clampCam();
+ let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),busy=false,arriving=null,pingP=null,pingT=0,atExit=true,fx=[],ancT=0;
+ const free=(x,y)=>x>0&&y>0&&x<MW.W&&y<MW.H&&!G.b[Math.floor(y/20)*G.gw+Math.floor(x/20)];
+ const pick=r=>{for(let i=0;i<24;i++){const x=r.zone[0]+Math.random()*(r.zone[2]-r.zone[0]),y=r.zone[1]+Math.random()*(r.zone[3]-r.zone[1]);if(free(x,y)){r.tx=x;r.ty=y;return}}r.tx=r.x;r.ty=r.y};
+ /* carneros: pastan (y se esconden en la hierba), te detectan, avisan y embisten */
+ const rams=M_RAMS.map(m=>{const r=Object.assign({},m,{x:0,y:0,tx:0,ty:0,wait:Math.random()*2,st:RN.calm.includes(m.id)?'calm':'graze',t0:0,face:-1,wt:0});pick(r);r.x=r.tx;r.y=r.ty;pick(r);return r});
+ const walkTo=(p,cb)=>{const pth=townPath(G,H,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=cb||null};
+ const resume=()=>{busy=false;last=performance.now()};
+ const reenter=()=>{alive=false;LS.mrun=null;closeSheet();stepMeadow(st,box)};
+ const fight=r=>{busy=true;moving=false;path=[];
+  creatureEncounter('carnero',(got)=>{r.st='calm';r.wait=99;RN.calm.push(r.id);Object.entries(got).forEach(([k,v])=>{RN.bag[k]=(RN.bag[k]||0)+v});save();hud();
+   const list=Object.entries(got).map(([k,v])=>`<div class="rcp-it ok"><img src="${V()}${matIc(k)}.webp" alt=""><b>${MAT[k].n}</b><span>+${v}</span></div>`).join('');
+   sheet(`<span class="eyebrow">El carnero está en calma</span><h2>Regalos de la resonancia</h2><div class="rcp-list">${list}<div class="rcp-it ok"><span style="font-size:28px">🪙</span><b>Florines</b><span>+${C.coins}</span></div></div><p class="small">Van a tu mochila. Se guardan cuando sales por la entrada del sur. Si una criatura te vence, los pierdes.</p><p class="small">📜 Historia real: las cuerdas de los laúdes se hacían sobre todo con tripa de oveja. ✨ En Mont Keys, los carneros resonantes sueltan una fibra que canta.</p><button class="cta gold" type="button" id="mOk">Seguir</button>`);$('#mOk').onclick=()=>{closeSheet();resume()}},
+   ()=>faint(),{extraHP:0})};
+ const faint=()=>{const lost=Object.entries(RN.bag).filter(([k,v])=>v>0);RN.bag={};save();const f=document.createElement('div');f.className='f-faint';f.innerHTML='<p>Todo da vueltas…</p>';wrap.appendChild(f);requestAnimationFrame(()=>f.classList.add('on'));
+  setTimeout(()=>{sheet(`<span class="eyebrow">Punto de control · Entrada de los pastizales</span><h2>Despiertas junto a la entrada</h2>${lost.length?`<p class="lost">Perdiste lo que llevabas en la mochila: ${lost.map(([k,v])=>v+' '+MAT[k].n.toLowerCase()).join(', ')}.</p>`:''}<p class="small">Lo que ya habías guardado sigue a salvo.</p><button class="cta gold" type="button" id="mBack">Volver a entrar</button>`);$('#mBack').onclick=reenter},900)};
+ const bank=()=>{S.inv=S.inv||{};const got=Object.entries(RN.bag).filter(([k,v])=>v>0);got.forEach(([k,v])=>{S.inv[k]=(S.inv[k]||0)+v});RN.bag={};save();return got};
+ const leave=()=>{busy=true;const got=bank();hud();const txt=got.length?`<p>Guardaste ${got.map(([k,v])=>`<b>${v} ${MAT[k].n.toLowerCase()}</b>`).join(', ')} en tu inventario.</p>`:'';
+  if(ready()){sheet(`<span class="eyebrow">Entrada de los pastizales</span><h2>¡Tienes la fibra resonante!</h2>${txt}<button class="cta gold" type="button" id="mGo">Llevarla al taller</button><button class="ghost" type="button" id="mRe">Seguir explorando (volver a entrar)</button>`);$('#mGo').onclick=()=>{closeSheet();alive=false;LS.mrun=null;setTimeout(next,250)};$('#mRe').onclick=reenter;return}
+  sheet(`<span class="eyebrow">Entrada de los pastizales</span><h2>Todavía falta fibra</h2>${txt}<p>${Object.keys(REC).map(k=>`${MAT[k].n}: <b>${have(k)}/${REC[k]}</b>`).join(' · ')}</p><p class="small">Cada carnero calmado da 2 de fibra. Si vuelves a entrar, los carneros vuelven a estar inquietos.</p><button class="cta gold" type="button" id="mRe">Volver a entrar</button><button class="ghost" type="button" id="mStay">Seguir aquí</button>`);$('#mRe').onclick=reenter;$('#mStay').onclick=()=>{closeSheet();resume()}};
+ cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),wx=e.clientX-r.left+cam.x,wy=e.clientY-r.top+cam.y;pingP=[wx,wy];pingT=performance.now();
+  if(wy>MW.H-110&&Math.abs(wx-700)<160){walkTo([700,MW.H-40],leave);return}walkTo([wx,wy])});
+ const ro=new ResizeObserver(fit);ro.observe(wrap);
+ /* atardecer: degradado del cielo, penumbra con luz alrededor del viajero y hierba que se mece */
+ const dkc=document.createElement('canvas');
+ const dusk=t=>{g.save();g.setTransform(dpr,0,0,dpr,0,0);g.globalCompositeOperation='multiply';const gr=g.createLinearGradient(0,0,0,VH);gr.addColorStop(0,'rgb(255,200,170)');gr.addColorStop(.5,'rgb(235,195,215)');gr.addColorStop(1,'rgb(165,160,205)');g.fillStyle=gr;g.fillRect(0,0,VW,VH);
+  g.globalCompositeOperation='screen';const sg=g.createLinearGradient(0,0,0,VH*.5);sg.addColorStop(0,'rgba(255,130,70,.42)');sg.addColorStop(1,'rgba(255,120,90,0)');g.fillStyle=sg;g.fillRect(0,0,VW,VH*.55);g.globalCompositeOperation='source-over';const vg=g.createRadialGradient(VW/2,VH*.55,VH*.25,VW/2,VH*.55,VH*.8);vg.addColorStop(0,'rgba(20,8,40,0)');vg.addColorStop(1,'rgba(20,8,40,.45)');g.fillStyle=vg;g.fillRect(0,0,VW,VH);g.restore();
+  if(dkc.width!==cv.width||dkc.height!==cv.height){dkc.width=cv.width;dkc.height=cv.height}const d=dkc.getContext('2d');d.setTransform(1,0,0,1,0,0);d.globalCompositeOperation='source-over';d.clearRect(0,0,dkc.width,dkc.height);d.setTransform(dpr,0,0,dpr,0,0);
+  d.fillStyle='rgba(14,8,32,.34)';d.fillRect(0,0,VW,VH);d.globalCompositeOperation='destination-out';const hole=(x,y,r,a)=>{const q=d.createRadialGradient(x,y,0,x,y,r);q.addColorStop(0,`rgba(0,0,0,${a})`);q.addColorStop(1,'rgba(0,0,0,0)');d.fillStyle=q;d.beginPath();d.arc(x,y,r,0,6.3);d.fill()};
+  hole(H[0]-cam.x,H[1]-cam.y-30,200,1);hole(700-cam.x,MW.H-70-cam.y,120,.6);rams.forEach(r=>{if(r.st==='calm')hole(r.x-cam.x,r.y-cam.y-60,110,.7)});
+  g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(dkc,0,0);g.restore()};
+ const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
+  if(!busy){if(moving&&path.length){const p=path[0],dx=p[0]-H[0],dy=p[1]-H[1],d=Math.hypot(dx,dy),v=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';
+    if(d<=v){H[0]=p[0];H[1]=p[1];path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(a)a()}}else{H[0]+=dx/d*v;H[1]+=dy/d*v}walkT+=dt}
+   if(H[1]>MW.H-55){if(!atExit&&!moving){atExit=true;leave()}}else if(H[1]<MW.H-90)atExit=false;
+   if(Math.hypot(H[0]-M_ANC[0],H[1]-M_ANC[1]-180)<130&&t-ancT>6000){ancT=t;toast('🔒 El círculo del Carnero ancestral. Todavía no estás preparado.')}
+   rams.forEach(r=>{const dh=Math.hypot(H[0]-r.x,H[1]-r.y);if(r.st==='calm')return;
+    if(r.st==='graze'){if(dh<C.alert&&H[1]<MW.H-140){r.st='alert';r.t0=t;r.face=H[0]<r.x?-1:1;return}if(r.wait>0){r.wait-=dt;return}const dx=r.tx-r.x,dy=r.ty-r.y,d=Math.hypot(dx,dy);if(d<4){r.wait=1+Math.random()*2.5;pick(r);return}r.face=dx<0?-1:1;const v=C.speed*dt*.5,nx=r.x+dx/d*v,ny=r.y+dy/d*v;if(free(nx,ny)){r.x=nx;r.y=ny;r.wt+=dt}else pick(r);return}
+    if(r.st==='alert'){r.face=H[0]<r.x?-1:1;if(t-r.t0>900){r.st='charge';r.t0=t}return}
+    if(r.st==='charge'){const dx=H[0]-r.x,dy=H[1]-r.y,d=Math.hypot(dx,dy);r.face=dx<0?-1:1;if(d<46){r.st='graze';r.wait=2;fight(r);return}if(t-r.t0>3500||dh>C.alert*2.2){r.st='graze';r.wait=1.5;return}const v=C.charge*1.4*dt,nx=r.x+dx/d*v,ny=r.y+dy/d*v;if(free(nx,ny)){r.x=nx;r.y=ny;r.wt+=dt*2}else{r.st='graze';r.wait=1}}})}
+  cam.x+=(H[0]-VW/2-cam.x)*Math.min(1,dt*5);cam.y+=(H[1]-VH*.55-cam.y)*Math.min(1,dt*5);clampCam();
+  g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);g.drawImage(meadowGround(),cam.x,cam.y,VW,VH,0,0,VW,VH);g.translate(-cam.x,-cam.y);
+  const list=[];
+  mAll().forEach(o=>{const im=mimg(o);if(!im||!im.complete||!im.width)return;const w=im.width*o.s,h=im.height*o.s;if(o.x+w/2<cam.x||o.x-w/2>cam.x+VW||o.y-h>cam.y+VH||o.y-20>cam.y+VH)return;
+   list.push({y:o.y,d:()=>{g.save();if(o.tall){const sw=Math.sin(t/900+o.x*.01)*.025;g.translate(o.x,o.y);g.transform(1,0,sw,1,0,0);g.translate(-o.x,-o.y)}if(o.flip){g.translate(o.x,0);g.scale(-1,1);g.translate(-o.x,0)}
+    if(!o.tall){g.fillStyle='rgba(10,5,20,.3)';g.beginPath();g.ellipse(o.x,o.y-2,w*.3,Math.max(4,w*.05),0,0,6.3);g.fill()}g.drawImage(im,o.x-w/2,o.y-h+(o.tall?8:0),w,h);g.restore()}})});
+  /* el viajero */
+  const fi=[1,2,3,2][Math.floor(walkT/.16)%4],hk=moving?(hdir==='front'?'h_frente_'+fi:'h_lado_'+fi):'h_quieto_1',hi=TIMG[hk],hflip=moving&&hdir==='side'&&facing<0,bob=moving&&fi===2?-1.5:0;
+  list.push({y:H[1],d:()=>{g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(H[0],H[1],13,4,0,0,6.3);g.fill();if(hi&&hi.complete&&hi.naturalWidth){const k=68/144,w=hi.width*k,h=hi.height*k;g.save();g.translate(H[0],H[1]+bob);if(hflip)g.scale(-1,1);if(!moving)g.scale(1-.006*Math.sin(t/750),1+.022*Math.sin(t/750));g.drawImage(hi,-w/2,-h+2,w,h);g.restore()}}});
+  /* los carneros: escondidos en la hierba solo se ven los ojos y las puntas de los cuernos */
+  const inTall=(x,y)=>mAll().some(o=>o.tall&&Math.abs(x-o.x)<(o.k==='pasto_alto_pastizal'?60:150)*o.s/.5&&y<o.y+4&&y>o.y-60);
+  rams.forEach(r=>list.push({y:r.y,d:()=>{const key=r.st==='calm'?'c_carnero_calm':r.st==='alert'?'c_carnero_alerta':r.st==='charge'?'c_carnero_res':(r.wt>0&&r.wait<=0?'c_carnero_walk'+(Math.floor(r.wt/.28)%2):'c_carnero_idle'),im=TIMG[key]||TIMG.c_carnero_idle;if(!im||!im.complete||!im.width)return;
+   const sc=r.st==='calm'?.38:.46,w=im.width*sc,h=im.height*sc,hid=r.st==='graze'&&inTall(r.x,r.y)&&Math.hypot(H[0]-r.x,H[1]-r.y)>C.alert;
+   g.fillStyle='rgba(0,0,0,.32)';g.beginPath();g.ellipse(r.x,r.y-2,w*.32,7,0,0,6.3);g.fill();
+   g.save();g.translate(r.x,r.y);if(r.face>0)g.scale(-1,1);g.globalAlpha=hid?.22:1;g.drawImage(im,-w/2,-h+4,w,h);g.restore();
+   if(hid){const a=.6+.4*Math.sin(t/300+r.x);[-1,1].forEach(s2=>{g.fillStyle=`rgba(255,170,60,${a*.3})`;g.beginPath();g.arc(r.x+r.face*w*.3+s2*5,r.y-h*.72,6,0,6.3);g.fill();g.fillStyle=`rgba(255,215,120,${a})`;g.beginPath();g.arc(r.x+r.face*w*.3+s2*5,r.y-h*.72,2,0,6.3);g.fill()})}
+   if(r.st==='alert'||r.st==='charge'){for(let i=0;i<3;i++){const q=((t/500)+i/3)%1;g.strokeStyle=`rgba(255,170,60,${.6*(1-q)})`;g.lineWidth=2.5;g.beginPath();g.ellipse(r.x,r.y-h*.55,w*.3+q*60,h*.2+q*30,0,0,6.3);g.stroke()}g.fillStyle='#ffb340';g.font='900 26px Alegreya Sans, sans-serif';g.textAlign='center';g.fillText('!',r.x,r.y-h-6)}}}));
+  list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
+  dusk(t);
+  const bobY=Math.sin(t/260)*4;g.textAlign='center';g.font='700 11px Cinzel, serif';const lbl='Salida · guardar mochila',tw=g.measureText(lbl).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(700-tw/2,MW.H-62,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(lbl,700,MW.H-49);
+  if(ready()){g.fillStyle='#ffd56e';g.beginPath();g.arc(700,MW.H-90+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',700,MW.H-84+bobY)}
+  if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}
+  if(ready())edgeArrow(g,dpr,VW,VH,700-cam.x,MW.H-60-cam.y,t);
+ };requestAnimationFrame(frame);if(DEV)window.__M={rams,RN,H,fight}}
+
 function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC||24;if(!S.m2||S.m2.done)S.m2={savia:0,common:0};const M=S.m2;M.savia=M.savia||0;M.common=M.common||0;
  if(!LS.fzone)return forestChooser(st,box);
  const ZK=LS.fzone,Z=F_ZONES[ZK],RN=LS.frun,H=LS.fhero,objs=forestLayout(ZK),G=forestGrid(ZK);
@@ -2373,6 +2496,7 @@ const STEP={
  room(st,box){return stepRoom(st,box)},
  finale(st,box){return stepFinale(st,box)},
  forest(st,box){return stepForest(st,box)},
+ meadow(st,box){return stepMeadow(st,box)},
  citymap(st,box){/* Florencia en mosaico: el héroe camina libre (sin atravesar edificios); la cámara lo sigue */
   townAssets();LS.mapDone=LS.mapDone||[];TOWN_TRIO=st.go==='escenario'||LS.mapDone.includes('escenario')||LS.L.id!=='w1m01';if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
   S.mundo=S.mundo||{spirits:{},fog:{}};const W=S.mundo;const open=k=>{const l=TOWN_LOC[k];return !l||!l.fog||LS.L.id!=='w1m01'||LS.mapDone.includes(l.need)||W.fog[k]==='open'};
