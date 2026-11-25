@@ -582,6 +582,12 @@ body>.enc{position:fixed}
 .sh-coins{font:700 15px Cinzel,serif;text-align:center;margin:4px 0}.sh-list{display:flex;flex-direction:column;gap:6px;max-height:44vh;overflow:auto;margin:8px 0}
 .sh-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:12px;background:rgba(40,28,16,.85);color:#f3e2c0}.sh-row>div{flex:1;display:flex;flex-direction:column;text-align:left}.sh-row b{font-size:14px}.sh-row small{font-size:11px;opacity:.85}.sh-row small.res{color:#ffcf8a}
 .sh-ic{width:46px;height:46px;object-fit:contain;flex:none}.sh-row .chipb[disabled]{opacity:.4}.bag-buff{background:rgba(90,230,150,.15);border-radius:8px;padding:4px 8px}
+.npc{display:flex;gap:12px;align-items:flex-end;margin-bottom:10px}.npc-img{height:170px;max-width:42%;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.4))}.npc-tx{flex:1}.npc-tx h2{margin:2px 0 6px;font-family:Cinzel,serif}.npc-hi{font-style:italic}
+.npc-ops{display:flex;flex-direction:column;gap:6px}.npc-op{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:1px solid rgba(120,80,30,.35);background:rgba(60,40,20,.08);font:600 15px 'Alegreya Sans',sans-serif;text-align:left;color:inherit}.npc-op span{font-size:20px;width:26px;text-align:center}
+.npc-op.gold{background:linear-gradient(180deg,#f6dc9a,#d9a948);border-color:#a8782c;color:#3a2410;box-shadow:0 0 14px rgba(255,200,90,.6);animation:vitP 1.8s ease-in-out infinite}
+.fr-tools{position:absolute;right:10px;top:132px;display:flex;flex-direction:column;gap:8px;z-index:5}.fr-b{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,215,120,.6);background:rgba(20,14,8,.8);font-size:20px;box-shadow:0 0 10px rgba(0,0,0,.4)}
+.cm-quest.route small{color:#ffd56e}.cm-quest.free{opacity:.9}
+#toFree{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:30;box-shadow:0 6px 20px rgba(0,0,0,.4)}
 </style>
 
 <div id="sky"></div>
@@ -653,7 +659,7 @@ const W1={id:'w1',num:'I',place:'Firenze',name:'El Renacimiento italiano',tag:'D
  pal:{top:['#b9a07c','#8f7556'],cliff:['#5b4a3b','#1e1915'],mid:'#4e4033',house:'#d9c3a0',houseSh:'#b89f7c',roof:'#b35a36',roofSh:'#8a4229',tree:'#1f2e22',tree2:'#2c4230',plaza:'#cdb48c',cloud:'#e9b48a',rim:'#f6c27a',dust:'#ffd99a'},
  landmark:'duomo',stampColor:'#e8c27a',
  img:{src:'w1i.webp',w:768,h:2048,float:true,nodes:[[475,1783],[323,1664],[519,1546],[331,1427],[524,1309],[282,1190],[454,1072],[276,953],[483,834],[347,716],[526,597],[300,479],[447,360]],chest:[425,1454]},
- chapters:[[0,'Capítulo I · La ciudad de la música'],[3,'Capítulo II · Las voces olvidadas'],[7,'Capítulo III · Entender la música'],[10,'Capítulo IV · Expresarte']],
+ chapters:[[0,'Parte I · La ciudad de la música'],[3,'Parte II · Las voces olvidadas'],[7,'Parte III · Entender la música'],[10,'Parte IV · Expresarte']],
  lessons:[
  /* ---------------- 01 ---------------- */
  {id:'w1m01',t:'La ciudad de la música',d:'Florencia sigue en pie, pero ha perdido su alma. Recorre la ciudad, ayuda a Matteo y a tres jóvenes músicos a recuperar el antiguo ritual del Espíritu Guardián.',scene:true,game:true,
@@ -1064,7 +1070,8 @@ const WORLDS=[W1,
 const KEY='mk-aprender';
 let S={xp:0,coins:0,done:{},archive:[],comps:[],streak:{last:'',n:0},chests:{},world:0};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)S=Object.assign(S,s)}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+let MEMORY=null;/* durante un recuerdo no se guarda nada: al salir se restaura la partida real */
+const save=()=>{if(MEMORY)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 /*MIG-START*/
 /* ===================== ESTADO DEL MUNDO (formato de guardado v2) =====================
    El mundo recuerda al héroe: ruta, lugares, puertas, hechos y regeneración viven aparte de los capítulos.
@@ -1090,11 +1097,64 @@ function migrateSave(old){const S2=JSON.parse(JSON.stringify(old||{}));const don
  S2.quests={side:{},free:{},orders:{}};S2.regen=S2.regen||{};
  return S2}
 /*MIG-END*/
+
+/* ===================== FLORENCIA LIBRE · LA RUTA DEL HÉROE ===================== */
+const FREE_L={id:'free',t:'Florencia',free:true,game:true,scene:true,steps:[{type:'citymap',free:true}]};
+const freeOn=()=>!!(S.done&&S.done.w1m01);
+const routeLesson=()=>S.route&&WORLDS[0].lessons.find(l=>l.id===S.route.ch);
+const routeTracked=()=>!S.route||S.route.track!==false;
+const CH_N=id=>{const i=CH_IDS.indexOf(id);return i>=0?ROMAN[i]:''};
+/* el objetivo de la ruta: dónde ocurre el siguiente tramo y desde qué paso se reanuda */
+function routeObjective(){const L=routeLesson();if(!L)return null;const st=L.steps,i=Math.min(S.route.step||0,st.length-1),cap='Capítulo '+CH_N(L.id)+' · '+L.t;
+ if(!st.some(x=>x.type==='citymap'))return {loc:null,start:i,book:true,act:cap,mission:'Continúa este capítulo desde el Libro de la ruta.'};
+ if(st[i].type==='citymap')return {loc:st[i].go,start:i+1,act:st[i].act||cap,mission:st[i].mission||'',cap};
+ for(let j=i;j>=0;j--)if(st[j].type==='citymap')return {loc:st[j].go,start:i,act:st[j].act||cap,mission:'Retoma la ruta en '+((TOWN_LOC[st[j].go]||{}).n||'su lugar')+'.',cap};
+ const n=st.findIndex((x,j)=>j>i&&x.type==='citymap');if(n<0)return {loc:null,start:i,book:true,act:cap,mission:'Continúa este capítulo desde el Libro de la ruta.'};
+ return {loc:st[n].go,start:i,act:st[n].act||cap,mission:st[n].mission||'',cap}}
+let ROUTE_START=null,ROUTE_HERE=null;
+function openFree(){if(!freeOn())return drawMap();const v=$('#vLesson');runLesson(WORLDS[0],FREE_L,false,false)}
+function setLoc(region,x,y,extra){if(MEMORY)return;S.loc=Object.assign({region,x,y},extra||{});save()}
+/* seguir la ruta desde el lugar del objetivo: se reanuda en el último punto seguro */
+function resumeRoute(){const L=routeLesson(),o=routeObjective();if(!L||!o)return;ROUTE_START=o.start;ROUTE_HERE=o.loc;if(o.loc&&TOWN_LOC[o.loc])setLoc('florencia',TOWN_LOC[o.loc].at[0],TOWN_LOC[o.loc].at[1],{route:true});runLesson(WORLDS[0],L,false,false)}
+/* recuerdos: copia completa de la partida; al salir todo vuelve a como estaba */
+function startMemory(W,L){MEMORY={snap:JSON.stringify(S)};runLesson(W,L,false,true)}
+function endMemory(){if(!MEMORY)return;const snap=MEMORY.snap;MEMORY=null;S=JSON.parse(snap);save()}
+/* regiones libres (bosque y pastizales): se entra por la puerta y se sale por su camino de siempre */
+function enterRegion(r){const box=$('#lStage');if(!box)return;setLoc(r==='bosque'?'bosque':'pastizales',0,0);LS.fzone=null;LS.mrun=null;if(r==='bosque')stepForest({free:true,act:'Exploración libre'},box);else stepMeadow({free:true,act:'Exploración libre'},box)}
+function backToTown(gate){const at=(TOWN_LOC[gate]||TOWN_LOC.puerta).at;setLoc('florencia',at[0],at[1]+10);closeSheet();openFree()}
+const GATE_TXT={oeste:'Más allá de estas murallas se extiende un antiguo bosque. Dicen que, entre sus árboles, todavía resuenan melodías que nadie recuerda haber tocado.',
+ este:'Las praderas parecen tranquilas desde aquí. Sin embargo, los pastores dejaron de visitarlas hace muchos años.',
+ norte:'Un antiguo jardín permanece oculto tras estas puertas. Entre sus enredaderas todavía se distingue el símbolo de una lira.'};
+/* personajes de cada lugar (menú provisional; los paneles completos llegan en M2) */
+const LOC_NPC={taller:{n:'Bernardo',p:'Maestro lutier',img:'m2/maestro_pie',hi:'—¡Ah, joven músico! ¿Qué te trae hoy a mi taller?'},
+ campanario:{n:'Matteo',p:'Campanero',img:'matteo',hi:'—Las campanas siempre tienen algo que contarnos, joven viajero.'},
+ scriptorium:{n:'Isabella',p:'Copista',img:'m3/isabella_pie',hi:'—Cada página guarda una voz. ¿Vienes a leer conmigo?'},
+ carniceria:{n:'Piero',p:'Carnicero y cocinero',img:'m4/carnicero_pie',hi:'—¡Bienvenido! Siempre hay sitio para un viajero hambriento.'},
+ panaderia:{n:'Lucia',p:'Panadera',img:'m4/panadera_pie',hi:'—¡Pan recién horneado! Pasa, pasa.'},
+ escenario:{n:'Los tres músicos',p:'Violín, flauta y laúd',img:'laudista_pie',hi:'—¡Viajero! Florencia vuelve a sonar gracias a ti.'},
+ gremio:{n:'El gremio de músicos',p:'Encargos',img:null,hi:'Sobre la puerta cuelga un cartel: «Se buscan compositores». Por ahora, nadie atiende.'},
+ fuente:{n:'La fuente',p:'Plaza de Florencia',img:null,hi:'El agua canta otra vez.'},plaza:{n:'La plaza de los faroles',p:'Florencia',img:null,hi:'Los faroles brillan desde que el Guardián despertó.'}};
+function freeLoc(k){const l=TOWN_LOC[k],o=routeObjective(),here=o&&o.loc===k&&!o.book,np=LOC_NPC[k],gate=(k==='oeste'||k==='este'||k==='norte')?k:null,ops=[];
+ if(here)ops.push({ic:'⭐',t:'Seguir la ruta del héroe',gold:1,f:()=>{closeSheet();resumeRoute()}});
+ if(gate&&gateOpen(gate)&&gate!=='norte')ops.push({ic:gate==='oeste'?'🌲':'🐏',t:gate==='oeste'?'Salir al bosque':'Salir a los pastizales',f:()=>{closeSheet();enterRegion(gate==='oeste'?'bosque':'pastizales')}});
+ if(SHOPS[k])ops.push({ic:'🪙',t:'Entrar en la tienda',f:()=>openShop(k)});
+ ops.push({ic:'👋',t:'Despedirse',f:()=>closeSheet()});
+ const img=np&&np.img?`<img class="npc-img" src="${V()}${np.img}.webp" alt="">`:'';
+ const head=gate?`<span class="eyebrow">${esc(l.n)}</span><h2>${gateOpen(gate)?'La puerta está abierta':'La puerta está cerrada'}</h2><p class="npc-hi">«${esc(GATE_TXT[gate])}»</p>`
+  :`<span class="eyebrow">${esc(np?np.p:l.n)}</span><h2>${esc(np?np.n:l.n)}</h2><p class="npc-hi">${esc(np?np.hi:'')}</p>`;
+ sheet(`<div class="npc">${img}<div class="npc-tx">${head}</div></div><div class="npc-ops">${ops.map((x,i)=>`<button type="button" class="npc-op ${x.gold?'gold':''}" data-op="${i}"><span>${x.ic}</span>${esc(x.t)}</button>`).join('')}</div>`);
+ $$('[data-op]').forEach(b=>b.onclick=()=>ops[+b.dataset.op].f())}
+function heroMenu(){const tr=routeTracked();sheet(`<span class="eyebrow">Menú del héroe</span><h2>${esc(S.route?('Ruta: Capítulo '+CH_N(S.route.ch)):'Florencia')}</h2><div class="npc-ops"><button class="npc-op" type="button" id="hmBook"><span>📖</span>Libro de la ruta</button><button class="npc-op" type="button" id="hmTrack"><span>${tr?'🙈':'⭐'}</span>${tr?'Ocultar la ruta':'Mostrar la ruta'}</button><button class="npc-op" type="button" id="hmX"><span>✕</span>Cerrar</button></div>`);
+ $('#hmBook').onclick=()=>{closeSheet();openRouteBook()};$('#hmTrack').onclick=()=>{toggleTrack();closeSheet()};$('#hmX').onclick=closeSheet}
+function toggleTrack(){S.route=S.route||{ch:'w1m01',step:0};S.route.track=!routeTracked();save();if(LS&&LS.L&&LS.L.free&&!LS.mrun&&!LS.fzone)renderStep()}
+function openRouteBook(){const v=$('#vLesson');gameFS(false);micOff();ACTIVE_KB=null;v.hidden=true;document.body.style.overflow='';LS=null;drawMap()}
+function bootWorld(){if(!freeOn()||LS)return;openFree();const r=S.loc&&S.loc.region;if(S.loc&&S.loc.route&&r!=='florencia'){resumeRoute();return}if(r==='bosque'||r==='pastizales')setTimeout(()=>enterRegion(r),60)}
+
 /* los hechos ocurren una sola vez; las recompensas de la historia los consultan */
 function fact(k){S.facts=S.facts||{};if(S.facts[k])return false;S.facts[k]=Date.now();save();return true}
 const hasFact=k=>!!(S.facts&&S.facts[k]);
 /* ¿estamos dentro de un «recuerdo» (capítulo ya completado que se repite)? entonces nada toca el mundo real */
-const inMemory=()=>!!(LS&&LS.L&&S.done&&S.done[LS.L.id]&&!(S.route&&S.route.ch===LS.L.id));
+const inMemory=()=>!!MEMORY;
 function worldPlace(k,v){if(inMemory())return;S.wstate=S.wstate||{places:{}};S.wstate.places=S.wstate.places||{};if(S.wstate.places[k]!==v){S.wstate.places[k]=v;save()}}
 function worldFound(k){if(inMemory())return;S.wstate=S.wstate||{};S.wstate.found=S.wstate.found||{};if(!S.wstate.found[k]){S.wstate.found[k]=true;save()}}
 /* fase del día preparada para el futuro (amanecer, día, atardecer, noche); hoy siempre «dia» en el mundo libre */
@@ -1229,7 +1289,7 @@ function drawImgMap(W){setWeather(W.weather||'clouds');svg.classList.toggle('sun
   const go=()=>openNode(W,L,i,{done,cur,locked,fin});n.addEventListener('click',go);n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});
  });
  return curIdx}
-function drawMap(){
+function drawMap(){{let b=$('#toFree');if(freeOn()&&!LS){if(!b){b=document.createElement('button');b.id='toFree';b.type='button';b.className='cta gold';b.textContent='🏰 Volver a Florencia';b.onclick=()=>{b.remove();openFree()};document.body.appendChild(b)}}else if(b)b.remove()}
  const W=WORLDS[curW],c=W.pal,seed=curW*97+13,r=rng(seed);svg.innerHTML='';clouds=[];svg.classList.remove('float','sunny');setWeather('clouds');svg.setAttribute('viewBox','0 0 420 1560');
  if(W.img){document.documentElement.style.setProperty('--acc',W.acc);$('#sky').style.background=W.img.float?W.sky:'radial-gradient(120% 70% at 50% 40%,#3a2a1c,#120c08)';dustColor=c.dust;svg.setAttribute('aria-label','Mapa del mundo '+W.num+': '+W.name);drawImgMap(W);
   $('#wEyebrow').textContent='Mundo '+W.num+' · '+W.place;$('#wName').textContent=W.name;$('#wTag').textContent=W.tag;{const bn=$('#wBanner');const lk=!isUnlocked(curW);bn.hidden=!W.preview&&!lk;if(lk)bn.innerHTML='🔒 <b>Isla bloqueada.</b> Completa el reto final de «'+esc(WORLDS[curW-1].name)+'» para despertarla.'+(W.preview?' Su contenido, además, está en preparación.':'');else if(W.preview)bn.textContent='En preparación: el contenido de este mundo se está investigando para presentarlo con rigor histórico y cultural. Puedes explorar su mapa.'}$('#wPrev').disabled=curW===0;$('#wNext').disabled=curW===WORLDS.length-1;updateStats();return}document.documentElement.style.setProperty('--acc',W.acc);$('#sky').style.background=W.sky;dustColor=c.dust;
@@ -1305,11 +1365,11 @@ function chest(W,open){if(W.preview){sheet(`<span class="eyebrow">Cofre</span><h
  sheet(`<span class="eyebrow">Cofre del taller</span><h2>¡Cofre desbloqueado!</h2><p>Recibes <b>50 florines</b> y el sonido de <b>clavecín</b> para tu estudio.</p><button class="cta gold" id="x" type="button">Recoger</button>`);$('#x').onclick=()=>{S.chests[W.id]=true;S.coins+=50;save();closeSheet();drawMap()}}
 function openNode(W,L,i,st){const wi=WORLDS.indexOf(W);if(!isUnlocked(wi)){sheet(`<span class="eyebrow">Mundo ${W.num} · isla bloqueada</span><h2>${esc(L.t)}</h2><p>Esta isla despertará cuando completes el reto final de <b>${esc(WORLDS[wi-1].name)}</b>.</p><button class="cta" id="x" type="button">Entendido</button>`);$('#x').onclick=closeSheet;return}
  if(W.preview){sheet(`<span class="eyebrow">Mundo ${W.num} · ${st.fin?'Reto final':'Lección '+ROMAN[i]}</span><h2>${esc(L.t)}</h2><p>${esc(L.d)}</p><p class="small">En preparación. Antes de abrir este mundo, su contenido se investigará y se revisará con músicos que conozcan la tradición.</p><button class="cta" id="x" type="button">Entendido</button>`);$('#x').onclick=closeSheet;return}
- const fin=st.fin,chap=(W.chapters||[]).filter(c=>c[0]<=i).pop();sheet(`${chap&&!fin?`<span class="small" style="color:#8a5a22;font-weight:700">${esc(chap[1])}</span>`:''}<span class="eyebrow">${fin?'Reto final del mundo':'Módulo '+String(i+1).padStart(2,'0')}${st.done?' · completada':''}</span><h2>${esc(L.t)}</h2><p>${esc(L.d)}</p>
+ const fin=st.fin,chap=(W.chapters||[]).filter(c=>c[0]<=i).pop();sheet(`${chap&&!fin?`<span class="small" style="color:#8a5a22;font-weight:700">${esc(chap[1])}</span>`:''}<span class="eyebrow">${fin?'Reto final del mundo':'Capítulo '+ROMAN[i]}${st.done?' · Recuerdo del héroe':''}</span><h2>${esc(L.t)}</h2><p>${esc(L.d)}</p>
   ${fin||W.lessons.length>8?'':`<div class="steps4"><div class="step4"><span>I</span>Descubrir</div><div class="step4"><span>II</span>Aprender</div><div class="step4"><span>III</span>Tocar</div><div class="step4"><span>IV</span>Crear</div></div>`}
   <p class="small">${fin?'Premios: logro «Primer compositor», sello de Italia, +200 XP, 100 florines y el siguiente mundo':'Prácticas: '+L.steps.filter(x=>x.type!=='story').length+' · Descubrimiento: <b>'+esc(L.disc.name)+'</b> · +20 XP'}</p>
-  <button class="cta" type="button" id="go" ${st.locked?'disabled':''}>${st.locked?'Completa la lección anterior para abrirla':st.done?'Repasar (+10 XP)':'Empezar'}</button>`);
- if(!st.locked)$('#go').onclick=()=>{closeSheet();runLesson(W,L,fin,st.done)}}
+  <button class="cta" type="button" id="go" ${st.locked?'disabled':''}>${st.locked?'Completa el capítulo anterior para abrirlo':st.done?'Revivir el recuerdo':freeOn()&&S.route&&S.route.ch===L.id?'Seguir la ruta del héroe':'Empezar'}</button>${st.done?'<p class="small">Un recuerdo no cambia tu partida: ni florines, ni materiales, ni instrumentos, ni el mundo.</p>':''}`);
+ if(!st.locked)$('#go').onclick=()=>{closeSheet();if(st.done&&!fin){startMemory(W,L);return}if(freeOn()&&S.route&&S.route.ch===L.id){const o=routeObjective();if(o&&o.book){resumeRoute();return}openFree();return}runLesson(W,L,fin,st.done)}}
 
 /* ===================== HOJA / TOAST ===================== */
 function sheet(h){$('#card').innerHTML=h;$('#sheet').classList.add('on');$('#scrim').classList.add('on');const b=$('#card button');if(b)setTimeout(()=>b.focus(),50)}
@@ -1505,13 +1565,16 @@ function plazaLights(){const total=LS.lightsTotal||9,done=LS.lightsDone||0,n=Mat
 let LS=null;
 /* los músicos repiten tu melodía en bucle hasta que sales del capítulo */
 const LOOPMEL={on:false,id:0};function loopMelody(mel){LOOPMEL.on=true;const id=++LOOPMEL.id;const play=()=>{if(!LOOPMEL.on||LOOPMEL.id!==id||!LS)return;const a=ac();let t=a.currentTime+.1,tot=0;mel.forEach(n=>{const d=n.d*.5;tone(n.p,n.v,d*.95,'trio',t);t+=d;tot+=d});setTimeout(play,(tot+1.6)*1000)};setTimeout(play,1200)}
-function runLesson(W,L,fin,review){LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';gameInit();gameFS(true);TW_LAST='';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();if(UNLOCK_ALL&&L.id==='w1m03'){S.m3={};save()}if(S.mundo&&S.mundo.spirits){S.mundo.spirits={};save()}if(L.id==='w1m03'&&S.m3&&S.m3.ck>0&&S.m3.ck<L.steps.length){LS.i=S.m3.ck;setTimeout(()=>toast('Continúas donde lo dejaste en el scriptorium.'),800)}if(L.id==='w1m04'&&S.m4&&S.m4.v!==M4V){S.m4={v:M4V};save()}if(L.id==='w1m04'&&S.m4&&S.m4.ck>0&&S.m4.ck<L.steps.length){LS.i=S.m4.ck;setTimeout(()=>toast('Continúas donde lo dejaste.'),800)}renderStep()}
-function exitLesson(){$('#lFoot').classList.remove('hide-foot');LOOPMEL.on=false;gameFS(false);micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;drawMap()}
-$('#lClose').onclick=()=>{if(!LS)return;sheet(`<h2>¿Salir de la lección?</h2><p>Perderás el avance de esta lección.</p><button class="cta" id="q1" type="button">Salir</button><button class="ghost" id="q2" type="button">Seguir aprendiendo</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet};
+function runLesson(W,L,fin,review){{const b=document.getElementById('toFree');if(b)b.remove()}LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';gameInit();gameFS(true);TW_LAST='';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();if(UNLOCK_ALL&&L.id==='w1m03'){S.m3={};save()}if(S.mundo&&S.mundo.spirits){S.mundo.spirits={};save()}if(L.id==='w1m03'&&S.m3&&S.m3.ck>0&&S.m3.ck<L.steps.length&&ROUTE_START==null){LS.i=S.m3.ck;setTimeout(()=>toast('Continúas donde lo dejaste en el scriptorium.'),800)}if(L.id==='w1m04'&&S.m4&&S.m4.v!==M4V){S.m4={v:M4V};save()}if(L.id==='w1m04'&&S.m4&&S.m4.ck>0&&S.m4.ck<L.steps.length&&ROUTE_START==null){LS.i=S.m4.ck;setTimeout(()=>toast('Continúas donde lo dejaste.'),800)}if(ROUTE_START!=null){LS.i=ROUTE_START;LS.route=true;LS.here=ROUTE_HERE;ROUTE_START=null;ROUTE_HERE=null}renderStep()}
+function exitLesson(){$('#lFoot').classList.remove('hide-foot');LOOPMEL.on=false;gameFS(false);micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;if(MEMORY)endMemory();if(freeOn())openFree();else drawMap()}
+$('#lClose').onclick=()=>{if(!LS)return;if(LS.L.free){heroMenu();return}
+ if(MEMORY){sheet(`<span class="eyebrow">Recuerdo del héroe</span><h2>¿Salir del recuerdo?</h2><p>Nada de lo que pase en un recuerdo cambia tu partida real.</p><button class="cta" id="q1" type="button">Volver al presente</button><button class="ghost" id="q2" type="button">Seguir recordando</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet;return}
+ if(LS.route||(freeOn()&&S.route&&S.route.ch===LS.L.id)){sheet(`<span class="eyebrow">La ruta del héroe</span><h2>¿Pausar la ruta?</h2><p>Volverás al último lugar seguro de Florencia. Cuando quieras, retomarás la historia desde el último punto seguro.</p><button class="cta" id="q1" type="button">Pausar la ruta</button><button class="ghost" id="q2" type="button">Seguir la historia</button>`);$('#q1').onclick=()=>{closeSheet();const h=LS.here&&TOWN_LOC[LS.here];if(h)setLoc('florencia',h.at[0],h.at[1]+10);else if(S.loc&&S.loc.route)setLoc('florencia',TOWN_LOC.puerta.at[0],TOWN_LOC.puerta.at[1]);exitLesson()};$('#q2').onclick=closeSheet;return}
+ sheet(`<h2>¿Salir de la lección?</h2><p>Perderás el avance de esta lección.</p><button class="cta" id="q1" type="button">Salir</button><button class="ghost" id="q2" type="button">Seguir aprendiendo</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet};
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
 function next(){if(!micGlobal)micOff();EAR.chordDown=[];EAR.cj=null;EAR.heard=null;LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
 function head(ph,q,sub){const cur=LS&&LS.L.steps[LS.i],who=cur&&cur.who;if(!q&&!sub)return `<span class="lphase">${esc(ph||'')}</span>`;return `<span class="lphase">${esc(ph||'')}</span><div class="g-say">${who&&WHO[who]?`<span class="g-who">${portrait(who)}<span>${esc(WHO[who])}</span></span>`:''}${q?`<b class="g-q">${esc(q)}</b>`:''}${sub?`<span class="g-sub">${esc(sub)}</span>`:''}</div>`}
-function renderStep(){$('#lFoot').classList.remove('hide-foot');const st=LS.L.steps[LS.i],box=$('#lStage');if(S.route&&S.route.ch===LS.L.id&&!LS.review&&(st.ck||st.type==='citymap')){S.route.step=LS.i;save()}if(st.ck&&LS.L.id==='w1m04'){S.m4=S.m4||{};S.m4.ck=LS.i;S.m4.v=M4V;save()}if(st.skipMats&&hasMats(st.skipMats)){LS.i++;return renderStep()}$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
+function renderStep(){$('#lFoot').classList.remove('hide-foot');const st=LS.L.steps[LS.i],box=$('#lStage');if(S.route&&S.route.ch===LS.L.id&&!LS.review&&(st.ck||st.type==='citymap')){S.route.step=LS.i;save()}if(st.ck&&LS.L.id==='w1m04'){S.m4=S.m4||{};S.m4.ck=LS.i;S.m4.v=M4V;save()}if(st.skipMats&&hasMats(st.skipMats)){LS.i++;return renderStep()}if(LS.route&&st.type==='citymap'){if(st.go===LS.here){LS.i++;return renderStep()}S.route.step=LS.i;const at=LS.here&&TOWN_LOC[LS.here]?TOWN_LOC[LS.here].at:(S.loc&&S.loc.x?[S.loc.x,S.loc.y]:TOWN_LOC.puerta.at);setLoc('florencia',at[0],at[1]+10);save();return openFree()}$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
  (STEP[st.type]||STEP.story)(st,box);if(st.stage&&!box.querySelector('.mstage'))box.insertAdjacentHTML('afterbegin',mstageHTML(st.stage));$('.lbody').scrollTop=0}
 /* ===================== MODO JUEGO: narración, escenas y personajes ===================== */
 /* ===================== MAPA DE LA CIUDAD: moverse por las calles y cumplir misiones ===================== */
@@ -1554,7 +1617,7 @@ const SCN_AR={llegada:'896/1200',entrada:'895/1200',dormida:'941/1672',plaza:'94
 const SCN={};
 function plazaOn(extra='',o={}){return plazaHTML(Object.assign({},o,{on:true,extra}))}
 function waterAwake(){if(!LS)return false;if(LS.scene&&LS.scene.water)return true;const n=LS.L.steps.findIndex(s=>s.fx==='water');return n>=0&&LS.i>=n}
-function isNight(){if(!LS)return true;const n=LS.L.steps.findIndex(s=>s.night);if(n<0)return LS.L.id!=='w1m02';return LS.i>=n}
+function isNight(){if(!LS)return true;if(LS.L&&LS.L.free)return worldPhase()==='noche';const n=LS.L.steps.findIndex(s=>s.night);if(n<0)return LS.L.id!=='w1m02';return LS.i>=n}
 function sceneImg(k){const R=SCN[k];if(R&&R.full)return `<div class="lscene"><div class="ls" style="background-image:url(${R.full})"></div></div>`;const img=f=>`<div class="lscene"><div class="ls" style="background-image:url(${V()}${f}.webp)"></div></div>`;
  switch(k){
   case 'llegada':return img('llegada');
@@ -1969,10 +2032,10 @@ const F_ZONES={
 /* llamadas del viento para el piccolo: cambian en cada árbol; más largas en las zonas difíciles */
 const F_CALLS=[[72,76,79],[72,77,81],[71,74,79],[69,72,76],[71,76,79],[74,77,81],[67,71,74],[69,74,77]];
 function flutePattern(n){const b=F_CALLS[Math.floor(Math.random()*F_CALLS.length)].slice();if(Math.random()<.4)b.reverse();const p=b.slice();if(n>=4)p.push(b[1]);if(n>=5)p.push(b[0]);return p}
-function forestChooser(st,box){const M=S.m2||{},need=st.need||9,needC=st.needC||24,REC=st.recipe,inv=S.inv||{};
- box.innerHTML=`<div class="fzones"><span class="eyebrow">Bosque de los Abetos Resonantes</span><h2>¿Dónde quieres entrar?</h2><p class="small">Cada vez que entras, la zona se reinicia: los árboles vuelven a crecer y los abetos mágicos se duermen. Lo que lleves en la mochila se guarda al salir por el sendero del sur; si un espíritu te vence, lo pierdes.</p><p class="small fz-have">${REC?Object.keys(REC).map(k=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""> ${MAT[k].n} ${Math.min(inv[k]||0,REC[k])}/${REC[k]}`).join(' · '):`<img class="ic-mat" src="${V()}m2/ic_resina.webp" alt=""> Savia mágica ${Math.min(M.savia||0,need)}/${need} · <img class="ic-mat" src="${V()}m2/ic_madera_comun.webp" alt=""> Madera común ${Math.min(M.common||0,needC)}/${needC}`}</p>
-  ${Object.entries(F_ZONES).map(([k,z])=>`<button class="fzone fz-${k}" type="button" data-z="${k}"><span class="fz-ic">${z.ic}</span><span><b>${z.n}</b> <i>${z.dif}</i><small>${z.d}</small><em>${z.r}</em></span></button>`).join('')}</div>`;
- box.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{LS.fzone=b.dataset.z;LS.fhero=F_ENTRY.slice();LS.frun={cut:[],trees:[],calm:[],common:0,savia:0,rara:0,rare:[],bonus:useBuff('gather')?1:0};if(LS.frun.bonus)setTimeout(()=>toast('🍞 El pan artesanal: +1 madera por árbol en esta visita'),600);stepForest(st,box)})}
+function forestChooser(st,box){const M=S.m2||{},need=st.need||9,needC=st.needC||24,REC=st.free?{madera_comun:0,savia_magica:0,madera_rara:0}:st.recipe,inv=S.inv||{};
+ box.innerHTML=`<div class="fzones"><span class="eyebrow">Bosque de los Abetos Resonantes</span><h2>¿Dónde quieres entrar?</h2><p class="small">Cada vez que entras, la zona se reinicia: los árboles vuelven a crecer y los abetos mágicos se duermen. Lo que lleves en la mochila se guarda al salir por el sendero del sur; si un espíritu te vence, lo pierdes.</p><p class="small fz-have">${st.free?Object.keys(REC).map(k=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""> ${MAT[k].n}: ${inv[k]||0}`).join(' · '):REC?Object.keys(REC).map(k=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""> ${MAT[k].n} ${Math.min(inv[k]||0,REC[k])}/${REC[k]}`).join(' · '):`<img class="ic-mat" src="${V()}m2/ic_resina.webp" alt=""> Savia mágica ${Math.min(M.savia||0,need)}/${need} · <img class="ic-mat" src="${V()}m2/ic_madera_comun.webp" alt=""> Madera común ${Math.min(M.common||0,needC)}/${needC}`}</p>
+  ${st.free?'<button class="ghost" type="button" id="fzTown" style="margin-bottom:8px">← Volver a Florencia</button>':''}${Object.entries(F_ZONES).map(([k,z])=>`<button class="fzone fz-${k}" type="button" data-z="${k}"><span class="fz-ic">${z.ic}</span><span><b>${z.n}</b> <i>${z.dif}</i><small>${z.d}</small><em>${z.r}</em></span></button>`).join('')}</div>`;
+ {const ft=box.querySelector('#fzTown');if(ft)ft.onclick=()=>backToTown('oeste')}box.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{LS.fzone=b.dataset.z;LS.fhero=F_ENTRY.slice();LS.frun={cut:[],trees:[],calm:[],common:0,savia:0,rara:0,rare:[],bonus:useBuff('gather')?1:0};if(LS.frun.bonus)setTimeout(()=>toast('🍞 El pan artesanal: +1 madera por árbol en esta visita'),600);stepForest(st,box)})}
 
 const FW={W:1400,H:2200};
 const F_PATH=[[700,2200],[700,1900],[470,1640],[520,1260],[900,1080],[960,720],[660,470],[700,230]];
@@ -2061,7 +2124,7 @@ function meadowGrid(){const C=TW.CELL,gw=Math.ceil(MW.W/C),gh=Math.ceil(MW.H/C),
  block(0,0,MW.W,150);block(0,0,40,MW.H);block(MW.W-40,0,MW.W,MW.H);M_OBJ.forEach(o=>{if(o.fp)block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});
  /* el círculo ancestral está cerrado: nadie entra todavía */
  block(M_ANC[0]-200,M_ANC[1]-140,M_ANC[0]+200,M_ANC[1]+110);return {b,gw,gh}}
-function stepMeadow(st,box){meadowAssets();const REC=st.recipe||{fibra_resonante:4};
+function stepMeadow(st,box){meadowAssets();if(!st.free)setLoc('pastizales',0,0,{route:!!LS.route});const REC=st.free?{}:(st.recipe||{fibra_resonante:4});
  if(!LS.mrun){LS.mrun={bag:{},calm:[],bonus:useBuff('rare')};LS.mhero=M_ENTRY.slice();if(LS.mrun.bonus)setTimeout(()=>toast('🍯 Frutos con miel: doble suerte en esta visita'),600)}
  const RN=LS.mrun,H=LS.mhero,G=meadowGrid(),C=CREATURES.carnero;const have=k=>((S.inv||{})[k]||0)+(RN.bag[k]||0);
  const ready=()=>Object.keys(REC).every(k=>have(k)>=REC[k]);let alive=true;
@@ -2069,7 +2132,7 @@ function stepMeadow(st,box){meadowAssets();const REC=st.recipe||{fibra_resonante
   <div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')} · Pastizales del eco</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
   <div class="cm-hint">Los carneros resonantes pastan en la hierba alta. Si te ven, embisten: calma su resonancia con tu piano.</div>${booksHTML()}</div>`;
  bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;matArt();
- const hud=()=>{$('#fmis').textContent=ready()?'¡Ya tienes la fibra! Vuelve por la entrada del sur para guardarla (o sigue explorando).':(st.mission||'Calma a los carneros resonantes para conseguir su fibra.');
+ const hud=()=>{if(st.free)$('#fmis').textContent='Exploración libre: los carneros pastan en la hierba alta. Sal por la entrada del sur para guardar lo que consigas.';else $('#fmis').textContent=ready()?'¡Ya tienes la fibra! Vuelve por la entrada del sur para guardarla (o sigue explorando).':(st.mission||'Calma a los carneros resonantes para conseguir su fibra.');const iv=S.inv||{};
   const bag=Object.entries(RN.bag).filter(([k,v])=>v>0&&!REC[k]).map(([k,v])=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""><b class="bag">+${v}</b>`).join(' ');
   $('#fhud').innerHTML=Object.keys(REC).map(k=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""> ${Math.min(have(k),REC[k])}/${REC[k]}${RN.bag[k]?` <b class="bag">+${RN.bag[k]}</b>`:''}`).join(' · ')+(bag?' · '+bag:'')+` · 🪙 ${S.coins||0}`};hud();
  const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
@@ -2090,7 +2153,7 @@ function stepMeadow(st,box){meadowAssets();const REC=st.recipe||{fibra_resonante
  const faint=()=>{const lost=Object.entries(RN.bag).filter(([k,v])=>v>0);RN.bag={};save();const f=document.createElement('div');f.className='f-faint';f.innerHTML='<p>Todo da vueltas…</p>';wrap.appendChild(f);requestAnimationFrame(()=>f.classList.add('on'));
   setTimeout(()=>{sheet(`<span class="eyebrow">Punto de control · Entrada de los pastizales</span><h2>Despiertas junto a la entrada</h2>${lost.length?`<p class="lost">Perdiste lo que llevabas en la mochila: ${lost.map(([k,v])=>v+' '+MAT[k].n.toLowerCase()).join(', ')}.</p>`:''}<p class="small">Lo que ya habías guardado sigue a salvo.</p><button class="cta gold" type="button" id="mBack">Volver a entrar</button>`);$('#mBack').onclick=reenter},900)};
  const bank=()=>{S.inv=S.inv||{};const got=Object.entries(RN.bag).filter(([k,v])=>v>0);got.forEach(([k,v])=>{S.inv[k]=(S.inv[k]||0)+v});RN.bag={};save();return got};
- const leave=()=>{busy=true;const got=bank();hud();const txt=got.length?`<p>Guardaste ${got.map(([k,v])=>`<b>${v} ${MAT[k].n.toLowerCase()}</b>`).join(', ')} en tu inventario.</p>`:'';
+ const leave=()=>{busy=true;const got=bank();hud();if(st.free){sheet(`<span class="eyebrow">Entrada de los pastizales</span><h2>${got.length?'Guardaste lo que conseguiste':'Sales de los pastizales'}</h2>${got.length?`<p>${got.map(([k,v])=>`<b>${v} ${MAT[k].n.toLowerCase()}</b>`).join(', ')}</p>`:''}<button class="cta gold" type="button" id="mTown">Volver a Florencia</button><button class="ghost" type="button" id="mRe">Seguir explorando (volver a entrar)</button>`);$('#mTown').onclick=()=>{alive=false;LS.mrun=null;backToTown('este')};$('#mRe').onclick=reenter;return}const txt=got.length?`<p>Guardaste ${got.map(([k,v])=>`<b>${v} ${MAT[k].n.toLowerCase()}</b>`).join(', ')} en tu inventario.</p>`:'';
   if(ready()){sheet(`<span class="eyebrow">Entrada de los pastizales</span><h2>¡Tienes la fibra resonante!</h2>${txt}<button class="cta gold" type="button" id="mGo">Llevarla al taller</button><button class="ghost" type="button" id="mRe">Seguir explorando (volver a entrar)</button>`);$('#mGo').onclick=()=>{closeSheet();alive=false;LS.mrun=null;setTimeout(next,250)};$('#mRe').onclick=reenter;return}
   sheet(`<span class="eyebrow">Entrada de los pastizales</span><h2>Todavía falta fibra</h2>${txt}<p>${Object.keys(REC).map(k=>`${MAT[k].n}: <b>${have(k)}/${REC[k]}</b>`).join(' · ')}</p><p class="small">Cada carnero calmado da 2 de fibra. Si vuelves a entrar, los carneros vuelven a estar inquietos.</p><button class="cta gold" type="button" id="mRe">Volver a entrar</button><button class="ghost" type="button" id="mStay">Seguir aquí</button>`);$('#mRe').onclick=reenter;$('#mStay').onclick=()=>{closeSheet();resume()}};
  cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),wx=e.clientX-r.left+cam.x,wy=e.clientY-r.top+cam.y;pingP=[wx,wy];pingT=performance.now();
@@ -2133,12 +2196,12 @@ function stepMeadow(st,box){meadowAssets();const REC=st.recipe||{fibra_resonante
   list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
   dusk(t);
   const bobY=Math.sin(t/260)*4;g.textAlign='center';g.font='700 11px Cinzel, serif';const lbl='Salida · guardar mochila',tw=g.measureText(lbl).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(700-tw/2,MW.H-62,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(lbl,700,MW.H-49);
-  if(ready()){g.fillStyle='#ffd56e';g.beginPath();g.arc(700,MW.H-90+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',700,MW.H-84+bobY)}
+  if(ready()&&!st.free){g.fillStyle='#ffd56e';g.beginPath();g.arc(700,MW.H-90+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',700,MW.H-84+bobY)}
   if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}
-  if(ready())edgeArrow(g,dpr,VW,VH,700-cam.x,MW.H-60-cam.y,t);
+  if(ready()&&!st.free)edgeArrow(g,dpr,VW,VH,700-cam.x,MW.H-60-cam.y,t);
  };requestAnimationFrame(frame);if(DEV)window.__M={rams,RN,H,fight}}
 
-function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC||24;if(!S.m2||S.m2.done)S.m2={savia:0,common:0};const M=S.m2;M.savia=M.savia||0;M.common=M.common||0;
+function stepForest(st,box){forestAssets();if(!st.free)setLoc('bosque',0,0,{route:!!LS.route});const need=st.need||9,needC=st.needC||24;if(!S.m2||S.m2.done)S.m2={savia:0,common:0};const M=S.m2;M.savia=M.savia||0;M.common=M.common||0;
  if(!LS.fzone)return forestChooser(st,box);
  const ZK=LS.fzone,Z=F_ZONES[ZK],RN=LS.frun,H=LS.fhero,objs=forestLayout(ZK),G=forestGrid(ZK);
  const RES_ON=new Set(F_SPECIAL.filter(x=>x.res).slice(0,Z.res).map(x=>x.id)),isRes=o=>!!(o.sp&&o.sp.res&&RES_ON.has(o.sp.id));
@@ -2153,7 +2216,7 @@ function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC|
   <div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')} · ${esc(Z.n)}</small><b id="fmis"></b><em class="cm-frags" id="fhud"></em></div>
   <div class="cm-hint">${esc(Z.n)} · ${esc(Z.dif)}. Toca cualquier árbol para invocar el piccolo y recoger madera. ¡Cuidado con los espíritus!</div>${booksHTML()}</div>`;
  bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
- const hud=()=>{$('#fmis').textContent=ready()?'¡Ya tienes lo necesario! Sal por el sendero del sur para guardarlo y llevarlo al taller (o sigue recolectando).':(st.mission||'Recoge madera.');
+ const hud=()=>{if(st.free){const iv=S.inv||{};$('#fmis').textContent='Exploración libre: recoge madera, savia y madera rara. Sal por el sendero del sur para guardarlo.';$('#fhud').innerHTML=[['savia_magica','savia'],['madera_comun','common'],['madera_rara','rara']].map(([k,r])=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""> ${iv[k]||0}${RN[r]?` <b class="bag">+${RN[r]}</b>`:''}`).join(' · ')+` · 🪙 ${S.coins||0}`;return}$('#fmis').textContent=ready()?'¡Ya tienes lo necesario! Sal por el sendero del sur para guardarlo y llevarlo al taller (o sigue recolectando).':(st.mission||'Recoge madera.');
   if(REC){$('#fhud').innerHTML=Object.keys(REC).map(k=>`<img class="ic-mat" src="${V()}${matIc(k)}.webp" alt=""> ${Math.min(have(k),REC[k])}/${REC[k]}${RN[RK[k]]?` <b class="bag">+${RN[RK[k]]}</b>`:''}`).join(' · ')+` · 🪙 ${S.coins||0}`;return}
   $('#fhud').innerHTML=`<img class="ic-mat" src="${V()}m2/ic_resina.webp" alt=""> Savia ${Math.min(M.savia,need)}/${need}${RN.savia?` <b class="bag">+${RN.savia}</b>`:''} · <img class="ic-mat" src="${V()}m2/ic_madera_comun.webp" alt=""> Común ${Math.min(M.common,needC)}/${needC}${RN.common?` <b class="bag">+${RN.common}</b>`:''} · 🪙 ${S.coins||0}`};hud();
  const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
@@ -2205,7 +2268,7 @@ function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC|
  const faint=()=>{const lost=[RN.savia,RN.common,RN.rara];RN.savia=0;RN.common=0;RN.rara=0;save();const f=document.createElement('div');f.className='f-faint';f.innerHTML='<p>Todo da vueltas…</p>';wrap.appendChild(f);requestAnimationFrame(()=>f.classList.add('on'));
   setTimeout(()=>{sheet(`<span class="eyebrow">Punto de control · Taller del maestro</span><h2>Despiertas junto al taller</h2><p>«Esos espíritus te dejaron sin nada —dice el maestro Bernardo—. Tendrás que volver a intentarlo.»</p>${lost[0]||lost[1]||lost[2]?`<p class="lost">Perdiste lo que llevabas en la mochila: ${lost[0]} de savia mágica, ${lost[1]} de madera común${lost[2]?` y ${lost[2]} de madera rara`:''}.</p>`:''}<p class="small">Lo que ya habías guardado sigue a salvo${REC?'':` (savia ${M.savia}/${need} · común ${M.common}/${needC})`}.</p><button class="cta gold" type="button" id="fBack">Volver a entrar</button>`);$('#fBack').onclick=reenter},900)};
  /* salida: guarda la mochila */
- const leave=()=>{busy=true;const got=bank();hud();const txt=got[0]||got[1]||got[2]?`<p>Guardaste <b>${got[0]} de savia mágica</b>, <b>${got[1]} de madera común</b>${got[2]?` y <b>${got[2]} de madera rara</b>`:''} en tu inventario.</p>`:'';
+ const leave=()=>{busy=true;const got=bank();hud();if(st.free){sheet(`<span class="eyebrow">Salida del bosque</span><h2>${got[0]||got[1]||got[2]?'Guardaste lo que recogiste':'Sales del bosque'}</h2>${got[0]||got[1]||got[2]?`<p><b>${got[0]}</b> de savia mágica · <b>${got[1]}</b> de madera común${got[2]?` · <b>${got[2]}</b> de madera rara`:''}</p>`:''}<button class="cta gold" type="button" id="fTown">Volver a Florencia</button><button class="ghost" type="button" id="fRe">Seguir explorando (volver a entrar)</button>`);$('#fTown').onclick=()=>{alive=false;LS.fzone=null;backToTown('oeste')};$('#fRe').onclick=reenter;return}const txt=got[0]||got[1]||got[2]?`<p>Guardaste <b>${got[0]} de savia mágica</b>, <b>${got[1]} de madera común</b>${got[2]?` y <b>${got[2]} de madera rara</b>`:''} en tu inventario.</p>`:'';
   if(REC){const miss=Object.keys(REC).filter(k=>have(k)<REC[k]);if(!miss.length){sheet(`<span class="eyebrow">Salida del bosque</span><h2>¡Tienes todo para ${esc(st.what||'el instrumento')}!</h2>${txt}<button class="cta gold" type="button" id="fGo">Llevarlo al taller</button><button class="ghost" type="button" id="fRe">Seguir recolectando (volver a entrar)</button>`);$('#fGo').onclick=()=>{closeSheet();alive=false;LS.fzone=null;setTimeout(next,250)};$('#fRe').onclick=reenter;return}
    sheet(`<span class="eyebrow">Salida del bosque</span><h2>Todavía falta material</h2>${txt}<p>${miss.map(k=>`${MAT[k].n}: <b>${have(k)}/${REC[k]}</b>`).join(' · ')}</p>${miss.includes('madera_rara')?'<p class="small">La madera rara está en los tocones dorados: 1 en la Arboleda y 2 en el Bosque.</p>':''}<p class="small">Si vuelves a entrar, la zona se reinicia.</p><button class="cta gold" type="button" id="fRe">Volver a entrar (elegir zona)</button><button class="ghost" type="button" id="fStay">Seguir aquí</button>`);$('#fRe').onclick=reenter;$('#fStay').onclick=()=>{closeSheet();resume()};return}
   if(M.savia>=need&&M.common>=needC){sheet(`<span class="eyebrow">Salida del bosque</span><h2>¡Tienes todo lo necesario!</h2>${txt}<p class="small">Savia ${M.savia}/${need} · común ${M.common}/${needC}. Si recoges más, se queda en tu inventario personal.</p><button class="cta gold" type="button" id="fGo">Llevarlo al taller</button><button class="ghost" type="button" id="fRe">Seguir recolectando (volver a entrar)</button>`);$('#fGo').onclick=()=>{closeSheet();M.done=1;save();alive=false;LS.fzone=null;setTimeout(next,250)};$('#fRe').onclick=reenter;return}
@@ -2623,24 +2686,25 @@ const STEP={
  forest(st,box){return stepForest(st,box)},
  meadow(st,box){return stepMeadow(st,box)},
  citymap(st,box){/* Florencia en mosaico: el héroe camina libre (sin atravesar edificios); la cámara lo sigue */
-  townAssets();LS.mapDone=LS.mapDone||[];TOWN_TRIO=st.go==='escenario'||LS.mapDone.includes('escenario')||LS.L.id!=='w1m01';if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
-  S.mundo=S.mundo||{spirits:{},fog:{}};const W=S.mundo;const open=k=>{const l=TOWN_LOC[k];return !l||!l.fog||LS.L.id!=='w1m01'||LS.mapDone.includes(l.need)||W.fog[k]==='open'};
+  townAssets();LS.mapDone=LS.mapDone||[];TOWN_TRIO=st.free?(hasFact('musicos_reunidos')||freeOn()):(st.go==='escenario'||LS.mapDone.includes('escenario')||LS.L.id!=='w1m01');const RO=st.free?routeObjective():null,goalK=st.free?(RO&&routeTracked()&&!RO.book?RO.loc:null):st.go;if(LS.mapPrev&&!LS.mapDone.includes(LS.mapPrev))LS.mapDone.push(LS.mapPrev);LS.mapPrev=st.go;
+  S.mundo=S.mundo||{spirits:{},fog:{}};const W=S.mundo;const open=k=>{const l=TOWN_LOC[k];if(st.free)return true;return !l||!l.fog||LS.L.id!=='w1m01'||LS.mapDone.includes(l.need)||W.fog[k]==='open'};
   const newly=Object.keys(TOWN_LOC).filter(k=>TOWN_LOC[k].fog&&open(k)&&W.fog[k]!=='open');
   let G=townGrid(k=>open(k)&&!newly.includes(k)||W.fog[k]==='open');
-  if(!LS.hero||LS.townV!==2){LS.hero=TOWN_LOC[st.from||'puerta'].at.slice();LS.townV=2}const night=isNight(),lampsOn=!night||LS.L.id!=='w1m01'||LS.mapDone.includes('plaza')||!!(LS.scene&&LS.scene.lights&&st.go!=='plaza');
+  if(st.free){LS.hero=S.loc&&S.loc.region==='florencia'&&S.loc.x?[S.loc.x,S.loc.y]:TOWN_LOC.puerta.at.slice();LS.townV=2}else if(!LS.hero||LS.townV!==2){LS.hero=TOWN_LOC[st.from||'puerta'].at.slice();LS.townV=2}const night=isNight(),lampsOn=!night||LS.L.id!=='w1m01'||LS.mapDone.includes('plaza')||!!(LS.scene&&LS.scene.lights&&st.go!=='plaza');
   box.innerHTML=`<div class="cmap tmap" id="cmap"><canvas id="tcv"></canvas>
-   <div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b><em class="cm-frags">🪙 ${S.coins||0} florines${(S.inv&&Object.keys(S.inv).length)?' · 🎒 '+Object.values(S.inv).reduce((a,b)=>a+b,0):''}</em></div>
-   <div class="cm-hint">${st.hunt?'Toca el suelo para caminar. Sigue el ruido: busca las ondas moradas.':'Toca el suelo para caminar. Ve al lugar marcado con <b>!</b>'}</div>${booksHTML()}</div>`;
-  bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
+   ${st.free?(RO&&routeTracked()?`<div class="cm-quest route ${QMINI()}"><small>⭐ Ruta del héroe · ${esc(RO.act)}</small><b>${esc(RO.mission)}</b><em class="cm-frags">`:`<div class="cm-quest free mini-keep"><small>Exploración libre</small><b>Florencia</b><em class="cm-frags">`):`<div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b><em class="cm-frags">`}🪙 ${S.coins||0} florines${(S.inv&&Object.keys(S.inv).length)?' · 🎒 '+Object.values(S.inv).reduce((a,b)=>a+b,0):''}</em></div>
+   ${st.free?`<div class="fr-tools"><button type="button" class="fr-b" id="frTrack" title="${routeTracked()?'Ocultar la ruta':'Mostrar la ruta'}">${routeTracked()?'🙈':'⭐'}</button><button type="button" class="fr-b" id="frBook" title="Libro de la ruta">📖</button></div>`:''}
+   <div class="cm-hint">${st.free?'Toca el suelo para caminar. Toca un lugar o una puerta para entrar.':st.hunt?'Toca el suelo para caminar. Sigue el ruido: busca las ondas moradas.':'Toca el suelo para caminar. Ve al lugar marcado con <b>!</b>'}</div>${booksHTML()}</div>`;
+  bindBooks(box);if(st.free){$('#frTrack').onclick=e=>{e.stopPropagation();toggleTrack()};$('#frBook').onclick=e=>{e.stopPropagation();openRouteBook()};if(RO&&RO.book&&routeTracked()){const q=box.querySelector('.cm-quest.route');if(q)q.onclick=e=>{e.stopPropagation();openRouteBook()}}}const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
   const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
   const cam={x:LS.hero[0]-VW/2,y:LS.hero[1]-VH*.55};const clampCam=()=>{cam.x=Math.max(0,Math.min(TW.W-VW,cam.x));cam.y=Math.max(0,Math.min(TW.H-VH,cam.y))};clampCam();
   let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),alive=true,busy=false,arriving=null,pingP=null,pingT=0,fogAnim={};
   newly.forEach(k=>{fogAnim[k]=0});if(newly.length)setTimeout(()=>{newly.forEach(k=>{W.fog[k]='open';worldFound(k)});save();G=townGrid(open);toast('¡La niebla se levanta! Descubriste: '+newly.map(k=>TOWN_LOC[k].n).join(', '))},900);
   const spirits=()=>TOWN_SPIRITS.filter(s=>LS.L.id==='w1m01'&&W.spirits[s.id]!=='calmado'&&open(s.need)&&W.fog[s.need]==='open').concat(st.hunt&&!huntDone?[huntSp]:[]);
   const walkTo=(p,onArrive)=>{const pth=townPath(G,LS.hero,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=onArrive||null};
-  let huntDone=false;const huntSp=st.hunt?Object.assign({id:'hunt',battle:true},st.hunt):null;const goalAt=st.hunt?[st.hunt.x,st.hunt.y]:TOWN_LOC[st.go].at;
+  let huntDone=false;const huntSp=st.hunt?Object.assign({id:'hunt',battle:true},st.hunt):null;const goalAt=st.hunt?[st.hunt.x,st.hunt.y]:goalK&&TOWN_LOC[goalK]?TOWN_LOC[goalK].at:null;
   const hitLoc=(wx,wy)=>{{const b=TOWN_BUBBLE.find(b=>Math.hypot(wx-b.x,wy-b.y)<92);if(b)return b.k}for(const [k,l] of Object.entries(TOWN_LOC)){const o=TOWN_OBJ.find(o=>o.loc===k);if(o){const im=TIMG[o.k];if(im&&im.complete){const w=im.width*(o.s||1),h=im.height*(o.s||1);if(wx>o.x-w/2&&wx<o.x+w/2&&wy>o.y-h&&wy<o.y+10)return k}}if(Math.hypot(wx-l.at[0],wy-l.at[1])<70)return k}return null};
-  const arriveLoc=k=>{if(k===st.go){busy=true;alive=false;setTimeout(next,250);return}const l=TOWN_LOC[k];if(l.locked){toast(l.locked);return}if(l.fog&&!open(k)){toast(`${l.n}: la niebla lo cubre. Se abrirá cuando ${l.msg}.`);return}
+  const arriveLoc=k=>{if(st.free){freeLoc(k);return}if(k===st.go){busy=true;alive=false;setTimeout(next,250);return}const l=TOWN_LOC[k];if(GATE_TXT[k]&&!gateOpen(k)){toast(GATE_TXT[k]);return}if(l.locked&&!GATE_TXT[k]){toast(l.locked);return}if(l.fog&&!open(k)){toast(`${l.n}: la niebla lo cubre. Se abrirá cuando ${l.msg}.`);return}
    if(k==='taller')sheet(`<span class="eyebrow">Taller del lutier</span><h2>Maestro Bernardo</h2><p>«¡Un viajero músico! Aquí construimos instrumentos con madera, cuerdas y resinas. Pronto te enseñaré qué madera elegir para la tapa de un laúd.»</p><p class="small">Muy pronto: fabricación de instrumentos (Módulo 2).</p><button class="cta" type="button" onclick="closeSheet()">Volver</button>`);
    else if(SHOPS[k]){if(S.done.w1m03||UNLOCK_ALL)openShop(k);else toast(`${l.n}: abrirá pronto.`)}
    else if(k==='gremio')toast('El gremio: aquí aparecerán encargos de composición. ¡Muy pronto!');else if(k==='scriptorium')toast('El scriptorium: tinta, pergamino y lectura de partituras. ¡Muy pronto!');
@@ -2657,7 +2721,7 @@ const STEP={
    INVOKE_HOOK=()=>{const tt=wrap.querySelector('.tut');if(tt)tt.remove();if(ib)ib.classList.remove('pulse');townEncounter(Object.assign({preChosen:'piano_viejo'},sp),()=>{huntDone=true;unlockChord('C');if(sp.coins&&!inMemory()&&fact('pay:hunt:'+LS.L.id+':'+LS.i)){S.coins=(S.coins||0)+sp.coins;save();toast(`🪙 +${sp.coins} florines`)}alive=false;setTimeout(next,300)})}};
   const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();if(!alive)INVOKE_HOOK=null;return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
    if(moving&&path.length&&!busy){const p=path[0],dx=p[0]-LS.hero[0],dy=p[1]-LS.hero[1],d=Math.hypot(dx,dy),sp=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';
-    if(d<=sp){LS.hero=p.slice();path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(!st.hunt&&Math.hypot(LS.hero[0]-goalAt[0],LS.hero[1]-goalAt[1])<40&&!a)arriveLoc(st.go);else if(a)a()}}else{LS.hero[0]+=dx/d*sp;LS.hero[1]+=dy/d*sp}walkT+=dt;
+    if(d<=sp){LS.hero=p.slice();path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(st.free)setLoc('florencia',Math.round(LS.hero[0]),Math.round(LS.hero[1]));if(!st.hunt&&!st.free&&goalAt&&Math.hypot(LS.hero[0]-goalAt[0],LS.hero[1]-goalAt[1])<40&&!a)arriveLoc(st.go);else if(a)a()}}else{LS.hero[0]+=dx/d*sp;LS.hero[1]+=dy/d*sp}walkT+=dt;
     const s=spirits().find(s=>Math.hypot(LS.hero[0]-s.x,LS.hero[1]-s.y)<75);if(s){encounter(s)}}
    cam.x+=(LS.hero[0]-VW/2-cam.x)*Math.min(1,dt*5);cam.y+=(LS.hero[1]-VH*.55-cam.y)*Math.min(1,dt*5);clampCam();
    g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,VW,VH);{const gr=townGround();g.drawImage(gr,cam.x,cam.y,VW,VH,0,0,VW,VH)}g.translate(-cam.x,-cam.y);sideWalls(g,cam,VW,VH);
@@ -2679,7 +2743,7 @@ const STEP={
    const bobY=Math.sin(t/260)*4;g.textAlign='center';
    Object.entries(TOWN_LOC).forEach(([k,l])=>{if(k==='puerta')return;if(l.fog&&!(open(k)&&W.fog[k]==='open'))return;const o=TOWN_OBJ.find(o=>o.loc===k),im=o&&TIMG[o.k],top=o&&im&&im.complete?o.y-im.height*(o.s||1):l.at[1]-60;const lx=o?o.x:l.at[0];
     g.font='700 11px Cinzel, serif';const tw=g.measureText(l.n).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(lx-tw/2,l.at[1]+12,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(l.n,lx,l.at[1]+25);
-    if(k===st.go){g.fillStyle='#ffd56e';g.beginPath();g.arc(lx,top-22+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',lx,top-16+bobY)}});
+    if(k===goalK){g.fillStyle='#ffd56e';g.beginPath();g.arc(lx,top-22+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',lx,top-16+bobY)}});
    if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}
    if(!st.hunt&&goalAt)edgeArrow(g,dpr,VW,VH,goalAt[0]-cam.x,goalAt[1]-cam.y-30,t);
   };requestAnimationFrame(frame)},
@@ -3022,7 +3086,7 @@ function finishLesson(){const {W,L,fin,review}=LS;$('#lBar').style.width='100%';
  $('#lStage').innerHTML=`<div class="done"><span class="lphase">${fin?'Mundo completado':'Lección completada'}</span><p class="lq" style="font-family:var(--display)">${esc(L.t)}</p><div class="stars">${st}</div><p class="ltext">+${xp} XP${coins?` · +${coins} florines`:''}${S.streak.n>1?` · racha de ${S.streak.n} días`:''}</p>
   ${L.disc?`<div class="acard"><span class="per">${newDisc?'Nuevo en tu Archivo':'En tu Archivo'} · ${esc(L.disc.per)}</span><h3>${esc(L.disc.name)}</h3><p>${esc(L.disc.text)}</p><p><b>Por qué importa:</b> ${esc(L.disc.sig)}</p></div>`:''}
   ${fin?`<div class="stamp on" style="--sc:${W.stampColor};width:120px">SELLO<br>${esc(W.place.toUpperCase())}</div>`:''}</div>`;
- $('#lFoot').innerHTML='';if(LS.lastComp){const lc=LS.lastComp;setTimeout(()=>{const b=document.createElement('button');b.className='ghost';b.type='button';b.style.marginTop='8px';b.textContent='Abrir mi composición en el estudio';b.onclick=()=>openInStudio(lc);$('#lFoot').appendChild(b)},0)}foot('Volver al mapa',()=>{exitLesson();if(fin&&curW<WORLDS.length-1)toast('¡Sello obtenido! Se desbloqueó la siguiente isla: ve con la flecha ›.')},{gold:true})}
+ $('#lFoot').innerHTML='';if(LS.lastComp){const lc=LS.lastComp;setTimeout(()=>{const b=document.createElement('button');b.className='ghost';b.type='button';b.style.marginTop='8px';b.textContent='Abrir mi composición en el estudio';b.onclick=()=>openInStudio(lc);$('#lFoot').appendChild(b)},0)}foot(freeOn()&&!MEMORY?'Volver a Florencia':MEMORY?'Volver al presente':'Volver al mapa',()=>{exitLesson();if(fin&&curW<WORLDS.length-1)toast('¡Sello obtenido! Se desbloqueó la siguiente isla: ve con la flecha ›.')},{gold:true})}
 
 /* ===================== PASAPORTE ===================== */
 function allDiscs(){const out=[];WORLDS.forEach(w=>{if(w.preview)return;w.lessons.concat([w.finale]).forEach(l=>{if(l.disc)out.push(l.disc)})});return out}
@@ -3104,7 +3168,8 @@ const cv=$('#dust'),cx=cv.getContext('2d');let DW,DH,parts=[];
 function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*devicePixelRatio;parts=Array.from({length:40},()=>({x:Math.random()*DW,y:Math.random()*DH,r:(Math.random()*1.6+.4)*devicePixelRatio,s:Math.random()*.25+.05,a:Math.random()*6}))}rs();addEventListener('resize',rs);
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
-if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},migrateSave};
+if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))setTimeout(bootWorld,80);
+window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc};
 })();
 </script>
 </body></html>
