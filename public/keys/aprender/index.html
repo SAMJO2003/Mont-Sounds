@@ -1065,6 +1065,47 @@ const KEY='mk-aprender';
 let S={xp:0,coins:0,done:{},archive:[],comps:[],streak:{last:'',n:0},chests:{},world:0};
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)S=Object.assign(S,s)}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+/*MIG-START*/
+/* ===================== ESTADO DEL MUNDO (formato de guardado v2) =====================
+   El mundo recuerda al héroe: ruta, lugares, puertas, hechos y regeneración viven aparte de los capítulos.
+   Los campos antiguos (done, inv, instr, codex, m3, m4…) se conservan tal cual. */
+const SAVE_FMT=2,KEY_BAK='mk-aprender-backup-v1';
+const CH_IDS=['w1m01','w1m02','w1m03','w1m04','w1m05','w1m06','w1m07','w1m08','w1m09','w1m10','w1m11','w1m12'];
+function migrateSave(old){const S2=JSON.parse(JSON.stringify(old||{}));const done=S2.done||{},inv=S2.inv||{},instr=S2.instr||[],codex=S2.codex||[],fog=(S2.mundo&&S2.mundo.fog)||{},now=Date.now();
+ const facts={},fact=k=>{facts[k]=facts[k]||now};
+ CH_IDS.forEach(id=>{if(done[id])fact('cap:'+id)});instr.forEach(i=>fact('instr:'+i));codex.forEach(c=>fact('codex:'+c));
+ if(S2.vital)fact('skill:vital');if(S2.metRam)fact('met:carnero');if(instr.includes('laud'))fact('laud_fabricado');if(instr.includes('piccolo_raro'))fact('piccolo_reforzado');
+ const m1=!!done.w1m01;if(m1){['campanario_vivo','fuente_viva','plaza_luz','musicos_reunidos','guardian_despierto'].forEach(fact)}
+ /* ruta del héroe: primer capítulo sin completar; se respetan los puntos de guardado internos */
+ const ch=CH_IDS.find(id=>!done[id])||CH_IDS[CH_IDS.length-1];let step=0;
+ if(ch==='w1m03'&&S2.m3&&S2.m3.ck>0)step=S2.m3.ck;if(ch==='w1m04'&&S2.m4&&S2.m4.v===2&&S2.m4.ck>0)step=S2.m4.ck;
+ const found={puerta:true};if(m1)['campanario','fuente','plaza','escenario','taller','gremio','scriptorium'].forEach(k=>found[k]=true);Object.keys(fog).forEach(k=>{if(fog[k]==='open')found[k]=true});
+ if(done.w1m02||m1)found.artesanos=found.artesanos||!!done.w1m02;if(done.w1m03||m1){found.carniceria=true;found.panaderia=true}
+ const gates={oeste:m1||!!done.w1m02,este:!!done.w1m04||instr.includes('laud')||(inv.fibra_resonante||0)>0||!!S2.metRam,norte:false};
+ const places={campanario:m1?'vivo':'dormido',fuente:m1?'viva':'seca',plaza:m1?'luz':'apagada',escenario:m1?'musicos':'vacio',scriptorium:done.w1m03?'restaurado':'cerrado'};
+ if(S2.world&&typeof S2.world==='object')S2.world=0;S2.fmt=SAVE_FMT;S2.migrated=now;
+ S2.route={ch,step,track:true};
+ S2.wstate={found,gates,places,services:{taller:true,carniceria:!!(done.w1m03),panaderia:!!(done.w1m03)},npcs:{},time:{phase:'dia',t:0}};
+ S2.facts=Object.assign(facts,S2.facts||{});
+ S2.quests={side:{},free:{},orders:{}};S2.regen=S2.regen||{};
+ return S2}
+/*MIG-END*/
+/* los hechos ocurren una sola vez; las recompensas de la historia los consultan */
+function fact(k){S.facts=S.facts||{};if(S.facts[k])return false;S.facts[k]=Date.now();save();return true}
+const hasFact=k=>!!(S.facts&&S.facts[k]);
+/* ¿estamos dentro de un «recuerdo» (capítulo ya completado que se repite)? entonces nada toca el mundo real */
+const inMemory=()=>!!(LS&&LS.L&&S.done&&S.done[LS.L.id]&&!(S.route&&S.route.ch===LS.L.id));
+function worldPlace(k,v){if(inMemory())return;S.wstate=S.wstate||{places:{}};S.wstate.places=S.wstate.places||{};if(S.wstate.places[k]!==v){S.wstate.places[k]=v;save()}}
+function worldFound(k){if(inMemory())return;S.wstate=S.wstate||{};S.wstate.found=S.wstate.found||{};if(!S.wstate.found[k]){S.wstate.found[k]=true;save()}}
+/* fase del día preparada para el futuro (amanecer, día, atardecer, noche); hoy siempre «dia» en el mundo libre */
+const DAY_PHASES=['amanecer','dia','atardecer','noche'];function worldPhase(){return (S.wstate&&S.wstate.time&&S.wstate.time.phase)||'dia'}
+/* regeneración configurable por tipo de recurso (aún no se aplica: base para la fase de economía) */
+const REGEN={arbol:{min:6},abeto_resonante:{min:20},tocon_raro:{min:45},carnero:{min:15},espiritu:{min:5}};
+function regenReady(kind,id){const r=(S.regen||{})[kind+':'+id];return !r||Date.now()-r>=(REGEN[kind]||{min:0}).min*60000}
+function regenMark(kind,id){S.regen=S.regen||{};S.regen[kind+':'+id]=Date.now();save()}
+
+/* migración: una sola vez, con copia independiente del guardado anterior */
+try{if(S.world&&typeof S.world==='object'){S.world=0;S.fmt=0}if(!S.fmt||S.fmt<SAVE_FMT){const raw=localStorage.getItem(KEY);if(raw&&!localStorage.getItem(KEY_BAK))localStorage.setItem(KEY_BAK,raw);S=migrateSave(S);save()}}catch(e){console.warn('migración',e)}
 const worldDoneCount=w=>w.lessons.filter(l=>S.done[l.id]).length+(w.finale&&w.finale.id&&S.done[w.finale.id]?1:0);
 const worldComplete=w=>!!(w.finale&&w.finale.id&&S.done[w.finale.id]);
 function today(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
@@ -1470,7 +1511,7 @@ $('#lClose').onclick=()=>{if(!LS)return;sheet(`<h2>¿Salir de la lección?</h2><
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
 function next(){if(!micGlobal)micOff();EAR.chordDown=[];EAR.cj=null;EAR.heard=null;LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
 function head(ph,q,sub){const cur=LS&&LS.L.steps[LS.i],who=cur&&cur.who;if(!q&&!sub)return `<span class="lphase">${esc(ph||'')}</span>`;return `<span class="lphase">${esc(ph||'')}</span><div class="g-say">${who&&WHO[who]?`<span class="g-who">${portrait(who)}<span>${esc(WHO[who])}</span></span>`:''}${q?`<b class="g-q">${esc(q)}</b>`:''}${sub?`<span class="g-sub">${esc(sub)}</span>`:''}</div>`}
-function renderStep(){$('#lFoot').classList.remove('hide-foot');const st=LS.L.steps[LS.i],box=$('#lStage');if(st.ck&&LS.L.id==='w1m04'){S.m4=S.m4||{};S.m4.ck=LS.i;S.m4.v=M4V;save()}if(st.skipMats&&hasMats(st.skipMats)){LS.i++;return renderStep()}$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
+function renderStep(){$('#lFoot').classList.remove('hide-foot');const st=LS.L.steps[LS.i],box=$('#lStage');if(S.route&&S.route.ch===LS.L.id&&!LS.review&&(st.ck||st.type==='citymap')){S.route.step=LS.i;save()}if(st.ck&&LS.L.id==='w1m04'){S.m4=S.m4||{};S.m4.ck=LS.i;S.m4.v=M4V;save()}if(st.skipMats&&hasMats(st.skipMats)){LS.i++;return renderStep()}$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
  (STEP[st.type]||STEP.story)(st,box);if(st.stage&&!box.querySelector('.mstage'))box.insertAdjacentHTML('afterbegin',mstageHTML(st.stage));$('.lbody').scrollTop=0}
 /* ===================== MODO JUEGO: narración, escenas y personajes ===================== */
 /* ===================== MAPA DE LA CIUDAD: moverse por las calles y cumplir misiones ===================== */
@@ -1621,7 +1662,8 @@ const TOWN_LOC={
 const TOWN_SPIRITS=[{id:'ruido-1',x:430,y:1830,need:'taller',name:'Espíritu del Ruido',reward:{coins:10,item:'resina',itemName:'resina de abeto'},
  tasks:[{t:'chord',ch:'C',say:'Recuerda el acorde: toca Do mayor'},{t:'arp',ch:'C',say:'Ahora en arpegio: Do, Mi, Sol, subiendo'},{t:'alt',n:4,say:'Remata: grave, aguda, grave, aguda',hint:'Salta de un lado al otro del teclado.'}]}];
 /* puertas de la ciudad: cerradas hasta el módulo que las abre */
-function gateOpen(k){const L=LS&&LS.L,li=L?WORLDS[0].lessons.indexOf(L):-1;
+function gateOpen(k){if(S.wstate&&S.wstate.gates&&S.wstate.gates[k])return true;const r=gateRule(k);if(r&&!inMemory()&&S.wstate&&S.wstate.gates){S.wstate.gates[k]=true;save()}return r}
+function gateRule(k){const L=LS&&LS.L,li=L?WORLDS[0].lessons.indexOf(L):-1;
  if(k==='oeste')return !!(S.done&&S.done.w1m01)||li>=1;
  if(k==='este')return !!(S.done&&S.done.w1m04)||li>=4||(L&&L.id==='w1m04'&&LS.i>=L.steps.findIndex(x=>x.go==='este'));
  if(k==='norte')return !!S.m5open;return true}
@@ -1909,7 +1951,7 @@ function spendMats(R){S.inv=S.inv||{};Object.keys(R).forEach(k=>{S.inv[k]=Math.m
 function spendCoins(n){if((S.coins||0)<n)return false;S.coins-=n;save();return true}
 /* entrega un instrumento cobrando su receta solo si todavía no lo tenías */
 function giveCraft(st){if(st.pay&&!hasInstr(st.give))spendMats(st.pay);giveInstr(st.give)}
-function giveInstr(id){S.instr=S.instr||[];if(S.instr.includes(id))return;S.instr.push(id);S.bookNew=1;save();setTimeout(bookBadge,50);const x=INSTR_BOOK.find(i=>i.id===id);if(x)setTimeout(()=>toast(`🎒 Nuevo instrumento: ${x.n}`),700)}
+function giveInstr(id){S.instr=S.instr||[];if(S.instr.includes(id))return;S.instr.push(id);S.facts=S.facts||{};S.facts['instr:'+id]=S.facts['instr:'+id]||Date.now();if(id==='laud')S.facts.laud_fabricado=S.facts.laud_fabricado||Date.now();S.bookNew=1;save();setTimeout(bookBadge,50);const x=INSTR_BOOK.find(i=>i.id===id);if(x)setTimeout(()=>toast(`🎒 Nuevo instrumento: ${x.n}`),700)}
 /* desafíos de acordes por nivel del espíritu (el acorde no queda atado a un enemigo: se sortea en cada encuentro) */
 /* niveles de los Espíritus del Ruido: cada nivel pide más resistencia y desafíos más variados (acordes mayores y menores, arpegios, trinos) */
 const NOISE_LEVELS={1:{types:['chord'],pool:['C','F'],n:2,hint:true},2:{types:['chord'],pool:['C','F','G'],n:3,hint:true},3:{types:['chord','chord','arp'],pool:['C','F','G','Am'],n:3,hint:false},4:{types:['chord','arp','trill'],pool:['C','F','G','Am','Dm','Em'],n:4,hint:false}};
@@ -2513,7 +2555,7 @@ const CODEX={m3_partitura:{t:'La melodía de medianoche',k:'Partitura recuperada
  m3_sello:{t:'El Sello del Maestro',k:'Pista',seal:'full',d:'Una clave de Sol entrelazada con una rosa de los vientos. Las notas del manuscrito completaron el sello: es la firma del Maestro Compositor.'},
  m3_mapa:{t:'Trozo de mapa n.º 1',k:'Fragmento de mapa',map:1,d:'Un trozo roto de un mapa antiguo: una costa, un bosque y un camino que se corta en el borde. En la orilla hay un dibujo diminuto… parece un clavecín. Faltan más trozos.'},
  m3_pista:{t:'La inscripción',k:'Pista',d:'«Cuando la música pierda su voz, buscad aquello que fue olvidado.» Apareció completa cuando la melodía sonó entera por primera vez.'}};
-function codexAdd(id){S.codex=S.codex||[];if(S.codex.includes(id))return;S.codex.push(id);S.bookNew='codice';save();setTimeout(bookBadge,50);setTimeout(()=>toast(`📜 Nuevo en el Códice del Compositor: ${CODEX[id].t}`),500)}
+function codexAdd(id){S.codex=S.codex||[];if(S.codex.includes(id))return;S.codex.push(id);S.facts=S.facts||{};S.facts['codex:'+id]=S.facts['codex:'+id]||Date.now();S.bookNew='codice';save();setTimeout(bookBadge,50);setTimeout(()=>toast(`📜 Nuevo en el Códice del Compositor: ${CODEX[id].t}`),500)}
 function codexHTML(){const have=(S.codex||[]).filter(id=>CODEX[id]);const ic={'Partitura recuperada':'🎼','Fragmento':'📄','Pista':'🗝️','Fragmento de mapa':'🗺️'};
  const items=have.map(id=>{const c=CODEX[id];return `<div class="bk-item cx"><small class="cx-k">${ic[c.k]||'📜'} ${esc(c.k)}</small><h3>${esc(c.t)}</h3>${c.notes?`<div class="dstaff">${m3Staff({notes:c.notes,clef:true,w:330,h:150})}</div><button class="chipb" type="button" data-cx="${id}">▶ Escuchar</button>`:''}${c.map?`<div class="cx-map">${m3MapSvg({route:1})}</div>`:''}${c.seal?`<div class="cx-seal">${m3SealSvg(c.seal==='half')}</div>`:''}<p class="small">${esc(c.d)}</p></div>`}).join('');
  const locked=Array.from({length:3},(_,i)=>`<div class="bk-item cx lock"><small class="cx-k">Página por descubrir</small><h3>· · ·</h3><p class="small">Una pista del Maestro Compositor espera en otro lugar de la isla.</p></div>`).join('');
@@ -2570,7 +2612,7 @@ function townEncounter(sp,onWin){const tasks=sp.tasks||[{t:'high',say:'Toca una 
  setTimeout(()=>{ov.classList.add('in');choose()},60)}
 /* paso de la lección: aparece un espíritu y hay que calmarlo con un acorde */
 function stepSpirit(st,box){townAssets();box.innerHTML=st.bg?sceneImg(st.bg):`<div class="lscene charsc dusk"><div class="ls" style="background-image:url(${V()}campanario_top.webp)"></div></div>`;foot('…',()=>{},{disabled:true});
- townEncounter({name:st.name||'Espíritu del Ruido',tint:st.tint,battle:st.battle,heroHP:st.hp,intro:st.intro,introStaff:st.chord?{notes:[{ps:CHORD_BOOK[st.chord].ps,d:'w'}],names:true,w:170,cap:CHORD_BOOK[st.chord].n}:null,tasks:st.tasks,winText:st.winText,winBtn:'Continuar'},()=>{if(st.chord)unlockChord(st.chord);if(st.coins){S.coins=(S.coins||0)+st.coins;save();toast(`+${st.coins} florines`)}next()})}
+ townEncounter({name:st.name||'Espíritu del Ruido',tint:st.tint,battle:st.battle,heroHP:st.hp,intro:st.intro,introStaff:st.chord?{notes:[{ps:CHORD_BOOK[st.chord].ps,d:'w'}],names:true,w:170,cap:CHORD_BOOK[st.chord].n}:null,tasks:st.tasks,winText:st.winText,winBtn:'Continuar'},()=>{if(st.chord)unlockChord(st.chord);if(st.coins&&!inMemory()&&fact('pay:'+LS.L.id+':'+LS.i)){S.coins=(S.coins||0)+st.coins;save();toast(`+${st.coins} florines`)}next()})}
 
 const FAM_IMG={'Violín':'m2/fam_violin','Flauta':'m2/fam_flauta','Tambor':'m2/fam_tambor','Laúd':'m2/instr_laud','Trompeta':'m2/fam_trompeta','Pandero':'m2/instr_tamburo','Arpa':'m2/fam_arpa','Chirimía':'m2/fam_chirimia'};
 const STEP={
@@ -2593,7 +2635,7 @@ const STEP={
   const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
   const cam={x:LS.hero[0]-VW/2,y:LS.hero[1]-VH*.55};const clampCam=()=>{cam.x=Math.max(0,Math.min(TW.W-VW,cam.x));cam.y=Math.max(0,Math.min(TW.H-VH,cam.y))};clampCam();
   let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),alive=true,busy=false,arriving=null,pingP=null,pingT=0,fogAnim={};
-  newly.forEach(k=>{fogAnim[k]=0});if(newly.length)setTimeout(()=>{newly.forEach(k=>{W.fog[k]='open'});save();G=townGrid(open);toast('¡La niebla se levanta! Descubriste: '+newly.map(k=>TOWN_LOC[k].n).join(', '))},900);
+  newly.forEach(k=>{fogAnim[k]=0});if(newly.length)setTimeout(()=>{newly.forEach(k=>{W.fog[k]='open';worldFound(k)});save();G=townGrid(open);toast('¡La niebla se levanta! Descubriste: '+newly.map(k=>TOWN_LOC[k].n).join(', '))},900);
   const spirits=()=>TOWN_SPIRITS.filter(s=>LS.L.id==='w1m01'&&W.spirits[s.id]!=='calmado'&&open(s.need)&&W.fog[s.need]==='open').concat(st.hunt&&!huntDone?[huntSp]:[]);
   const walkTo=(p,onArrive)=>{const pth=townPath(G,LS.hero,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=onArrive||null};
   let huntDone=false;const huntSp=st.hunt?Object.assign({id:'hunt',battle:true},st.hunt):null;const goalAt=st.hunt?[st.hunt.x,st.hunt.y]:TOWN_LOC[st.go].at;
@@ -2608,11 +2650,11 @@ const STEP={
    const k=hitLoc(wx,wy);if(k){const l=TOWN_LOC[k];if(l.fog&&!open(k)){toast(`${l.n}: la niebla lo cubre. Se abrirá cuando ${l.msg}.`);return}walkTo(l.at,()=>arriveLoc(k));pingP=l.at;pingT=performance.now();return}
    pingP=[wx,wy];pingT=performance.now();walkTo([wx,wy])});
   const ro=new ResizeObserver(fit);ro.observe(wrap);
-  const encounter=sp=>{if(sp.id==='hunt')return huntStart(sp);busy=true;moving=false;path=[];townEncounter(sp,()=>{W.spirits[sp.id]='calmado';S.coins=(S.coins||0)+sp.reward.coins;S.inv=S.inv||{};S.inv[sp.reward.item]=(S.inv[sp.reward.item]||0)+1;save();
+  const encounter=sp=>{if(sp.id==='hunt')return huntStart(sp);busy=true;moving=false;path=[];townEncounter(sp,()=>{W.spirits[sp.id]='calmado';if(!inMemory()&&fact('pay:espiritu:'+sp.id)){S.coins=(S.coins||0)+sp.reward.coins;S.inv=S.inv||{};S.inv[sp.reward.item]=(S.inv[sp.reward.item]||0)+1}save();
     const q=box.querySelector('.cm-frags');if(q)q.textContent=`🪙 ${S.coins} florines · 🎒 ${Object.values(S.inv).reduce((a,b)=>a+b,0)}`;toast(`El espíritu recuperó su equilibrio. +${sp.reward.coins} florines · +1 ${sp.reward.itemName}`);busy=false;last=performance.now()})};
   const huntStart=sp=>{busy=true;moving=false;path=[];const ib=box.querySelector('[data-book=instr]');if(ib)ib.classList.add('pulse');
    wrap.insertAdjacentHTML('beforeend',`<div class="tut"><b>¡Encontraste al ${esc(sp.name)}!</b><span>Para enfrentarlo necesitas un instrumento. Abre tu <b>libro de instrumentos</b> (abajo a la derecha) y toca <b>«Invocar el piano»</b>.</span><i class="tut-arrow">➘</i></div>`);
-   INVOKE_HOOK=()=>{const tt=wrap.querySelector('.tut');if(tt)tt.remove();if(ib)ib.classList.remove('pulse');townEncounter(Object.assign({preChosen:'piano_viejo'},sp),()=>{huntDone=true;unlockChord('C');if(sp.coins){S.coins=(S.coins||0)+sp.coins;save();toast(`🪙 +${sp.coins} florines`)}alive=false;setTimeout(next,300)})}};
+   INVOKE_HOOK=()=>{const tt=wrap.querySelector('.tut');if(tt)tt.remove();if(ib)ib.classList.remove('pulse');townEncounter(Object.assign({preChosen:'piano_viejo'},sp),()=>{huntDone=true;unlockChord('C');if(sp.coins&&!inMemory()&&fact('pay:hunt:'+LS.L.id+':'+LS.i)){S.coins=(S.coins||0)+sp.coins;save();toast(`🪙 +${sp.coins} florines`)}alive=false;setTimeout(next,300)})}};
   const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();if(!alive)INVOKE_HOOK=null;return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
    if(moving&&path.length&&!busy){const p=path[0],dx=p[0]-LS.hero[0],dy=p[1]-LS.hero[1],d=Math.hypot(dx,dy),sp=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';
     if(d<=sp){LS.hero=p.slice();path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(!st.hunt&&Math.hypot(LS.hero[0]-goalAt[0],LS.hero[1]-goalAt[1])<40&&!a)arriveLoc(st.go);else if(a)a()}}else{LS.hero[0]+=dx/d*sp;LS.hero[1]+=dy/d*sp}walkT+=dt;
@@ -2687,11 +2729,11 @@ const STEP={
   const say=$('#csay'),ln=say.querySelector('.cs-line'),wh=say.querySelector('.cs-who'),nx=say.querySelector('.cs-next'),acc=say.querySelector('.cs-acc');
   const cv=box.querySelector('canvas.water:not([data-auto])');if(cv){setTimeout(()=>{FWc=fountainWater(cv,FCFG[cv.dataset.cfg]);if(st.fx==='water'||st.img==='final'){FWc.fill(1);FWc.all(true)}else if(LS.scene&&LS.scene.water){FWc.fill(1);FWc.all(true)}},60)}
   if(st.fx==='lights'){const order=[2,3,4,5,0,1];box.querySelectorAll('.luz').forEach(e=>e.classList.remove('on'));order.forEach((i,j)=>setTimeout(()=>{box.querySelectorAll(`.luz[data-luz="${i}"]`).forEach(e=>e.classList.add('on'))},900+j*650))}
-  if(st.fx==='bells'){const t=ac().currentTime+.4;[60,64,67,72].forEach((p,i)=>bell(p,.6,t+i*.45))}
+  if(st.fx==='bells')worldPlace('campanario','vivo');if(st.fx==='water')worldPlace('fuente','viva');if(st.fx==='lights')worldPlace('plaza','luz');if(st.fx==='bells'){const t=ac().currentTime+.4;[60,64,67,72].forEach((p,i)=>bell(p,.6,t+i*.45))}
   if(st.playKeep&&LS.keep[st.playKeep]){const mel=LS.keep[st.playKeep];if(st.loop)loopMelody(mel);else setTimeout(()=>{const a=ac();let t=a.currentTime+.1;mel.forEach(n=>{tone(n.p,n.v,n.d*.5*.95,'trio',t);t+=n.d*.5})},1200)}
   if(st.ckClear&&S.m3){S.m3={};save()}if(st.give&&st.giveAt==null)giveCraft(st);if(st.codex)codexAdd(st.codex);if(st.chords)st.chords.forEach(unlockChord);
   const floatUpd=i=>{const h=box.querySelector('.cut-float'),fl=st.fl&&st.fl[i];if(h)h.innerHTML=fl?fl.map((f,j)=>`<img src="${V()}${f}.webp" style="--j:${j};--n:${fl.length}" alt="">`).join(''):'';if(st.give&&st.giveAt===i)giveCraft(st)};
-  if(st.coins&&!st._paid){st._paid=1;S.coins=(S.coins||0)+st.coins;save();setTimeout(()=>toast(`🪙 +${st.coins} florines`),900)}
+  if(st.coins&&!st._paid&&!inMemory()&&fact('pay:'+LS.L.id+':'+LS.i)){st._paid=1;S.coins=(S.coins||0)+st.coins;save();setTimeout(()=>toast(`🪙 +${st.coins} florines`),900)}
   const show=()=>{li++;floatUpd(li);if(li>=lines.length){if(st.accept){acc.hidden=false;nx.hidden=true;return}if(FWc)FWc.stop();next();return}
    const L=lines[li],dlg=L.startsWith('—');const tag=dlg&&st.who;wh.hidden=!tag;if(tag)wh.innerHTML=portrait(st.who)+'<span>'+esc(WHO[st.who])+'</span>';
    ln.className='cs-line'+(dlg?' dlg':'');ln.textContent=L;nx.hidden=true;say.hidden=false;
@@ -2974,8 +3016,8 @@ const STEP={
 };
 function saveComp(title,notes){let t=0;const bl=.5,arr=notes.map(n=>{const s=t;t+=n.d*bl;return [ +s.toFixed(3), +(t-.02).toFixed(3), n.p, Math.round(30+n.v*90), n.p>=60?'R':'L']});const id='c'+Date.now().toString(36);S.comps.unshift({id,title,notas:arr,dur:+t.toFixed(2),date:new Date().toISOString()});if(LS)LS.lastComp=id;save();toast('Composición guardada en tu Pasaporte.')}
 function openInStudio(id){const c=S.comps.find(x=>x.id===id);if(!c)return;try{localStorage.setItem('mk_import',JSON.stringify({app:'Mont Keys',pieza:{titulo:c.title,notas:c.notas.map(n=>[n[0],n[1],n[2],n[3],n[4],0,null,null,null]),duracion:c.dur,bpm:120,compas:4,estado:'lista',creado:c.date,origen:'aprender'}}));location.href=STUDIO}catch(e){toast('No pude pasarla al estudio en este navegador.')}}
-function finishLesson(){const {W,L,fin,review}=LS;$('#lBar').style.width='100%';const stars=LS.miss<=1?3:LS.miss<=4?2:1;const xp=review?10:(fin?200:20),coins=review?0:(fin?100:10);
- const prev=S.done[L.id]||0;S.done[L.id]=Math.max(prev,stars);S.xp+=xp;S.coins+=coins;const newDisc=L.disc&&!S.archive.includes(L.disc.id);if(newDisc)S.archive.push(L.disc.id);bumpStreak();save();
+function finishLesson(){const {W,L,fin,review}=LS;$('#lBar').style.width='100%';const stars=LS.miss<=1?3:LS.miss<=4?2:1;const was=!!S.done[L.id],xp=review||was?10:(fin?200:20),coins=review||was?0:(fin?100:10);
+ const prev=S.done[L.id]||0;S.done[L.id]=Math.max(prev,stars);if(!review){S.facts=S.facts||{};S.facts['cap:'+L.id]=S.facts['cap:'+L.id]||Date.now();if(S.route&&S.route.ch===L.id){const nx=CH_IDS.find(id=>!S.done[id]);S.route={ch:nx||L.id,step:0,track:S.route.track!==false}}if(L.id==='w1m01'){['campanario_vivo','fuente_viva','plaza_luz','musicos_reunidos','guardian_despierto'].forEach(k=>{S.facts[k]=S.facts[k]||Date.now()});if(S.wstate){Object.assign(S.wstate.places,{campanario:'vivo',fuente:'viva',plaza:'luz',escenario:'musicos'});S.wstate.gates.oeste=true}}}S.xp+=xp;S.coins+=coins;const newDisc=L.disc&&!S.archive.includes(L.disc.id);if(newDisc)S.archive.push(L.disc.id);bumpStreak();save();
  const st=[0,1,2].map(i=>`<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z" fill="${i<stars?'#f3d48e':'rgba(241,230,207,.15)'}" stroke="${i<stars?'#8c6326':'none'}"/></svg>`).join('');
  $('#lStage').innerHTML=`<div class="done"><span class="lphase">${fin?'Mundo completado':'Lección completada'}</span><p class="lq" style="font-family:var(--display)">${esc(L.t)}</p><div class="stars">${st}</div><p class="ltext">+${xp} XP${coins?` · +${coins} florines`:''}${S.streak.n>1?` · racha de ${S.streak.n} días`:''}</p>
   ${L.disc?`<div class="acard"><span class="per">${newDisc?'Nuevo en tu Archivo':'En tu Archivo'} · ${esc(L.disc.per)}</span><h3>${esc(L.disc.name)}</h3><p>${esc(L.disc.text)}</p><p><b>Por qué importa:</b> ${esc(L.disc.sig)}</p></div>`:''}
@@ -3062,7 +3104,7 @@ const cv=$('#dust'),cx=cv.getContext('2d');let DW,DH,parts=[];
 function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*devicePixelRatio;parts=Array.from({length:40},()=>({x:Math.random()*DW,y:Math.random()*DH,r:(Math.random()*1.6+.4)*devicePixelRatio,s:Math.random()*.25+.05,a:Math.random()*6}))}rs();addEventListener('resize',rs);
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
-if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S}};
+if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},migrateSave};
 })();
 </script>
 </body></html>
