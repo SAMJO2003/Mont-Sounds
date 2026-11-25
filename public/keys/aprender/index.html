@@ -1731,13 +1731,13 @@ const CREATURES={carnero:{n:'Carnero resonante',size:3,speed:38,alert:170,charge
 /* recompensas al azar (con protección contra la mala suerte para lo rarísimo) */
 function rollDrops(c,bonus){S.pity=S.pity||{};const got={};c.drops.forEach(d=>{const key=c.n+':'+d.k;let hit=Math.random()<Math.min(1,d.p*(bonus&&d.p<1?2:1));if(d.pity){S.pity[key]=(S.pity[key]||0)+1;if(S.pity[key]>=d.pity)hit=true;if(hit)S.pity[key]=0}if(hit)got[d.k]=(got[d.k]||0)+(d.n||1)});save();return got}
 /* carnero dibujado provisionalmente hasta que llegue su arte */
-function drawCarnero(g,x,y,t,calm){const im=TIMG[calm?'c_carnero_calm':'c_carnero_idle'];if(im&&im.complete&&im.naturalWidth){const h=100,w=im.width*h/im.height;g.drawImage(im,x-w/2,y-h,w,h);return}
+function drawCarnero(g,x,y,t,calm){const ok=i=>i&&i.complete&&i.naturalWidth,im=[TIMG[calm?'c_carnero_calm':'c_carnero_alerta'],TIMG.c_carnero_idle].find(ok);if(im){const h=Math.min(104,122*im.height/im.width),w=im.width*h/im.height,b=calm?Math.sin(t*1.2)*.8:Math.sin(t*3)*1.2;g.drawImage(im,x-w/2,y-h+b,w,h-b);return}
  g.save();g.translate(x,y);const b=Math.sin(t*2)*1.5;g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(0,-2,46,8,0,0,6.3);g.fill();g.fillStyle='#3b3a40';[-26,-12,14,28].forEach(lx=>g.fillRect(lx-4,-30,8,30));
  g.fillStyle=calm?'#5a5866':'#43424b';g.beginPath();g.ellipse(0,-50+b,48,28,0,0,6.3);g.fill();g.fillStyle='rgba(220,225,240,.35)';for(let i=0;i<9;i++){g.beginPath();g.arc(-34+i*8,-62+b+Math.sin(i)*5,6,0,6.3);g.fill()}
  g.fillStyle='#4a4952';g.beginPath();g.ellipse(-50,-66+b,16,13,-.3,0,6.3);g.fill();g.strokeStyle=calm?'#ffd98c':'#c9a86a';g.lineWidth=6;g.beginPath();g.arc(-46,-74+b,13,3.6,1.3);g.stroke();
  g.fillStyle=calm?'#ffe7a0':'#ffb340';g.beginPath();g.arc(-56,-68+b,2.6,0,6.3);g.fill();if(!calm){for(let i=0;i<2;i++){const q=((t*.8)+i/2)%1;g.strokeStyle=`rgba(255,180,70,${.5*(1-q)})`;g.lineWidth=2;g.beginPath();g.ellipse(-30,-60,30+q*40,18+q*24,0,0,6.3);g.stroke()}}g.restore()}
 /* encuentro con una criatura (reutiliza el combate musical) */
-function creatureEncounter(id,onWin,onLose,opt){const c=CREATURES[id];opt=opt||{};['idle','calm'].forEach(k=>timg('c_'+id+'_'+k,V()+c.art[k]+'.webp'));
+function creatureEncounter(id,onWin,onLose,opt){const c=CREATURES[id];opt=opt||{};['idle','calm','alerta'].forEach(k=>timg('c_'+id+'_'+k,V()+c.art[k]+'.webp'));
  townEncounter({name:c.n,battle:true,heroHP:3+(opt.extraHP||0),drawFn:drawCarnero,tasks:c.tasks(),winText:c.winText,winBtn:'Recoger los regalos',
   intro:S.metRam?null:['Una criatura con cuerpo, no un espíritu: el carnero resonante defiende su territorio.','Toca lo que te pida en tres fases. Cada nota equivocada te quita un corazón.','En la última fase, mantén blancas y redondas hasta que se llene la barra, y no toques durante el silencio.'],onLose},()=>{S.metRam=1;save();const got=rollDrops(c,opt.bonus);S.coins=(S.coins||0)+c.coins;save();onWin&&onWin(got,c)})}
 /* espíritu del ruido (dibujo en canvas) */
