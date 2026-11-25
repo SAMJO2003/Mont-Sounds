@@ -585,9 +585,23 @@ body>.enc{position:fixed}
 .npc{display:flex;gap:12px;align-items:flex-end;margin-bottom:10px}.npc-img{height:170px;max-width:42%;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.4))}.npc-tx{flex:1}.npc-tx h2{margin:2px 0 6px;font-family:Cinzel,serif}.npc-hi{font-style:italic}
 .npc-ops{display:flex;flex-direction:column;gap:6px}.npc-op{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:1px solid rgba(120,80,30,.35);background:rgba(60,40,20,.08);font:600 15px 'Alegreya Sans',sans-serif;text-align:left;color:inherit}.npc-op span{font-size:20px;width:26px;text-align:center}
 .npc-op.gold{background:linear-gradient(180deg,#f6dc9a,#d9a948);border-color:#a8782c;color:#3a2410;box-shadow:0 0 14px rgba(255,200,90,.6);animation:vitP 1.8s ease-in-out infinite}
-.fr-tools{position:absolute;right:10px;top:132px;display:flex;flex-direction:column;gap:8px;z-index:5}.fr-b{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,215,120,.6);background:rgba(20,14,8,.8);font-size:20px;box-shadow:0 0 10px rgba(0,0,0,.4)}
+.fr-tools{position:absolute;right:10px;top:132px;display:flex;flex-direction:column;gap:8px;z-index:5}.fr-b svg{width:22px;height:22px;fill:none;stroke:#e8c27a;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.fr-b{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,215,120,.6);background:rgba(20,14,8,.8);font-size:20px;box-shadow:0 0 10px rgba(0,0,0,.4)}
 .cm-quest.route small{color:#ffd56e}.cm-quest.free{opacity:.9}
 #toFree{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:30;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.npcp{position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}.npcp-bd{position:absolute;inset:0;background:rgba(5,3,2,.55);opacity:0;transition:opacity .25s;pointer-events:auto}
+.npcp-card{position:relative;width:min(100%,480px);max-height:92vh;overflow:auto;margin:0 8px 8px;padding:14px 14px 12px;border-radius:18px;pointer-events:auto;color:#f3e2c0;
+ background:linear-gradient(180deg,rgba(28,18,10,.86),rgba(16,10,6,.97)),var(--bg,none) center/cover;border:1px solid rgba(232,194,122,.55);box-shadow:0 0 0 3px rgba(60,38,18,.9),0 0 0 4px rgba(232,194,122,.35),0 18px 40px rgba(0,0,0,.6);transform:translateY(30px);opacity:0;transition:transform .28s cubic-bezier(.2,.8,.3,1),opacity .25s}
+.npcp.in .npcp-bd{opacity:1}.npcp.in .npcp-card{transform:none;opacity:1}
+.npcp-x{position:absolute;right:10px;top:10px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(232,194,122,.5);background:rgba(20,12,6,.8);color:#f3e2c0;font-size:15px;z-index:2}
+.npcp-top{display:flex;align-items:flex-end;gap:12px;min-height:150px}.npcp-img{height:190px;max-width:44%;object-fit:contain;margin:-30px 0 -6px -4px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}.npcp.place .npcp-img{height:150px;margin:0}
+.npcp-id b{display:block;font:700 24px Cinzel,serif;color:#ffd98c;text-shadow:0 2px 6px #000}.npcp-id small{font:600 12px 'Alegreya Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#d9c39a}
+.npcp-say{margin:10px 0;padding:10px 12px;border-radius:10px;background:linear-gradient(180deg,#f3e6c8,#e4d0a4);color:#3a2410;font:italic 16px/1.35 'Alegreya Sans',sans-serif;box-shadow:inset 0 0 0 1px rgba(120,80,30,.35)}
+.npcp-ops{display:flex;flex-direction:column;gap:7px}.npcp-op{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;border:1px solid rgba(232,194,122,.3);background:rgba(255,240,210,.06);color:#f3e2c0;font:600 16px 'Alegreya Sans',sans-serif;text-align:left}
+.npcp-op svg{width:22px;height:22px;flex:none;fill:none;stroke:#e8c27a;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.npcp-op span{flex:1}
+.npcp-op.k-route{background:linear-gradient(180deg,#f6dc9a,#d4a447);color:#3a2410;border-color:#a8782c;box-shadow:0 0 16px rgba(255,200,90,.55);animation:vitP 1.8s ease-in-out infinite}.npcp-op.k-route svg{stroke:#3a2410;fill:rgba(58,36,16,.15)}.npcp-badge{font:700 10px Cinzel,serif;font-style:normal;padding:2px 7px;border-radius:999px;background:#3a2410;color:#ffd98c}
+.npcp-op.k-trade{border-color:rgba(255,207,90,.45)}.npcp-op.k-trade svg{stroke:#ffcf5a}.npcp-op.k-music{border-color:rgba(120,220,170,.45);background:rgba(90,230,150,.07)}.npcp-op.k-music svg{stroke:#9dffc4}
+.npcp-op.k-bye{opacity:.8;border-style:dashed}
+.enc.lute.read{background:radial-gradient(120% 80% at 50% 10%,#2c2416,#0d0a06 72%)}
 </style>
 
 <div id="sky"></div>
@@ -1118,7 +1132,7 @@ function setLoc(region,x,y,extra){if(MEMORY)return;S.loc=Object.assign({region,x
 function resumeRoute(){const L=routeLesson(),o=routeObjective();if(!L||!o)return;ROUTE_START=o.start;ROUTE_HERE=o.loc;if(o.loc&&TOWN_LOC[o.loc])setLoc('florencia',TOWN_LOC[o.loc].at[0],TOWN_LOC[o.loc].at[1],{route:true});runLesson(WORLDS[0],L,false,false)}
 /* recuerdos: copia completa de la partida; al salir todo vuelve a como estaba */
 function startMemory(W,L){MEMORY={snap:JSON.stringify(S)};runLesson(W,L,false,true)}
-function endMemory(){if(!MEMORY)return;const snap=MEMORY.snap;MEMORY=null;S=JSON.parse(snap);save()}
+function endMemory(){if(!MEMORY)return;const snap=MEMORY.snap,pr=MEMORY.practice,ok=MEMORY.ok;MEMORY=null;S=JSON.parse(snap);save();if(pr)practiceStat(pr,ok)}
 /* regiones libres (bosque y pastizales): se entra por la puerta y se sale por su camino de siempre */
 function enterRegion(r){const box=$('#lStage');if(!box)return;setLoc(r==='bosque'?'bosque':'pastizales',0,0);LS.fzone=null;LS.mrun=null;if(r==='bosque')stepForest({free:true,act:'Exploración libre'},box);else stepMeadow({free:true,act:'Exploración libre'},box)}
 function backToTown(gate){const at=(TOWN_LOC[gate]||TOWN_LOC.puerta).at;setLoc('florencia',at[0],at[1]+10);closeSheet();openFree()}
@@ -1134,7 +1148,89 @@ const LOC_NPC={taller:{n:'Bernardo',p:'Maestro lutier',img:'m2/maestro_pie',hi:'
  escenario:{n:'Los tres músicos',p:'Violín, flauta y laúd',img:'laudista_pie',hi:'—¡Viajero! Florencia vuelve a sonar gracias a ti.'},
  gremio:{n:'El gremio de músicos',p:'Encargos',img:null,hi:'Sobre la puerta cuelga un cartel: «Se buscan compositores». Por ahora, nadie atiende.'},
  fuente:{n:'La fuente',p:'Plaza de Florencia',img:null,hi:'El agua canta otra vez.'},plaza:{n:'La plaza de los faroles',p:'Florencia',img:null,hi:'Los faroles brillan desde que el Guardián despertó.'}};
-function freeLoc(k){const l=TOWN_LOC[k],o=routeObjective(),here=o&&o.loc===k&&!o.book,np=LOC_NPC[k],gate=(k==='oeste'||k==='este'||k==='norte')?k:null,ops=[];
+
+/* ===================== HABITANTES DE FLORENCIA (fichas independientes) =====================
+   Cada personaje: dónde está (función, para futuras rutinas), si ya se le conoce, saludos según los hechos del mundo y servicios. */
+const chIdx=()=>CH_IDS.indexOf(S.route&&S.route.ch);
+const NPCS={
+ bernardo:{n:'Bernardo',p:'Maestro lutier',img:'m2/maestro_pie',bg:'m2/taller_int',where:()=>'taller',avail:()=>true,shop:'taller',
+  hi:[[()=>hasInstr('laud'),'—¿Cómo suenan esas cuerdas? Espero que estés cuidando bien nuestro laúd.'],[()=>hasInstr('piccolo_raro'),'—¡Ah, joven músico! Todavía tenemos mucho trabajo por delante.'],[()=>true,'—¡Ah, joven músico! ¿Qué te trae hoy a mi taller?']],
+  sv:['route','instr','craft','sell','ask','bye']},
+ matteo:{n:'Matteo',p:'Campanero',img:'matteo',bg:'campanario_top',where:()=>'campanario',avail:()=>true,
+  hi:[[()=>hasFact('cap:w1m03'),'—Desde que se abrió aquella puerta del scriptorium, las campanas suenan distintas al anochecer.'],[()=>hasFact('cap:w1m02'),'—Dicen que el bosque vuelve a cantar. Las campanas también lo notan.'],[()=>true,'—Las campanas siempre tienen algo que contarnos, joven viajero.']],
+  sv:['route','bells','ask','bye']},
+ isabella:{n:'Isabella',p:'Copista del scriptorium',img:'m3/isabella_pie',bg:'m3/int_scrip_3',where:()=>'scriptorium',avail:()=>!!(S.done&&S.done.w1m02)||chIdx()>=2,
+  hi:[[()=>hasFact('cap:w1m03'),'—Ya lees la música del Maestro. ¿Practicamos un poco? Las notas se olvidan si no se visitan.'],[()=>true,'—Cada página guarda una voz. ¿Vienes a leer conmigo?']],
+  sv:['route','read','codex','ask','bye']},
+ piero:{n:'Piero',p:'Carnicero y cocinero',img:'m4/carnicero_pie',bg:'m4/int_carniceria',where:()=>'carniceria',avail:()=>!!(S.done&&S.done.w1m03)||chIdx()>=3,shop:'carniceria',
+  hi:[[()=>hasFact('met:carnero'),'—¡Huele a pastizal! ¿Traes algo de esos carneros?'],[()=>true,'—¡Bienvenido! Siempre hay sitio para un viajero hambriento.']],
+  sv:['route','buy','sell','cook','trade','ask','bye']},
+ lucia:{n:'Lucia',p:'Panadera',img:'m4/panadera_pie',bg:'m2/taller_int',where:()=>'panaderia',avail:()=>!!(S.done&&S.done.w1m03)||chIdx()>=3,shop:'panaderia',
+  hi:[[()=>hasInstr('laud'),'—Me han dicho que tocas el laúd. ¡Un día tienes que tocar para mis clientes!'],[()=>true,'—¡Pan recién horneado! Pasa, que todavía está caliente.']],
+  sv:['route','buy','trade','ask','bye']},
+ violinista:{n:'Chiara',p:'Violinista · aprendiz',img:'violinista_pie',where:()=>'escenario',avail:()=>freeOn(),kind:'strings',
+  hi:[[()=>true,'—Todavía me tiembla el arco en las notas largas… ¿practicamos juntas un rato?']],sv:['route','play','ask','bye'],
+  mel:[[67,69,71,72,71,69,67],[64,67,72,71,69,67,64],[72,71,69,67,65,64,62,60]]},
+ flautista:{n:'Tommaso',p:'Flautista · aprendiz',img:'flautista_pie',where:()=>'escenario',avail:()=>freeOn(),kind:'flute',
+  hi:[[()=>true,'—Estoy aprendiendo a subir escalas sin quedarme sin aire. ¿Me acompañas?']],sv:['route','play','ask','bye'],
+  mel:[[72,71,69,67,69,71,72],[60,62,64,65,67,69,71,72],[67,69,71,69,67,65,64]]},
+ laudista:{n:'Nico',p:'Laudista · aprendiz',img:'laudista_pie',where:()=>'escenario',avail:()=>freeOn(),kind:'lute',
+  hi:[[()=>hasInstr('laud'),'—¡Tienes un laúd! Yo todavía me equivoco con los arpegios… practiquemos.'],[()=>true,'—Los acordes se me resisten, pero los arpegios ya me salen. ¿Tocamos?']],sv:['route','play','ask','bye'],
+  mel:[[60,64,67,72,67,64,60],[65,69,72,77,72,69,65],[67,71,74,79,74,71,67]]}};
+/* preguntas: estructura lista para M4 (si un personaje no tiene, la opción se oculta) */
+const ASK={};
+/* fabricación libre: recetas fuera de la historia (el laúd se fabrica en la ruta y es único) */
+const CRAFTS=[{id:'laud',by:'bernardo',story:true,unique:true}];
+const freeCrafts=npc=>CRAFTS.filter(c=>c.by===npc&&!c.story&&!(c.unique&&hasInstr(c.id)));
+/* práctica libre: nunca toca la historia; se guarda solo una estadística para el futuro */
+function practiceStat(id,ok){if(MEMORY)return;S.practice=S.practice||{};const p=S.practice[id]=S.practice[id]||{n:0,ok:0};p.n++;if(ok)p.ok++;p.last=Date.now();save()}
+const PRACTICE_STEPS={bells:()=>{const B=WORLDS[0].lessons[0].steps.filter(x=>x.type==='bells').map(x=>Object.assign({},x,{ph:'Práctica con Matteo'}));const pick=B.sort(()=>Math.random()-.5).slice(0,3);return pick}};
+function startPractice(id){const steps=PRACTICE_STEPS[id]();MEMORY={snap:JSON.stringify(S),practice:id};runLesson(WORLDS[0],{id:'practice_'+id,t:'Práctica libre',practice:true,game:true,scene:true,steps},false,true)}
+/* lectura con Isabella: frases generadas solo con lo que el jugador ya sabe */
+function knownNotes(){return [64,65,67,69,71,72]}
+function readPhrase(n,leap){const W2=knownNotes();let j=Math.floor(Math.random()*W2.length);const out=[W2[j]];for(let i=1;i<n;i++){let st=leap?[-3,-2,2,3][Math.floor(Math.random()*4)]:[-1,1][Math.floor(Math.random()*2)];let q=j+st;if(q<0||q>=W2.length)q=j-st;q=Math.max(0,Math.min(W2.length-1,q));if(q===j)q=j+(j<W2.length-1?1:-1);if(Math.abs(W2[q]-W2[j])===6)q=j+(st>0?1:-1);q=Math.max(0,Math.min(W2.length-1,q));j=q;out.push(W2[j])}return out}
+function readDrill(){const R=[{n:4,leap:false,names:'all',hint:'always',say:'—Primero con ayuda: lee y toca.'},{n:5,leap:false,names:'first',hint:'miss',say:'—Ahora solo te digo la primera nota.'},{n:6,leap:true,names:'none',hint:'miss',say:'—La última, con saltos. Solo leyendo.'}];let r=0;
+ const go=()=>{const c=R[r];lutePlay({title:'Práctica de lectura',tag:'Isabella · ronda '+(r+1)+' de '+R.length,hero:'h_quieto_1',kind:'piano',cls:'read',seq:readPhrase(c.n,c.leap),names:c.names,hint:c.hint,who:'isabella',say:c.say,sub:'Si te equivocas, la frase vuelve a empezar. Es solo práctica.',winText:r<R.length-1?'¡Bien leído!':'¡Práctica completada!',okText:r<R.length-1?'Siguiente frase':'Terminar',cancelText:'Dejar la práctica',onDone:()=>{r++;if(r<R.length)setTimeout(go,350);else practiceStat('lectura',true)}})};go()}
+function playWith(id){const np=NPCS[id];const m=np.mel[Math.floor(Math.random()*np.mel.length)];lutePlay({title:'Tocar con '+np.n,tag:np.p,hero:'h_quieto_1',kind:np.kind,cls:'read',seq:m,names:'all',hint:'always',say:'—Sigue las teclas iluminadas, yo te acompaño.',sub:'Práctica libre: puedes repetirla siempre que quieras.',winText:'¡Qué bien sonamos juntos!',okText:'Terminar',cancelText:'Dejarlo por ahora',again:false,onDone:()=>practiceStat('tocar_'+id,true)})}
+/* iconos propios (sin emojis) para el panel */
+const ICO={route:'<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/>',instr:'<ellipse cx="9" cy="15" rx="6" ry="6.5"/><path d="M13 11l7-7M18 3l3 3"/><circle cx="9" cy="15" r="1.6"/>',
+ craft:'<path d="M3 21l9-9M14 4l6 6-3 3-6-6zM12 6l3-3"/>',sell:'<circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/><path d="M9 9v6M15 9v6"/>',buy:'<path d="M5 8h14l-1.5 12h-11zM9 8a3 3 0 016 0"/>',
+ cook:'<path d="M4 11h16v3a6 6 0 01-6 6h-4a6 6 0 01-6-6zM8 7c0-2 2-2 2-4M14 7c0-2 2-2 2-4"/>',trade:'<path d="M4 8h14l-3-3M20 16H6l3 3"/>',bells:'<path d="M12 3a5 5 0 015 5v5l2 3H5l2-3V8a5 5 0 015-5zM10 19a2 2 0 004 0"/>',
+ read:'<path d="M4 5h6a2 2 0 012 2v12a2 2 0 00-2-2H4zM20 5h-6a2 2 0 00-2 2v12a2 2 0 012-2h6z"/>',play:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+ codex:'<path d="M6 3h11a1 1 0 011 1v16l-3-2-3 2-3-2-3 2V4a1 1 0 011-1z"/>',ask:'<path d="M9 9a3 3 0 115 2c-1 .8-2 1.4-2 3M12 18v.5"/>',bye:'<path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/>',gate:'<path d="M5 21V9a7 7 0 0114 0v12M9 21v-7h6v7"/>'};
+const ico=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]||ICO.ask}</svg>`;
+function npcsAt(loc){return Object.keys(NPCS).filter(id=>NPCS[id].where()===loc&&NPCS[id].avail())}
+function npcGreet(np){const h=np.hi.find(([c])=>c());return h?h[1]:''}
+function routeHere(loc){const o=routeObjective();return !!(o&&!o.book&&o.loc===loc)}
+/* servicios: cada uno decide si se muestra; los que aún no existen no aparecen */
+const SVC={route:{t:'Seguir la ruta del héroe',k:'route',show:np=>routeHere(np.where()),run:()=>resumeRoute()},
+ instr:{t:'Mis instrumentos',k:'svc',run:()=>openBook('instr')},
+ craft:{t:'Fabricar instrumentos',k:'svc',show:(np,id)=>freeCrafts(id).length>0,run:()=>{}},
+ sell:{t:'Vender materiales',k:'trade',show:np=>!!(np.shop&&SHOPS[np.shop].sell.length),run:np=>openShop(np.shop,'sell')},
+ buy:{t:'Comprar alimentos',k:'trade',show:np=>!!(np.shop&&SHOPS[np.shop].buy.length),run:np=>openShop(np.shop,'buy')},
+ cook:{t:'Cocinar',k:'trade',show:np=>!!(np.shop&&SHOPS[np.shop].cook.length),run:np=>openShop(np.shop,'cook')},
+ trade:{t:'Hacer un trueque',k:'trade',show:np=>!!(np.shop&&SHOPS[np.shop].trade.length),run:np=>openShop(np.shop,'trade')},
+ bells:{t:'Practicar con las campanas',k:'music',run:()=>startPractice('bells')},
+ read:{t:'Practicar lectura musical',k:'music',run:()=>readDrill()},
+ play:{t:'Tocar juntos',k:'music',run:(np,id)=>playWith(id)},
+ codex:{t:'Consultar el Códice',k:'svc',show:()=>(S.codex||[]).length>0,run:()=>openBook('codice')},
+ ask:{t:'Preguntar',k:'svc',show:(np,id)=>!!(ASK[id]&&ASK[id].length),run:()=>{}},
+ bye:{t:'Despedirse',k:'bye',run:()=>{}}};
+function closeNpc(){const p=$('#npcP');if(p){p.classList.remove('in');setTimeout(()=>p.remove(),250)}}
+function npcPanel({img,bg,name,prof,hi,ops,cls}){closeNpc();const p=document.createElement('div');p.id='npcP';p.className='npcp '+(cls||'');
+ p.innerHTML=`<div class="npcp-bd"></div><div class="npcp-card"${bg?` style="--bg:url(${V()}${bg}.webp)"`:''}><button class="npcp-x" type="button" aria-label="Cerrar">✕</button>
+  <div class="npcp-top">${img?`<img class="npcp-img" src="${V()}${img}.webp" alt="">`:''}<div class="npcp-id"><b>${esc(name)}</b><small>${esc(prof||'')}</small></div></div>
+  <div class="npcp-say">${esc(hi||'')}</div><div class="npcp-ops">${ops.map((o,i)=>`<button type="button" class="npcp-op k-${o.k}" data-op="${i}">${ico(o.ic)}<span>${esc(o.t)}</span>${o.k==='route'?'<i class="npcp-badge">Ruta</i>':''}</button>`).join('')}</div></div>`;
+ document.body.appendChild(p);requestAnimationFrame(()=>p.classList.add('in'));
+ p.querySelector('.npcp-bd').onclick=closeNpc;p.querySelector('.npcp-x').onclick=closeNpc;p.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{const o=ops[+b.dataset.op];closeNpc();setTimeout(()=>o.f(),o.k==='bye'?0:230)})}
+function openNpc(id){const np=NPCS[id];const ops=np.sv.filter(k=>{const v=SVC[k];return !v.show||v.show(np,id)}).map(k=>({ic:k,t:SVC[k].t,k:SVC[k].k,f:()=>SVC[k].run(np,id)}));
+ npcPanel({img:np.img,bg:np.bg,name:np.n,prof:np.p,hi:npcGreet(np),ops,cls:routeHere(np.where())&&routeTracked()?'has-route':''})}
+
+function freeLoc(k){const here=npcsAt(k);if(here.length===1){openNpc(here[0]);return}if(here.length>1){const l=TOWN_LOC[k];npcPanel({img:null,name:l.n,prof:'¿Con quién quieres hablar?',hi:'',ops:here.map(id=>({ic:'play',t:NPCS[id].n+' · '+NPCS[id].p,k:'svc',f:()=>openNpc(id)})).concat(routeHere(k)?[{ic:'route',t:'Seguir la ruta del héroe',k:'route',f:()=>resumeRoute()}]:[]).concat([{ic:'bye',t:'Despedirse',k:'bye',f:()=>{}}])});return}
+ const gate0=(k==='oeste'||k==='este'||k==='norte')?k:null;{const l=TOWN_LOC[k],np=LOC_NPC[k],ops=[];if(routeHere(k))ops.push({ic:'route',t:'Seguir la ruta del héroe',k:'route',f:()=>resumeRoute()});if(gate0&&gateOpen(gate0)&&gate0!=='norte')ops.push({ic:'gate',t:gate0==='oeste'?'Salir al bosque':'Salir a los pastizales',k:'svc',f:()=>enterRegion(gate0==='oeste'?'bosque':'pastizales')});ops.push({ic:'bye',t:'Despedirse',k:'bye',f:()=>{}});
+  npcPanel({img:gate0?(gateOpen(gate0)?'town/p_puerta_'+(gate0==='norte'?'norte_jardin':gate0):'town/p_puerta_'+(gate0==='norte'?'norte_jardin':gate0)+'_c'):null,name:l.n,prof:gate0?(gateOpen(gate0)?'La puerta está abierta':'La puerta está cerrada'):(np?np.p:''),hi:gate0?'«'+GATE_TXT[gate0]+'»':(np&&!np.img?np.hi:'Todavía no hay nadie que te atienda aquí.'),ops,cls:'place'});return}
+}
+function freeLocOld(k){const l=TOWN_LOC[k],o=routeObjective(),here=o&&o.loc===k&&!o.book,np=LOC_NPC[k],gate=(k==='oeste'||k==='este'||k==='norte')?k:null,ops=[];
  if(here)ops.push({ic:'⭐',t:'Seguir la ruta del héroe',gold:1,f:()=>{closeSheet();resumeRoute()}});
  if(gate&&gateOpen(gate)&&gate!=='norte')ops.push({ic:gate==='oeste'?'🌲':'🐏',t:gate==='oeste'?'Salir al bosque':'Salir a los pastizales',f:()=>{closeSheet();enterRegion(gate==='oeste'?'bosque':'pastizales')}});
  if(SHOPS[k])ops.push({ic:'🪙',t:'Entrar en la tienda',f:()=>openShop(k)});
@@ -1148,7 +1244,7 @@ function heroMenu(){const tr=routeTracked();sheet(`<span class="eyebrow">Menú d
  $('#hmBook').onclick=()=>{closeSheet();openRouteBook()};$('#hmTrack').onclick=()=>{toggleTrack();closeSheet()};$('#hmX').onclick=closeSheet}
 function toggleTrack(){S.route=S.route||{ch:'w1m01',step:0};S.route.track=!routeTracked();save();if(LS&&LS.L&&LS.L.free&&!LS.mrun&&!LS.fzone)renderStep()}
 function openRouteBook(){const v=$('#vLesson');gameFS(false);micOff();ACTIVE_KB=null;v.hidden=true;document.body.style.overflow='';LS=null;drawMap()}
-function bootWorld(){if(!freeOn()||LS)return;openFree();const r=S.loc&&S.loc.region;if(S.loc&&S.loc.route&&r!=='florencia'){resumeRoute();return}if(r==='bosque'||r==='pastizales')setTimeout(()=>enterRegion(r),60)}
+function bootWorld(){if(!freeOn()||LS)return;if(S.route&&S.route.ch==='w1m03'&&S.route.step>0&&S.wstate&&S.wstate.time&&!S.wstate.time.set3){S.wstate.time.phase='noche';S.wstate.time.set3=1;save()}openFree();const r=S.loc&&S.loc.region;if(S.loc&&S.loc.route&&r!=='florencia'){resumeRoute();return}if(r==='bosque'||r==='pastizales')setTimeout(()=>enterRegion(r),60)}
 
 /* los hechos ocurren una sola vez; las recompensas de la historia los consultan */
 function fact(k){S.facts=S.facts||{};if(S.facts[k])return false;S.facts[k]=Date.now();save();return true}
@@ -1568,13 +1664,14 @@ const LOOPMEL={on:false,id:0};function loopMelody(mel){LOOPMEL.on=true;const id=
 function runLesson(W,L,fin,review){{const b=document.getElementById('toFree');if(b)b.remove()}LS={W,L,fin,review,i:0,miss:0,keep:{},lastComp:null,scene:{},lightsDone:0,lightsTotal:L.steps.filter(x=>x.type==='lights').reduce((a,x)=>a+x.tasks.length,0)};$('#vLesson').hidden=false;document.body.style.overflow='hidden';gameInit();gameFS(true);TW_LAST='';ac();lessonBarSetup();if(inputMode()!=='touch')applyInput();if(UNLOCK_ALL&&L.id==='w1m03'){S.m3={};save()}if(S.mundo&&S.mundo.spirits){S.mundo.spirits={};save()}if(L.id==='w1m03'&&S.m3&&S.m3.ck>0&&S.m3.ck<L.steps.length&&ROUTE_START==null){LS.i=S.m3.ck;setTimeout(()=>toast('Continúas donde lo dejaste en el scriptorium.'),800)}if(L.id==='w1m04'&&S.m4&&S.m4.v!==M4V){S.m4={v:M4V};save()}if(L.id==='w1m04'&&S.m4&&S.m4.ck>0&&S.m4.ck<L.steps.length&&ROUTE_START==null){LS.i=S.m4.ck;setTimeout(()=>toast('Continúas donde lo dejaste.'),800)}if(ROUTE_START!=null){LS.i=ROUTE_START;LS.route=true;LS.here=ROUTE_HERE;ROUTE_START=null;ROUTE_HERE=null}renderStep()}
 function exitLesson(){$('#lFoot').classList.remove('hide-foot');LOOPMEL.on=false;gameFS(false);micOff();earStop();ACTIVE_KB=null;$('#vLesson').hidden=true;document.body.style.overflow='';LS=null;if(MEMORY)endMemory();if(freeOn())openFree();else drawMap()}
 $('#lClose').onclick=()=>{if(!LS)return;if(LS.L.free){heroMenu();return}
+ if(MEMORY&&MEMORY.practice){sheet(`<span class="eyebrow">Práctica libre</span><h2>¿Terminar la práctica?</h2><p>La práctica nunca cambia tu partida. Puedes repetirla cuando quieras.</p><button class="cta" id="q1" type="button">Terminar</button><button class="ghost" id="q2" type="button">Seguir practicando</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet;return}
  if(MEMORY){sheet(`<span class="eyebrow">Recuerdo del héroe</span><h2>¿Salir del recuerdo?</h2><p>Nada de lo que pase en un recuerdo cambia tu partida real.</p><button class="cta" id="q1" type="button">Volver al presente</button><button class="ghost" id="q2" type="button">Seguir recordando</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet;return}
  if(LS.route||(freeOn()&&S.route&&S.route.ch===LS.L.id)){sheet(`<span class="eyebrow">La ruta del héroe</span><h2>¿Pausar la ruta?</h2><p>Volverás al último lugar seguro de Florencia. Cuando quieras, retomarás la historia desde el último punto seguro.</p><button class="cta" id="q1" type="button">Pausar la ruta</button><button class="ghost" id="q2" type="button">Seguir la historia</button>`);$('#q1').onclick=()=>{closeSheet();const h=LS.here&&TOWN_LOC[LS.here];if(h)setLoc('florencia',h.at[0],h.at[1]+10);else if(S.loc&&S.loc.route)setLoc('florencia',TOWN_LOC.puerta.at[0],TOWN_LOC.puerta.at[1]);exitLesson()};$('#q2').onclick=closeSheet;return}
  sheet(`<h2>¿Salir de la lección?</h2><p>Perderás el avance de esta lección.</p><button class="cta" id="q1" type="button">Salir</button><button class="ghost" id="q2" type="button">Seguir aprendiendo</button>`);$('#q1').onclick=()=>{closeSheet();exitLesson()};$('#q2').onclick=closeSheet};
 function foot(label,fn,opts={}){$('#lFoot').innerHTML=`<button class="cta ${opts.gold?'gold':''}" type="button" id="fbtn" ${opts.disabled?'disabled':''}>${label}</button>`;const b=$('#fbtn');b.onclick=fn;return b}
 function next(){if(!micGlobal)micOff();EAR.chordDown=[];EAR.cj=null;EAR.heard=null;LS.i++;if(LS.i>=LS.L.steps.length)finishLesson();else renderStep()}
 function head(ph,q,sub){const cur=LS&&LS.L.steps[LS.i],who=cur&&cur.who;if(!q&&!sub)return `<span class="lphase">${esc(ph||'')}</span>`;return `<span class="lphase">${esc(ph||'')}</span><div class="g-say">${who&&WHO[who]?`<span class="g-who">${portrait(who)}<span>${esc(WHO[who])}</span></span>`:''}${q?`<b class="g-q">${esc(q)}</b>`:''}${sub?`<span class="g-sub">${esc(sub)}</span>`:''}</div>`}
-function renderStep(){$('#lFoot').classList.remove('hide-foot');const st=LS.L.steps[LS.i],box=$('#lStage');if(S.route&&S.route.ch===LS.L.id&&!LS.review&&(st.ck||st.type==='citymap')){S.route.step=LS.i;save()}if(st.ck&&LS.L.id==='w1m04'){S.m4=S.m4||{};S.m4.ck=LS.i;S.m4.v=M4V;save()}if(st.skipMats&&hasMats(st.skipMats)){LS.i++;return renderStep()}if(LS.route&&st.type==='citymap'){if(st.go===LS.here){LS.i++;return renderStep()}S.route.step=LS.i;const at=LS.here&&TOWN_LOC[LS.here]?TOWN_LOC[LS.here].at:(S.loc&&S.loc.x?[S.loc.x,S.loc.y]:TOWN_LOC.puerta.at);setLoc('florencia',at[0],at[1]+10);save();return openFree()}$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
+function renderStep(){$('#lFoot').classList.remove('hide-foot');const st=LS.L.steps[LS.i],box=$('#lStage');if(S.route&&S.route.ch===LS.L.id&&!LS.review&&(st.ck||st.type==='citymap')){S.route.step=LS.i;save()}if(st.ck&&LS.L.id==='w1m04'){S.m4=S.m4||{};S.m4.ck=LS.i;S.m4.v=M4V;save()}if(st.skipMats&&hasMats(st.skipMats)){LS.i++;return renderStep()}if(LS.route&&LS.L.id==='w1m03'&&!MEMORY&&S.wstate&&S.wstate.time&&S.wstate.time.phase!=='noche'){S.wstate.time.phase='noche';save()}if(LS.route&&st.type==='citymap'){if(st.go===LS.here){LS.i++;return renderStep()}S.route.step=LS.i;const at=LS.here&&TOWN_LOC[LS.here]?TOWN_LOC[LS.here].at:(S.loc&&S.loc.x?[S.loc.x,S.loc.y]:TOWN_LOC.puerta.at);setLoc('florencia',at[0],at[1]+10);save();return openFree()}$('#lBar').style.width=(LS.i/LS.L.steps.length*100)+'%';box.innerHTML='';$('#lFoot').innerHTML='';
  (STEP[st.type]||STEP.story)(st,box);if(st.stage&&!box.querySelector('.mstage'))box.insertAdjacentHTML('afterbegin',mstageHTML(st.stage));$('.lbody').scrollTop=0}
 /* ===================== MODO JUEGO: narración, escenas y personajes ===================== */
 /* ===================== MAPA DE LA CIUDAD: moverse por las calles y cumplir misiones ===================== */
@@ -1845,13 +1942,13 @@ const VITAL_W=[64,65,67,69,71,72],M4V=2;
 function vitalMelody(n){n=n||5;let j=Math.floor(Math.random()*3);const out=[VITAL_W[j]];let dir=1;for(let i=1;i<n;i++){if(j>=VITAL_W.length-1)dir=-1;else if(j<=0)dir=1;else if(i===Math.ceil(n/2)&&Math.random()<.7)dir=-dir;j+=dir;out.push(VITAL_W[j])}return out}
 function lutePlay(o){const prevKB=ACTIVE_KB,seq=o.seq;let i=0,miss=0,fin=false;const host=$('#vLesson').hidden?document.body:$('#vLesson');
  const hearts=o.hearts?`<div class="lt-hp" id="lHp">${Array.from({length:o.hearts.max},(_,j)=>`<i class="${j<o.hearts.have?'on':''}">♥</i>`).join('')}</div>`:'';
- const ov=document.createElement('div');ov.className='enc wood lute';
- ov.innerHTML=`<div class="enc-iris"></div><div class="enc-box"><div class="enc-top wtop"><div class="enc-hero"><img id="lHero" class="hero-anim" src="${V()}h_invocar_1.webp" alt="El viajero invoca su laúd"></div>${o.target?`<img class="enc-tree lt-target" src="${V()}${o.target}.webp" alt="">`:''}<b class="enc-name">${esc(o.title||'Laúd común')}</b><small>${esc(o.tag||'Laúd común · Restauración')}</small>${hearts}</div>
+ const ov=document.createElement('div');ov.className='enc wood lute'+(o.cls?' '+o.cls:'');
+ ov.innerHTML=`<div class="enc-iris"></div><div class="enc-box"><div class="enc-top wtop"><div class="enc-hero"><img id="lHero" class="hero-anim" src="${V()}${o.hero||'h_invocar_1'}.webp" alt="El viajero"></div>${o.target?`<img class="enc-tree lt-target" src="${V()}${o.target}.webp" alt="">`:''}<b class="enc-name">${esc(o.title||'Laúd común')}</b><small>${esc(o.tag||'Laúd común · Restauración')}</small>${hearts}</div>
   <div class="enc-mid"><div class="dstaff" id="lStf"></div><div class="g-say">${o.who&&WHO[o.who]?`<span class="g-who">${portrait(o.who)}<span>${esc(WHO[o.who])}</span></span>`:''}<b class="g-q">${esc(o.say||'Lee las notas y tócalas en orden.')}</b><span class="g-sub">${esc(o.sub||'Si te equivocas, la frase vuelve a empezar. No pierdes nada.')}</span></div><div class="fb" id="lfb"></div></div>
   <div class="enc-kb" id="lkb"></div>${o.cancel===false?'':`<button class="ghost" type="button" id="lNo">${esc(o.cancelText||'Guardar el laúd')}</button>`}<div class="lt-fx" id="lfx"></div></div>`;
  host.appendChild(ov);setTimeout(()=>ov.classList.add('in'),40);
- {const hi=ov.querySelector('#lHero'),f2=new Image(),f3=new Image();f2.src=V()+'h_inv_laud_2.webp';f3.src=V()+'h_inv_laud_3.webp';setTimeout(()=>{if(hi.isConnected)hi.src=f2.src},700);setTimeout(()=>{if(hi.isConnected&&f3.complete&&f3.naturalWidth)hi.src=f3.src},1800)}
- {const t=ac().currentTime+.15;[55,59,62,67].forEach((p,j)=>tone(p,.4,.9,'lute',t+j*.09))}
+ if(!o.hero){const hi=ov.querySelector('#lHero'),f2=new Image(),f3=new Image();f2.src=V()+'h_inv_laud_2.webp';f3.src=V()+'h_inv_laud_3.webp';setTimeout(()=>{if(hi.isConnected)hi.src=f2.src},700);setTimeout(()=>{if(hi.isConnected&&f3.complete&&f3.naturalWidth)hi.src=f3.src},1800)}
+ {const t=ac().currentTime+.15;[55,59,62,67].forEach((p,j)=>tone(p,.4,.9,o.kind||'lute',t+j*.09))}
  const stf=ov.querySelector('#lStf'),fb=ov.querySelector('#lfb'),fx=ov.querySelector('#lfx');
  const nameOn=j=>o.names==='all'||(o.names==='first'&&j===0);
  const draw=()=>{stf.innerHTML=m3Staff({notes:seq.map((p,j)=>({p,d:'q',name:nameOn(j)?1:0,st:j<i?'ok':j===i?'cur':''})),clef:true,w:Math.max(260,seq.length*52+110),h:150})};draw();
@@ -1860,11 +1957,11 @@ function lutePlay(o){const prevKB=ACTIVE_KB,seq=o.seq;let i=0,miss=0,fin=false;c
  /* partículas verdes y doradas: la firma visual de la cuerda */
  const burst=(el,n)=>{const bx=ov.getBoundingClientRect(),b=el?el.getBoundingClientRect():{left:bx.left+bx.width/2,top:bx.top+bx.height*.3,width:0,height:0};for(let k=0;k<n;k++){const sp=document.createElement('i');sp.className='lsp'+(k%2?' g':'');const a=Math.random()*6.283,d=30+Math.random()*70;sp.style.cssText=`left:${b.left-bx.left+b.width/2}px;top:${b.top-bx.top+b.height/2}px;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-30}px;--t:${.7+Math.random()*.6}s`;fx.appendChild(sp);setTimeout(()=>sp.remove(),1400)}};
  const hints=()=>{Object.values(kb.els).forEach(e=>e.classList.remove('hint'));const p=seq[i];if(p==null)return;if(o.hint==='always'||(o.hint==='miss'&&miss>=2))kb.hint(p,true)};
- const kb=keyboard(ov.querySelector('#lkb'),{lo:60,hi:76,labels:aidsOn(),kind:()=>'lute',onKey:p=>{if(fin)return;
+ const kb=keyboard(ov.querySelector('#lkb'),{lo:o.lo||60,hi:o.hi||76,labels:aidsOn(),kind:()=>o.kind||'lute',onKey:p=>{if(fin)return;
   if(p%12===seq[i]%12){kb.flash(p,'good');i++;draw();burst(stf.querySelectorAll('.nt')[i-1],10);fb.className='fb on ok';fb.innerHTML=`<b>${i}/${seq.length}</b>`;if(o.onStep)o.onStep(i,seq.length);if(i>=seq.length)finish();else hints()}
   else{kb.flash(p,'wrong');miss++;i=0;draw();ov.classList.remove('lt-miss');void ov.offsetWidth;ov.classList.add('lt-miss');fb.className='fb on bad';fb.innerHTML=`<b>Esa es ${NAMES[p%12]}</b>La frase vuelve a empezar, con calma. No pierdes nada.`;hints()}}});
  hints();
- const finish=()=>{fin=true;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));burst(null,36);ov.classList.add('lt-win');{const t=ac().currentTime+.1;[67,71,74,79].forEach((p,j)=>tone(p,.5,1,'lute',t+j*.11))}
+ const finish=()=>{fin=true;Object.values(kb.els).forEach(e=>e.classList.remove('hint'));burst(null,36);ov.classList.add('lt-win');{const t=ac().currentTime+.1;[67,71,74,79].forEach((p,j)=>tone(p,.5,1,o.kind||'lute',t+j*.11))}
   const hp=ov.querySelector('#lHp');if(hp&&o.hearts&&o.hearts.have<o.hearts.max){const e=hp.querySelectorAll('i')[o.hearts.have];if(e){e.classList.add('on','heal')}}
   fb.className='fb on ok';fb.innerHTML=`<b>${esc(o.winText||'¡La melodía está completa!')}</b>`;ov.querySelector('.enc-kb').innerHTML='';{const mr=ov.querySelector('.microw');if(mr)mr.remove()}if(nb)nb.remove();ACTIVE_KB=prevKB;
   const mid=ov.querySelector('.enc-mid'),b=document.createElement('button');b.className='cta gold';b.type='button';b.textContent=o.okText||'Continuar';b.onclick=()=>{close(true);o.onDone&&o.onDone()};mid.appendChild(b);
@@ -1969,7 +2066,7 @@ function instrCan(id,what,matRar){const x=INSTR_BOOK.find(i=>i.id===id);if(!x||!
  if(what==='combat')return r===0?x.fam==='percusion':!!pw.combat;
  if(what==='gather'){const lim=r===0?x.gather:(pw.gather||x.gather);return !!lim&&RARITY.indexOf(matRar||'comun')<=RARITY.indexOf(lim)}return false}
 function hasInstr(id){return id==='piano_viejo'||(S.instr||[]).includes(id)}
-const MAT={madera_comun:{n:'Madera común',ic:'m2/ic_madera_comun',rar:'comun',u:'Cuerpo y mástil de los instrumentos.'},savia_magica:{n:'Savia mágica',ic:'m2/ic_resina',rar:'raro',u:'Hace que las cuerdas vibren más tiempo.'},madera_rara:{n:'Madera rara',ic:'m2/ic_madera_rara',rar:'raro',u:'Guarda una vibración antigua: instrumentos de cuerda.'},
+const MAT={madera_comun:{n:'Madera común',ic:'m2/ic_madera_comun',rar:'comun',u:'Cuerpo y mástil de los instrumentos.',sell:1},savia_magica:{n:'Savia mágica',ic:'m2/ic_resina',rar:'raro',u:'Hace que las cuerdas vibren más tiempo.',sell:3},madera_rara:{n:'Madera rara',ic:'m2/ic_madera_rara',rar:'raro',u:'Guarda una vibración antigua: instrumentos de cuerda.',sell:8},
  fibra_resonante:{n:'Fibra resonante',ic:'m2/ic_cuerdas',art:'m4/material_fibra_resonante',rar:'raro',u:'De los carneros resonantes. Con ella se hacen cuerdas mágicas.',sell:6},
  lana_plateada:{n:'Lana plateada',ic:'m2/ic_cuerdas',art:'m4/material_lana_plateada',rar:'comun',u:'Comercio y fabricación.',sell:12},carne:{n:'Carne de carnero',ic:'m2/ic_cuerdas',art:'m4/material_carne',rar:'comun',u:'Cocina y comercio.',sell:8},
  cuerno:{n:'Fragmento de cuerno',ic:'m2/ic_cuerdas',art:'m4/material_cuerno',rar:'epico',u:'Fabricación futura.',sell:25},cristal:{n:'Cristal de resonancia',ic:'m2/ic_cuerdas',art:'m4/material_cristal_resonancia',rar:'legendario',u:'Instrumentos superiores.',sell:80},
@@ -1982,13 +2079,14 @@ const MAT={madera_comun:{n:'Madera común',ic:'m2/ic_madera_comun',rar:'comun',u
 const BUFF_N={heart:'🍖 +1 corazón en el próximo encuentro',gather:'🍞 +1 madera por árbol en la próxima visita al bosque',shield:'🍲 El primer error del próximo encuentro no quita corazón',rare:'🍯 Doble suerte en la próxima visita a los pastizales'};
 function useBuff(k){S.buffs=S.buffs||{};if(S.buffs[k]>0){S.buffs[k]--;save();return true}return false}
 /* COMERCIOS · un comerciante = una ficha (comprar, vender, trueque, cocinar). Lo que te compran vale menos de la mitad: no hay florines infinitos. */
-const SHOPS={carniceria:{n:'La carnicería de Piero',who:'Piero, el carnicero',img:'m4/carnicero_pie',bg:'m4/int_carniceria',hi:'—¡Bienvenido! Aquí compro, vendo y cocino. Si traes algo de los pastizales, te lo cambio por florines o por un buen plato.',
+const SHOPS={taller:{n:'El taller de Bernardo',who:'Bernardo',img:'m2/maestro_pie',bg:'m2/taller_int',hi:'—Siempre necesito buena madera. Te pago lo justo, aunque no mucho: la madera común abunda.',buy:[],sell:['madera_comun','savia_magica','madera_rara','lana_plateada'],trade:[],cook:[]},
+ carniceria:{n:'La carnicería de Piero',who:'Piero, el carnicero',img:'m4/carnicero_pie',bg:'m4/int_carniceria',hi:'—¡Bienvenido! Aquí compro, vendo y cocino. Si traes algo de los pastizales, te lo cambio por florines o por un buen plato.',
   buy:[{k:'carne',p:20},{k:'ing_verduras',p:10},{k:'ing_frutos',p:10},{k:'ing_miel',p:15}],sell:['lana_plateada','carne','cuerno','cristal','fibra_resonante'],
   trade:[{give:{lana_plateada:3},get:{madera_rara:1}},{give:{carne:2},get:{savia_magica:1}}],
   cook:[{k:'comida_carne_asada',need:{carne:1},fee:5},{k:'comida_estofado',need:{carne:1,ing_verduras:1},fee:10},{k:'comida_frutos_miel',need:{ing_frutos:1,ing_miel:1},fee:5}]},
  panaderia:{n:'La panadería de Lucia',who:'Lucia, la panadera',img:'m4/panadera_pie',bg:'m2/taller_int',hi:'—¡Pan recién horneado! Dicen que quien come mi pan recolecta el doble de rápido.',buy:[{k:'comida_pan',p:15}],sell:[],trade:[],cook:[]}};
 function openShop(id,tab,onClose){const sh=SHOPS[id],v=S.inv=S.inv||{},R=reserved();matArt();
- const tabs=[['buy','Comprar'],['sell','Vender'],['trade','Trueque'],['cook','Cocinar']].filter(([t])=>sh[t]&&sh[t].length);tab=tab||tabs[0][0];
+ const tabs=[['buy','Comprar'],['sell','Vender'],['trade','Trueque'],['cook','Cocinar']].filter(([t])=>sh[t]&&sh[t].length);tab=tab&&tabs.some(([t])=>t===tab)?tab:tabs[0][0];
  const ic=k=>`<img class="sh-ic" src="${V()}${matIc(k)}.webp" alt="">`,nm=k=>(MAT[k]||{n:k}).n,need=o=>Object.entries(o).map(([k,n])=>`${n} ${nm(k).toLowerCase()} (${v[k]||0})`).join(' + ');
  let rows='';
  if(tab==='buy')rows=sh.buy.map((b,i)=>`<div class="sh-row">${ic(b.k)}<div><b>${esc(nm(b.k))}</b><small>${esc((MAT[b.k]||{}).u||'')}</small><small>Tienes ${v[b.k]||0}</small></div><button class="chipb" data-buy="${i}" ${(S.coins||0)<b.p?'disabled':''}>🪙 ${b.p}</button></div>`).join('');
@@ -2693,7 +2791,7 @@ const STEP={
   if(st.free){LS.hero=S.loc&&S.loc.region==='florencia'&&S.loc.x?[S.loc.x,S.loc.y]:TOWN_LOC.puerta.at.slice();LS.townV=2}else if(!LS.hero||LS.townV!==2){LS.hero=TOWN_LOC[st.from||'puerta'].at.slice();LS.townV=2}const night=isNight(),lampsOn=!night||LS.L.id!=='w1m01'||LS.mapDone.includes('plaza')||!!(LS.scene&&LS.scene.lights&&st.go!=='plaza');
   box.innerHTML=`<div class="cmap tmap" id="cmap"><canvas id="tcv"></canvas>
    ${st.free?(RO&&routeTracked()?`<div class="cm-quest route ${QMINI()}"><small>⭐ Ruta del héroe · ${esc(RO.act)}</small><b>${esc(RO.mission)}</b><em class="cm-frags">`:`<div class="cm-quest free mini-keep"><small>Exploración libre</small><b>Florencia</b><em class="cm-frags">`):`<div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Misión')}</small><b>${esc(st.mission)}</b><em class="cm-frags">`}🪙 ${S.coins||0} florines${(S.inv&&Object.keys(S.inv).length)?' · 🎒 '+Object.values(S.inv).reduce((a,b)=>a+b,0):''}</em></div>
-   ${st.free?`<div class="fr-tools"><button type="button" class="fr-b" id="frTrack" title="${routeTracked()?'Ocultar la ruta':'Mostrar la ruta'}">${routeTracked()?'🙈':'⭐'}</button><button type="button" class="fr-b" id="frBook" title="Libro de la ruta">📖</button></div>`:''}
+   ${st.free?`<div class="fr-tools"><button type="button" class="fr-b" id="frTrack" title="${routeTracked()?'Ocultar la ruta':'Mostrar la ruta'}" aria-label="${routeTracked()?'Ocultar la ruta':'Mostrar la ruta'}">${routeTracked()?'<svg viewBox="0 0 24 24"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/><path d="M4 20L20 4"/></svg>':'<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/></svg>'}</button><button type="button" class="fr-b" id="frBook" title="Libro de la ruta" aria-label="Libro de la ruta"><svg viewBox="0 0 24 24"><path d="M4 5h6a2 2 0 012 2v12a2 2 0 00-2-2H4zM20 5h-6a2 2 0 00-2 2v12a2 2 0 012-2h6z"/></svg></button></div>`:''}
    <div class="cm-hint">${st.free?'Toca el suelo para caminar. Toca un lugar o una puerta para entrar.':st.hunt?'Toca el suelo para caminar. Sigue el ruido: busca las ondas moradas.':'Toca el suelo para caminar. Ve al lugar marcado con <b>!</b>'}</div>${booksHTML()}</div>`;
   bindBooks(box);if(st.free){$('#frTrack').onclick=e=>{e.stopPropagation();toggleTrack()};$('#frBook').onclick=e=>{e.stopPropagation();openRouteBook()};if(RO&&RO.book&&routeTracked()){const q=box.querySelector('.cm-quest.route');if(q)q.onclick=e=>{e.stopPropagation();openRouteBook()}}}const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
   const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
@@ -3080,13 +3178,13 @@ const STEP={
 };
 function saveComp(title,notes){let t=0;const bl=.5,arr=notes.map(n=>{const s=t;t+=n.d*bl;return [ +s.toFixed(3), +(t-.02).toFixed(3), n.p, Math.round(30+n.v*90), n.p>=60?'R':'L']});const id='c'+Date.now().toString(36);S.comps.unshift({id,title,notas:arr,dur:+t.toFixed(2),date:new Date().toISOString()});if(LS)LS.lastComp=id;save();toast('Composición guardada en tu Pasaporte.')}
 function openInStudio(id){const c=S.comps.find(x=>x.id===id);if(!c)return;try{localStorage.setItem('mk_import',JSON.stringify({app:'Mont Keys',pieza:{titulo:c.title,notas:c.notas.map(n=>[n[0],n[1],n[2],n[3],n[4],0,null,null,null]),duracion:c.dur,bpm:120,compas:4,estado:'lista',creado:c.date,origen:'aprender'}}));location.href=STUDIO}catch(e){toast('No pude pasarla al estudio en este navegador.')}}
-function finishLesson(){const {W,L,fin,review}=LS;$('#lBar').style.width='100%';const stars=LS.miss<=1?3:LS.miss<=4?2:1;const was=!!S.done[L.id],xp=review||was?10:(fin?200:20),coins=review||was?0:(fin?100:10);
- const prev=S.done[L.id]||0;S.done[L.id]=Math.max(prev,stars);if(!review){S.facts=S.facts||{};S.facts['cap:'+L.id]=S.facts['cap:'+L.id]||Date.now();if(S.route&&S.route.ch===L.id){const nx=CH_IDS.find(id=>!S.done[id]);S.route={ch:nx||L.id,step:0,track:S.route.track!==false}}if(L.id==='w1m01'){['campanario_vivo','fuente_viva','plaza_luz','musicos_reunidos','guardian_despierto'].forEach(k=>{S.facts[k]=S.facts[k]||Date.now()});if(S.wstate){Object.assign(S.wstate.places,{campanario:'vivo',fuente:'viva',plaza:'luz',escenario:'musicos'});S.wstate.gates.oeste=true}}}S.xp+=xp;S.coins+=coins;const newDisc=L.disc&&!S.archive.includes(L.disc.id);if(newDisc)S.archive.push(L.disc.id);bumpStreak();save();
+function finishLesson(){const {W,L,fin,review}=LS;if(MEMORY&&MEMORY.practice)MEMORY.ok=true;$('#lBar').style.width='100%';const stars=LS.miss<=1?3:LS.miss<=4?2:1;const was=!!S.done[L.id],xp=review||was?10:(fin?200:20),coins=review||was?0:(fin?100:10);
+ const prev=S.done[L.id]||0;S.done[L.id]=Math.max(prev,stars);if(!review){S.facts=S.facts||{};S.facts['cap:'+L.id]=S.facts['cap:'+L.id]||Date.now();if(S.route&&S.route.ch===L.id){const nx=CH_IDS.find(id=>!S.done[id]);S.route={ch:nx||L.id,step:0,track:S.route.track!==false}}if(L.id==='w1m03'&&S.wstate&&S.wstate.time)S.wstate.time.phase='dia';if(L.id==='w1m01'){['campanario_vivo','fuente_viva','plaza_luz','musicos_reunidos','guardian_despierto'].forEach(k=>{S.facts[k]=S.facts[k]||Date.now()});if(S.wstate){Object.assign(S.wstate.places,{campanario:'vivo',fuente:'viva',plaza:'luz',escenario:'musicos'});S.wstate.gates.oeste=true}}}S.xp+=xp;S.coins+=coins;const newDisc=L.disc&&!S.archive.includes(L.disc.id);if(newDisc)S.archive.push(L.disc.id);bumpStreak();save();
  const st=[0,1,2].map(i=>`<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z" fill="${i<stars?'#f3d48e':'rgba(241,230,207,.15)'}" stroke="${i<stars?'#8c6326':'none'}"/></svg>`).join('');
- $('#lStage').innerHTML=`<div class="done"><span class="lphase">${fin?'Mundo completado':'Lección completada'}</span><p class="lq" style="font-family:var(--display)">${esc(L.t)}</p><div class="stars">${st}</div><p class="ltext">+${xp} XP${coins?` · +${coins} florines`:''}${S.streak.n>1?` · racha de ${S.streak.n} días`:''}</p>
+ $('#lStage').innerHTML=`<div class="done"><span class="lphase">${L.practice?'Práctica completada':fin?'Mundo completado':'Lección completada'}</span><p class="lq" style="font-family:var(--display)">${esc(L.t)}</p><div class="stars">${st}</div><p class="ltext">+${xp} XP${coins?` · +${coins} florines`:''}${S.streak.n>1?` · racha de ${S.streak.n} días`:''}</p>
   ${L.disc?`<div class="acard"><span class="per">${newDisc?'Nuevo en tu Archivo':'En tu Archivo'} · ${esc(L.disc.per)}</span><h3>${esc(L.disc.name)}</h3><p>${esc(L.disc.text)}</p><p><b>Por qué importa:</b> ${esc(L.disc.sig)}</p></div>`:''}
   ${fin?`<div class="stamp on" style="--sc:${W.stampColor};width:120px">SELLO<br>${esc(W.place.toUpperCase())}</div>`:''}</div>`;
- $('#lFoot').innerHTML='';if(LS.lastComp){const lc=LS.lastComp;setTimeout(()=>{const b=document.createElement('button');b.className='ghost';b.type='button';b.style.marginTop='8px';b.textContent='Abrir mi composición en el estudio';b.onclick=()=>openInStudio(lc);$('#lFoot').appendChild(b)},0)}foot(freeOn()&&!MEMORY?'Volver a Florencia':MEMORY?'Volver al presente':'Volver al mapa',()=>{exitLesson();if(fin&&curW<WORLDS.length-1)toast('¡Sello obtenido! Se desbloqueó la siguiente isla: ve con la flecha ›.')},{gold:true})}
+ $('#lFoot').innerHTML='';if(LS.lastComp){const lc=LS.lastComp;setTimeout(()=>{const b=document.createElement('button');b.className='ghost';b.type='button';b.style.marginTop='8px';b.textContent='Abrir mi composición en el estudio';b.onclick=()=>openInStudio(lc);$('#lFoot').appendChild(b)},0)}foot(freeOn()&&(!MEMORY||MEMORY.practice)?'Volver a Florencia':MEMORY?'Volver al presente':'Volver al mapa',()=>{exitLesson();if(fin&&curW<WORLDS.length-1)toast('¡Sello obtenido! Se desbloqueó la siguiente isla: ve con la flecha ›.')},{gold:true})}
 
 /* ===================== PASAPORTE ===================== */
 function allDiscs(){const out=[];WORLDS.forEach(w=>{if(w.preview)return;w.lessons.concat([w.finale]).forEach(l=>{if(l.disc)out.push(l.disc)})});return out}
@@ -3169,7 +3267,7 @@ function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*d
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
 if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))setTimeout(bootWorld,80);
-window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc};
+window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc,openNpc,NPCS,toggleTrack};
 })();
 </script>
 </body></html>
