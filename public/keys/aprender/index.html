@@ -1840,9 +1840,9 @@ function noiseTasks(lv){const L=NOISE_LEVELS[lv]||NOISE_LEVELS[1],out=[];let pre
   out.push(ty==='arp'?{t:'arp',ch:c,say:`Arpegio de ${CHORD_BOOK[c].n}: ${nn}, una tras otra subiendo`}:{t:'chord',ch:c,hint:L.hint,say:`Toca ${CHORD_BOOK[c].n}: ${nn} a la vez`})}return out}
 /* zonas de recursos: cada entrada reinicia el mapa; más difícil = más árboles, más espíritus y más recursos */
 const F_ZONES={
- arbolillos:{n:'Arbolillos',dif:'Fácil',ic:'🌱',d:'Claros abiertos, pocos árboles jóvenes y dos espíritus lentos.',r:'1 abeto mágico (1 savia) · hasta 4 de madera común · sin madera rara',rare:0,dens:.3,young:.8,res:1,saviaY:1,commonMax:4,yieldC:1,spirits:['f1','f2'],lv:[1,1],chase:44,see:130,hp:5,dark:0,call:3},
- arboleda:{n:'Arboleda',dif:'Media',ic:'🌲',d:'Más árboles y cuatro espíritus más rápidos, con acordes menores y arpegios.',r:'2 abetos mágicos (2 savias cada uno) · hasta 10 de madera común · 1 tocón de madera rara',rare:1,dens:.62,young:.3,res:2,saviaY:2,commonMax:10,yieldC:1,spirits:['f1','f2','f3','f4'],lv:[1,2,3,2],chase:62,see:180,hp:4,dark:.06,call:4},
- bosque:{n:'Bosque',dif:'Difícil',ic:'🌲',d:'Bosque cerrado y oscuro, lleno de árboles y de espíritus muy rápidos que piden trinos, arpegios y acordes menores.',r:'3 abetos mágicos (3 savias cada uno) · hasta 24 de madera común (2 por árbol) · 2 tocones de madera rara',rare:2,dens:1,young:0,res:3,saviaY:3,commonMax:24,yieldC:2,spirits:['f1','f2','f3','f4','f5','f6','f7','f8'],lv:[2,3,3,4,4,3,2,4],chase:84,see:230,hp:4,dark:.2,call:5}};
+ arbolillos:{n:'Arbolillos',dif:'Fácil',ic:'🌱',d:'Claros abiertos, pocos árboles jóvenes y dos espíritus lentos.',r:'1 abeto mágico (1 savia) · hasta 4 de madera común · sin madera rara',rare:0,dens:.3,young:.8,res:1,saviaY:1,commonMax:4,yieldC:1,spirits:['f1','f2'],lv:[1,1],chase:44,see:130,hp:5,dark:0,gloom:.42,call:3},
+ arboleda:{n:'Arboleda',dif:'Media',ic:'🌲',d:'Más árboles y cuatro espíritus más rápidos, con acordes menores y arpegios.',r:'2 abetos mágicos (2 savias cada uno) · hasta 10 de madera común · 1 tocón de madera rara',rare:1,dens:.62,young:.3,res:2,saviaY:2,commonMax:10,yieldC:1,spirits:['f1','f2','f3','f4'],lv:[1,2,3,2],chase:62,see:180,hp:4,dark:.06,gloom:.58,call:4},
+ bosque:{n:'Bosque',dif:'Difícil',ic:'🌲',d:'Bosque cerrado y oscuro, lleno de árboles y de espíritus muy rápidos que piden trinos, arpegios y acordes menores.',r:'3 abetos mágicos (3 savias cada uno) · hasta 24 de madera común (2 por árbol) · 2 tocones de madera rara',rare:2,dens:1,young:0,res:3,saviaY:3,commonMax:24,yieldC:2,spirits:['f1','f2','f3','f4','f5','f6','f7','f8'],lv:[2,3,3,4,4,3,2,4],chase:84,see:230,hp:4,dark:.2,gloom:.74,call:5}};
 /* llamadas del viento para el piccolo: cambian en cada árbol; más largas en las zonas difíciles */
 const F_CALLS=[[72,76,79],[72,77,81],[71,74,79],[69,72,76],[71,76,79],[74,77,81],[67,71,74],[69,74,77]];
 function flutePattern(n){const b=F_CALLS[Math.floor(Math.random()*F_CALLS.length)].slice();if(Math.random()<.4)b.reverse();const p=b.slice();if(n>=4)p.push(b[1]);if(n>=5)p.push(b[0]);return p}
@@ -1967,6 +1967,27 @@ function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC|
   const s=sps.find(s=>!s.good&&Math.hypot(wx-s.x,wy-(s.y-30))<50);if(s){walkTo([s.x,s.y]);return}
   const o=hitTree(wx,wy);if(o){const side=H[0]<o.x?-1:1;walkTo([o.x+side*45,o.y+22],()=>gather(o));return}
   if(wy>FW.H-110&&Math.abs(wx-700)<140){walkTo([700,FW.H-40],leave);return}walkTo([wx,wy])});
+ /* ambiente tenebroso: penumbra con luz alrededor del viajero, niebla que se arrastra, motas y ojos que miran desde la espesura */
+ const GL=Z.gloom||.5,dkc=document.createElement('canvas'),fogC=(()=>{const c=document.createElement('canvas');c.width=520;c.height=200;const x=c.getContext('2d');for(let i=0;i<14;i++){const r=40+Math.random()*45,px=r+15+Math.random()*(490-2*r),py=100+(Math.random()-.5)*(150-2*r),gr=x.createRadialGradient(px,py,0,px,py,r);gr.addColorStop(0,'rgba(200,215,230,.5)');gr.addColorStop(1,'rgba(200,215,230,0)');x.fillStyle=gr;x.fillRect(0,0,520,200)}return c})();
+ const motes=Array.from({length:26},()=>({x:Math.random(),y:Math.random(),v:.2+Math.random()*.5,p:Math.random()*6}));
+ const eyes=objs.filter(o=>!o.sp&&!o.small&&fDistPath(o.x,o.y)>150).sort(()=>Math.random()-.5).slice(0,Math.round(4+GL*8)).map(o=>({x:o.x+(Math.random()-.5)*30,y:o.y-30-Math.random()*40,p:Math.random()*20,s:.8+Math.random()*.6}));
+ const gloom=t=>{if(dkc.width!==cv.width||dkc.height!==cv.height){dkc.width=cv.width;dkc.height=cv.height}const d=dkc.getContext('2d');d.setTransform(1,0,0,1,0,0);d.globalCompositeOperation='source-over';d.clearRect(0,0,dkc.width,dkc.height);d.setTransform(dpr,0,0,dpr,0,0);
+  g.save();g.globalCompositeOperation='multiply';g.fillStyle=`rgb(${Math.round(255-GL*120)},${Math.round(255-GL*95)},${Math.round(255-GL*55)})`;g.fillRect(cam.x,cam.y,VW,VH);g.restore();
+  d.fillStyle=`rgba(4,9,16,${GL})`;d.fillRect(0,0,VW,VH);d.globalCompositeOperation='destination-out';
+  const hole=(x,y,r,a)=>{if(x<-r||y<-r||x>VW+r||y>VH+r)return;const gr=d.createRadialGradient(x,y,0,x,y,r);gr.addColorStop(0,`rgba(0,0,0,${a})`);gr.addColorStop(.55,`rgba(0,0,0,${a*.7})`);gr.addColorStop(1,'rgba(0,0,0,0)');d.fillStyle=gr;d.beginPath();d.arc(x,y,r,0,6.3);d.fill()};
+  hole(H[0]-cam.x,H[1]-cam.y-30,175+Math.sin(t/700)*5,1);
+  sps.forEach(s=>hole(s.x-cam.x,s.y-cam.y-30,s.good?95:75,s.good?.8:.55));
+  objs.forEach(o=>{if((isRes(o))||(isRare(o)&&!RN.rare.includes(o.sp.id)))hole(o.x-cam.x,o.y-cam.y-55,isRes(o)&&RN.trees.includes(o.sp.id)?150:105,.7)});
+  hole(700-cam.x,FW.H-70-cam.y,120,.6);fx.forEach(p=>hole(p.x-cam.x,p.y-cam.y,40,.5));
+  g.save();g.setTransform(1,0,0,1,0,0);g.drawImage(dkc,0,0);g.setTransform(dpr,0,0,dpr,0,0);
+  /* ojos en la espesura: se apagan si te acercas */
+  eyes.forEach(e=>{const sx=e.x-cam.x,sy=e.y-cam.y;if(sx<-20||sy<-20||sx>VW+20||sy>VH+20)return;const dh=Math.hypot(H[0]-e.x,H[1]-e.y);if(dh<230)return;const k=Math.sin(t/1700+e.p);if(k<.45)return;const bl=((t/90+e.p*7)%40)<1.6?.15:1,a=Math.min(1,(k-.45)*4)*bl*Math.min(1,(dh-230)/120);
+   [-5,5].forEach(dx=>{g.fillStyle=`rgba(255,170,60,${a*.25})`;g.beginPath();g.arc(sx+dx*e.s,sy,5*e.s,0,6.3);g.fill();g.fillStyle=`rgba(255,215,120,${a})`;g.beginPath();g.ellipse(sx+dx*e.s,sy,1.8*e.s,1.2*e.s,0,0,6.3);g.fill()})});
+  /* niebla baja que se arrastra */
+  g.globalAlpha=.10+GL*.16;for(let i=0;i<4;i++){const w=fogC.width*1.6,x=((t/(60+i*25)+i*400)%(VW+w))-w,y=VH*(.2+i*.22)+Math.sin(t/3000+i)*14;g.drawImage(fogC,x,y,w,fogC.height*1.3)}g.globalAlpha=1;
+  /* motas pálidas */
+  motes.forEach(m=>{m.y-=m.v*.0006;if(m.y<0)m.y=1;const x=(m.x+Math.sin(t/2500+m.p)*.03)*VW,y=m.y*VH,a=.25+.25*Math.sin(t/600+m.p);g.fillStyle=`rgba(190,230,200,${a})`;g.beginPath();g.arc(x,y,1.4,0,6.3);g.fill()});
+  g.restore()};
  const ro=new ResizeObserver(fit);ro.observe(wrap);
  const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
   if(!busy){if(moving&&path.length){const p=path[0],dx=p[0]-H[0],dy=p[1]-H[1],d=Math.hypot(dx,dy),v=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';
@@ -1987,7 +2008,7 @@ function stepForest(st,box){forestAssets();const need=st.need||9,needC=st.needC|
   sps.forEach(s=>list.push({y:s.y,d:()=>{if(s.good){for(let i=0;i<4;i++){const a=t/700+i*1.57;g.fillStyle=`rgba(255,225,140,${.5+.4*Math.sin(t/300+i)})`;g.beginPath();g.arc(s.x+Math.cos(a)*30,s.y-40+Math.sin(a)*14,2.4,0,6.3);g.fill()}}else for(let i=0;i<2;i++){const q=((t/1300)+i/2)%1;g.strokeStyle=`rgba(170,140,255,${.45*(1-q)})`;g.lineWidth=2;g.beginPath();g.ellipse(s.x,s.y-30,18+q*46,9+q*22,0,0,6.3);g.stroke()}
    const sc=s.good?1:1+(s.lv-1)*.12;g.save();if(!s.good&&NOISE_TINT[s.lv])g.filter=NOISE_TINT[s.lv];g.translate(s.x,s.y);g.scale(sc,sc);drawSpirit(g,0,0,t/1000+s.zone[0],s.good,s.lv>=4?'espiritu_caos_calmo':s.lv>=3?'espiritu_estruendo_calmo':null);g.restore()}}));
   list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
-  if(Z.dark){g.fillStyle=`rgba(8,16,6,${Z.dark})`;g.fillRect(cam.x,cam.y,VW,VH)}
+  gloom(t);
   fx=fx.filter(p=>t-p.t<1400);fx.forEach(p=>{const k=(t-p.t)/1400;if(k<0)return;g.fillStyle=`rgba(255,220,120,${1-k})`;g.font='16px serif';g.fillText('♪',p.x,p.y-k*60)});
   const bobY=Math.sin(t/260)*4;g.textAlign='center';g.font='700 11px Cinzel, serif';const lbl='Salida · guardar mochila',tw=g.measureText(lbl).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(700-tw/2,FW.H-62,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(lbl,700,FW.H-49);
   if(ready()){g.fillStyle='#ffd56e';g.beginPath();g.arc(700,FW.H-90+bobY,13,0,6.3);g.fill();g.fillStyle='#3a2410';g.font='900 16px Alegreya Sans, sans-serif';g.fillText('!',700,FW.H-84+bobY)}
