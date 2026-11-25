@@ -1948,7 +1948,7 @@ function forestGrid(zk){const C=TW.CELL,gw=Math.ceil(FW.W/C),gh=Math.ceil(FW.H/C
 /* ===================== MÓDULO 4 · PASTIZALES DEL ECO (criaturas físicas) ===================== */
 const MW={W:1400,H:2000},M_ENTRY=[700,1900];
 const M_PATH=[[700,2000],[700,1760],[560,1520],[640,1240],[880,1020],[820,760],[600,560],[640,300]];
-const M_PIECES=['pastizal_alto','pasto_alto_pastizal','pasto_alto_tira','rastro_pasto','roca_musgo','corral_esquina','ruina_arco','entrada_pastizales','circulo_ancestral'];
+const M_PIECES=['corral_recto','ruina_muro','cabana_pastor','pastizal_alto','pasto_alto_pastizal','pasto_alto_tira','rastro_pasto','roca_musgo','corral_esquina','ruina_arco','entrada_pastizales','circulo_ancestral'];
 /* objetos fijos: x,y = base. tall = hierba alta que se cruza (no bloquea) */
 const M_OBJ=[
  {k:'entrada_pastizales',x:520,y:1965,s:.55,fp:[60,16]},{k:'entrada_pastizales',x:900,y:1965,s:.55,fp:[60,16],flip:1},
@@ -1958,6 +1958,9 @@ const M_OBJ=[
  {k:'pasto_alto_pastizal',x:820,y:1640,s:.5,tall:1},{k:'pasto_alto_pastizal',x:470,y:1430,s:.5,tall:1,flip:1},{k:'pasto_alto_pastizal',x:930,y:1320,s:.5,tall:1},{k:'pasto_alto_pastizal',x:640,y:1060,s:.48,tall:1},{k:'pasto_alto_pastizal',x:220,y:1060,s:.5,tall:1,flip:1},{k:'pasto_alto_pastizal',x:520,y:700,s:.5,tall:1},{k:'pasto_alto_pastizal',x:1240,y:1000,s:.5,tall:1},
  {k:'roca_musgo',x:560,y:1820,s:.5,fp:[90,24]},{k:'roca_musgo',x:1180,y:1400,s:.55,fp:[96,26],flip:1},{k:'roca_musgo',x:160,y:740,s:.5,fp:[90,24]},{k:'roca_musgo',x:700,y:420,s:.45,fp:[80,22],flip:1},
  {k:'corral_esquina',x:860,y:1460,s:.55,fp:[220,30]},{k:'corral_esquina',x:330,y:1050,s:.5,fp:[200,28],flip:1},
+ {k:'corral_recto',x:690,y:1470,s:.5,fp:[230,26]},{k:'corral_recto',x:520,y:1060,s:.45,fp:[210,24],flip:1},
+ {k:'ruina_muro',x:230,y:1390,s:.55,fp:[150,26]},{k:'ruina_muro',x:1230,y:880,s:.5,fp:[140,24],flip:1},
+ {k:'cabana_pastor',x:250,y:640,s:.62,fp:[220,50]},
  {k:'ruina_arco',x:1000,y:930,s:.6,fp:[150,26]},{k:'ruina_arco',x:250,y:330,s:.55,fp:[140,24],flip:1},
  {k:'circulo_ancestral',x:1080,y:330,s:.62,fp:[300,90],anc:1},
  {k:'olivo_1',x:140,y:1500,s:1.3,fp:[40,14]},{k:'olivo_2',x:1280,y:620,s:1.3,fp:[40,14]},{k:'cipres_1',x:1270,y:1720,s:1,fp:[24,12]},{k:'cipres_2',x:120,y:960,s:1,fp:[24,12]},{k:'cipres_1',x:900,y:240,s:1,fp:[24,12]}];
@@ -1970,16 +1973,16 @@ const M_DECAL=[{x:760,y:1380,s:.5,r:-.3},{x:520,y:990,s:.45,r:.5},{x:940,y:640,s
 /* hábitats de los carneros (zona donde pastan) */
 const M_RAMS=[{id:'r1',zone:[860,1060,1260,1300]},{id:'r2',zone:[180,780,560,980]},{id:'r3',zone:[880,560,1260,800]}];
 const M_ANC=[1080,300];
-function meadowAssets(){townAssets();forestAssets();M_PIECES.forEach(k=>timg('m_'+k,V()+'m4/'+k+'.webp'));['olivo_1','olivo_2','cipres_1','cipres_2'].forEach(k=>timg('m_'+k,V()+'town/p_'+k+'.webp'));timg('m_seco',V()+'m4/t_pastizal_seco.webp');
+function meadowAssets(){townAssets();forestAssets();M_PIECES.forEach(k=>timg('m_'+k,V()+'m4/'+k+'.webp'));['olivo_1','olivo_2','cipres_1','cipres_2'].forEach(k=>timg('m_'+k,V()+'town/p_'+k+'.webp'));timg('m_seco',V()+'m4/t_pastizal_seco.webp');timg('m_pasto',V()+'m4/t_pastizal.webp');
  Object.entries(CREATURES.carnero.art).forEach(([k,v])=>[].concat(v).forEach((p,i)=>timg('c_carnero_'+k+(Array.isArray(v)?i:''),V()+p+'.webp')));timg('c_carnero_idle',V()+'m4/carnero_idle.webp');timg('c_carnero_calm',V()+'m4/carnero_tranquilo.webp');timg('c_carnero_alerta',V()+'m4/carnero_alerta.webp');timg('c_carnero_res',V()+'m4/carnero_resonancia.webp');timg('c_carnero_walk0',V()+'m4/carnero_walk_01.webp');timg('c_carnero_walk1',V()+'m4/carnero_walk_02.webp')}
 const mimg=o=>TIMG['m_'+o.k];
 function mDistPath(x,y){let best=1e9;for(let i=0;i<M_PATH.length-1;i++){const a=M_PATH[i],b=M_PATH[i+1],dx=b[0]-a[0],dy=b[1]-a[1],L=dx*dx+dy*dy,t=Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/L));best=Math.min(best,Math.hypot(x-a[0]-dx*t,y-a[1]-dy*t))}return best}
 let MEADOW_GROUND=null;
 function meadowGround(){if(MEADOW_GROUND)return MEADOW_GROUND;const ok=k=>TIMG[k]&&TIMG[k].complete&&TIMG[k].width,c=document.createElement('canvas');c.width=MW.W;c.height=MW.H;const g=c.getContext('2d');
- if(!['cesped','pradera_flores','m_seco','m_rastro_pasto'].every(ok)){g.fillStyle='#3d4a26';g.fillRect(0,0,MW.W,MW.H);return c}
- g.fillStyle=g.createPattern(TIMG.cesped,'repeat');g.fillRect(0,0,MW.W,MW.H);
- {const F=document.createElement('canvas');F.width=MW.W;F.height=MW.H;const f=F.getContext('2d');f.fillStyle=f.createPattern(TIMG.pradera_flores,'repeat');f.fillRect(0,0,MW.W,MW.H);const r=townRng(9);f.globalCompositeOperation='destination-in';f.filter='blur(40px)';for(let i=0;i<14;i++){f.beginPath();f.ellipse(r()*MW.W,r()*MW.H,120+r()*160,80+r()*100,0,0,6.3);f.fill()}g.globalAlpha=.7;g.drawImage(F,0,0);g.globalAlpha=1}
- g.save();g.globalCompositeOperation='multiply';g.fillStyle='rgb(200,205,170)';g.fillRect(0,0,MW.W,MW.H);g.restore();
+ if(!['m_pasto','pradera_flores','m_seco','m_rastro_pasto'].every(ok)){g.fillStyle='#3d4a26';g.fillRect(0,0,MW.W,MW.H);return c}
+ g.fillStyle=g.createPattern(TIMG.m_pasto,'repeat');g.fillRect(0,0,MW.W,MW.H);
+ {const F=document.createElement('canvas');F.width=MW.W;F.height=MW.H;const f=F.getContext('2d');f.fillStyle=f.createPattern(TIMG.pradera_flores,'repeat');f.fillRect(0,0,MW.W,MW.H);const r=townRng(9);f.globalCompositeOperation='destination-in';f.filter='blur(40px)';for(let i=0;i<14;i++){f.beginPath();f.ellipse(r()*MW.W,r()*MW.H,120+r()*160,80+r()*100,0,0,6.3);f.fill()}g.globalAlpha=.25;g.drawImage(F,0,0);g.globalAlpha=1}
+ g.save();g.globalCompositeOperation='multiply';g.fillStyle='rgb(225,225,205)';g.fillRect(0,0,MW.W,MW.H);g.restore();
  const T=document.createElement('canvas');T.width=MW.W;T.height=MW.H;const t=T.getContext('2d');t.fillStyle=t.createPattern(TIMG.m_seco,'repeat');t.fillRect(0,0,MW.W,MW.H);
  const M=document.createElement('canvas');M.width=MW.W;M.height=MW.H;const m=M.getContext('2d');m.filter='blur(16px)';m.strokeStyle='#fff';m.lineWidth=74;m.lineCap='round';m.lineJoin='round';m.beginPath();M_PATH.forEach((p,i)=>i?m.lineTo(p[0],p[1]):m.moveTo(p[0],p[1]));m.stroke();
  [[700,1900,170,90],[1080,380,220,110]].forEach(([x,y,rx,ry])=>{m.beginPath();m.ellipse(x,y,rx,ry,0,0,6.3);m.fillStyle='#fff';m.fill()});
