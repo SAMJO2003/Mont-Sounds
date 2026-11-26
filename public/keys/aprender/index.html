@@ -1920,7 +1920,7 @@ const TOWN_LOC={
  plaza:{n:'La plaza de los faroles',ic:'🏮',at:[985,1300]},
  escenario:{n:'El escenario',ic:'🎭',at:[750,1520]},
  puerta:{n:'La puerta',ic:'🚪',at:[750,2150]},
- carniceria:{n:'La carnicería',ic:'🥩',at:[1250,2300],shop:'modulo4'},
+ carniceria:{n:'La carnicería',ic:'🥩',at:[1250,2282],shop:'modulo4'},
  panaderia:{n:'La panadería',ic:'🥖',at:[610,2225],shop:'modulo4'},
  norte:{n:'Puerta norte · jardín olvidado',ic:'🌿',at:[750,255],locked:'La puerta norte lleva al jardín olvidado de Beatrice. Se abrirá en el Módulo 5.'},
  oeste:{n:'Puerta oeste · bosque oscuro',ic:'🌲',at:[95,1535],locked:'La puerta del bosque oscuro sigue sellada. Se abrirá en el Módulo 2.'},
@@ -2011,11 +2011,11 @@ function gateBubbles(g,cam,VW,VH,t){TOWN_BUBBLE.forEach(b=>{if(b.x+110<cam.x||b.
   g.restore()})}
 /* cuadrícula de paso */
 function townGrid(open){const C=TW.CELL,gw=Math.ceil(TW.W/C),gh=Math.ceil(TW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};block(0,0,52,TW.H);block(TW.W-52,0,TW.W,TW.H);
- block(0,0,TW.W,120);block(0,0,64,TW.H);block(TW.W-64,0,TW.W,TW.H);block(0,TW.H-215,TW.W,TW.H);
+ block(0,0,TW.W,120);block(0,0,64,TW.H);block(TW.W-64,0,TW.W,TW.H);block(0,TW.H-110,TW.W,TW.H);
  TOWN_OBJ.forEach(o=>{if(!o.fp||!o.fp[0])return;block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});
  Object.entries(TOWN_LOC).forEach(([k,l])=>{if(l.fog&&!open(k))block(...l.fog)});return {b,gw,gh}}
 function townPath(G,from,to){const C=TW.CELL,{b,gw,gh}=G,cell=p=>[Math.max(0,Math.min(gw-1,Math.floor(p[0]/C))),Math.max(0,Math.min(gh-1,Math.floor(p[1]/C)))];
- let [sx,sy]=cell(from),[tx,ty]=cell(to);if(b[ty*gw+tx]){let best=null;for(let r=1;r<12&&!best;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const x=tx+dx,y=ty+dy;if(x>=0&&y>=0&&x<gw&&y<gh&&!b[y*gw+x]){const d=Math.hypot(dx,dy);if(!best||d<best.d)best={x,y,d}}}if(!best)return null;tx=best.x;ty=best.y}
+ let [sx,sy]=cell(from),[tx,ty]=cell(to);/* si el héroe quedó dentro de una zona bloqueada (muro, edificio), sale por la celda libre más cercana */if(b[sy*gw+sx]){let bs=null;for(let r=1;r<20&&!bs;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const x=sx+dx,y=sy+dy;if(x>=0&&y>=0&&x<gw&&y<gh&&!b[y*gw+x]){const d=Math.hypot(dx,dy);if(!bs||d<bs.d)bs={x,y,d}}}if(bs){sx=bs.x;sy=bs.y}}if(b[ty*gw+tx]){let best=null;for(let r=1;r<12&&!best;r++)for(let dy=-r;dy<=r;dy++)for(let dx=-r;dx<=r;dx++){const x=tx+dx,y=ty+dy;if(x>=0&&y>=0&&x<gw&&y<gh&&!b[y*gw+x]){const d=Math.hypot(dx,dy);if(!best||d<best.d)best={x,y,d}}}if(!best)return null;tx=best.x;ty=best.y}
  const N=gw*gh,gs=new Float32Array(N).fill(1e9),prev=new Int32Array(N).fill(-1),open=[[0,sy*gw+sx]];gs[sy*gw+sx]=0;const h=i=>Math.hypot(i%gw-tx,(i/gw|0)-ty);
  const D=[[1,0,1],[-1,0,1],[0,1,1],[0,-1,1],[1,1,1.414],[1,-1,1.414],[-1,1,1.414],[-1,-1,1.414]];let found=false,it=0;
  while(open.length&&it++<40000){let bi=0;for(let i=1;i<open.length;i++)if(open[i][0]<open[bi][0])bi=i;const [,u]=open.splice(bi,1)[0];if(u===ty*gw+tx){found=true;break}const ux=u%gw,uy=u/gw|0;
