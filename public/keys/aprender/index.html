@@ -2348,6 +2348,7 @@ const themeSeq=L=>L.filter(n=>n.m!=null).map(n=>n.m);
 /* ===================== CAPÍTULOS V-VI · CIMIENTOS (C0) =====================
    Estado del jardín de Beatrice. Solo c5Event() puede cambiarlo: así cada regla (por ejemplo, que el jardín solo lo abra Beatrice)
    vive en un único sitio, y dentro de un recuerdo nunca se toca el mundo real. */
+const C5_SALA_PAY=15;/* precio del Piano Fiorentino (500) y pago por sala confirmados por Santiago el 25-11-2026 */
 const C5_INSTR=['arpa','clavicordio','clavecin','virginal','organo','salterio','viola'];
 const wPlace=k=>S.wstate&&S.wstate.places?S.wstate.places[k]:undefined;
 const C5={gate:()=>gateOpen('norte'),beatrice:()=>hasFact('beatrice_restaurada'),garden:()=>wPlace('jardin')==='abierto',
@@ -2361,7 +2362,7 @@ function c5Event(k,arg){if(MEMORY)return false;S.wstate=S.wstate||{};const W=S.w
   case 'resonancia':fact('skill:resonancia');break;
   case 'voz':if(!C5_INSTR.includes(arg))return false;W.voces=W.voces||{};W.voces[arg]=1;fact('voz:'+arg);break;
   case 'fragmento':if(!(arg>=1&&arg<=8))return false;fact('melodia:'+arg);break;
-  case 'sala':if(!(arg>=1&&arg<=7))return false;fact('sala:'+arg);break;
+  case 'sala':if(!(arg>=1&&arg<=7))return false;if(!hasFact('sala:'+arg)){fact('sala:'+arg);S.coins=(S.coins||0)+C5_SALA_PAY}break;/* 15 florines por sala, una sola vez */
   case 'observatorio':if(arg!=='visible'&&arg!=='abierto')return false;if(arg==='visible'&&W.places.observatorio==='abierto')break;W.places.observatorio=arg;break;
   default:return false}
  save();return true}
