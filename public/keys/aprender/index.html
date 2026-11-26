@@ -1150,7 +1150,7 @@ function resumeRoute(){const L=routeLesson(),o=routeObjective();if(!L||!o)return
 function startMemory(W,L){MEMORY={snap:JSON.stringify(S)};runLesson(W,L,false,true)}
 function endMemory(){if(!MEMORY)return;const snap=MEMORY.snap,pr=MEMORY.practice,ok=MEMORY.ok;MEMORY=null;S=JSON.parse(snap);save();if(pr)practiceStat(pr,ok)}
 /* regiones libres (bosque y pastizales): se entra por la puerta y se sale por su camino de siempre */
-function enterRegion(r){const box=$('#lStage');if(!box)return;setLoc(r==='bosque'?'bosque':'pastizales',0,0);LS.fzone=null;LS.mrun=null;if(r==='bosque')stepForest({free:true,act:'Exploración libre'},box);else stepMeadow({free:true,act:'Exploración libre'},box)}
+function enterRegion(r){const box=$('#lStage');if(!box)return;if(r==='jardin'){if(!(S.loc&&S.loc.region==='jardin'))setLoc('jardin',G_PTS.entrada[0],G_PTS.entrada[1],{pt:'entrada'});LS.ghero=null;stepGarden({free:true,act:'Exploración libre'},box);return}setLoc(r==='bosque'?'bosque':'pastizales',0,0);LS.fzone=null;LS.mrun=null;if(r==='bosque')stepForest({free:true,act:'Exploración libre'},box);else stepMeadow({free:true,act:'Exploración libre'},box)}
 function backToTown(gate){const at=(TOWN_LOC[gate]||TOWN_LOC.puerta).at;setLoc('florencia',at[0],at[1]+10);closeSheet();openFree()}
 const GATE_TXT={oeste:'Más allá de estas murallas se extiende un antiguo bosque. Dicen que, entre sus árboles, todavía resuenan melodías que nadie recuerda haber tocado.',
  este:'Las praderas parecen tranquilas desde aquí. Sin embargo, los pastores dejaron de visitarlas hace muchos años.',
@@ -1193,6 +1193,9 @@ const NPCS={
  laudista:{n:'Nico',p:'Laudista · aprendiz',img:'laudista_pie',where:()=>'escenario',avail:()=>freeOn(),kind:'lute',
   hi:[[()=>hasInstr('laud'),'—¡Tienes un laúd! Yo todavía me equivoco con los arpegios… practiquemos.'],[()=>true,'—Los acordes se me resisten, pero los arpegios ya me salen. ¿Tocamos?']],sv:['route','play','ask','bye'],
   mel:[[60,64,67,72,67,64,60],[65,69,72,77,72,69,65],[67,71,74,79,74,71,67]],mel2:[[60,64,67,72,65,69,72,77],[67,71,74,79,60,64,67,72]]}};
+/* Beatrice vive en su taller del jardín (fuera de Florencia): se abre desde la región del jardín. Arte provisional hasta recibir el definitivo. */
+NPCS.beatrice={n:'Beatrice',p:'Fabricante de instrumentos de teclado',img:null,bg:'m2/taller_int',where:()=>'jardin_taller',avail:()=>C5.beatrice(),
+ hi:[[()=>C5.garden(),'—El jardín te recuerda. Y yo también. ¿Qué quieres estudiar hoy?'],[()=>true,'—Así que tú eres quien despertó mi taller. Pasa… y no toques nada sin preguntar.']],sv:['route','buyFior','ask','bye']};
 /* preguntas: ver CONVERSACIONES más abajo (si un personaje no tiene, la opción se oculta) */
 const ASK={};
 /* fabricación libre: recetas fuera de la historia (el laúd se fabrica en la ruta y es único) */
@@ -1287,7 +1290,7 @@ function talkCodexHTML(){const read=ASKQ.filter(x=>talked(x.id));if(!read.length
  return `<h3 class="tk-h">Conversaciones</h3>${chips}${Object.entries(by).map(([n,xs])=>`<div class="tk-g"><b>${esc(NPCS[n].n)} · ${esc(NPCS[n].p)}</b>${xs.map(x=>`<button type="button" class="tk-it" data-tk="${n}|${x.id}"><span>${esc(x.q)}</span><i class="tk-c ${x.cat}">${ASK_CAT[x.cat]}</i></button>`).join('')}</div>`).join('')||'<p class="small">No hay conversaciones de esta categoría.</p>'}`}
 
 /* iconos propios (sin emojis) para el panel */
-const ICO={stats:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',agua:'<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/>',faroles:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0012 3z"/>',route:'<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/>',instr:'<ellipse cx="9" cy="15" rx="6" ry="6.5"/><path d="M13 11l7-7M18 3l3 3"/><circle cx="9" cy="15" r="1.6"/>',
+const ICO={buyFior:'<path d="M3 10h18v3H3zM5 13v6M19 13v6M7 10V7h10v3"/>',stats:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',agua:'<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/>',faroles:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0012 3z"/>',route:'<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/>',instr:'<ellipse cx="9" cy="15" rx="6" ry="6.5"/><path d="M13 11l7-7M18 3l3 3"/><circle cx="9" cy="15" r="1.6"/>',
  craft:'<path d="M3 21l9-9M14 4l6 6-3 3-6-6zM12 6l3-3"/>',sell:'<circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/><path d="M9 9v6M15 9v6"/>',buy:'<path d="M5 8h14l-1.5 12h-11zM9 8a3 3 0 016 0"/>',
  cook:'<path d="M4 11h16v3a6 6 0 01-6 6h-4a6 6 0 01-6-6zM8 7c0-2 2-2 2-4M14 7c0-2 2-2 2-4"/>',trade:'<path d="M4 8h14l-3-3M20 16H6l3 3"/>',bells:'<path d="M12 3a5 5 0 015 5v5l2 3H5l2-3V8a5 5 0 015-5zM10 19a2 2 0 004 0"/>',
  read:'<path d="M4 5h6a2 2 0 012 2v12a2 2 0 00-2-2H4zM20 5h-6a2 2 0 00-2 2v12a2 2 0 012-2h6z"/>',play:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
@@ -1311,6 +1314,7 @@ const SVC={route:{t:'Seguir la ruta del héroe',k:'route',show:np=>routeHere(np.
  play:{t:'Tocar juntos',k:'music',run:(np,id)=>playWith(id)},
  codex:{t:'Consultar el Códice',k:'svc',show:()=>(S.codex||[]).length>0,run:()=>openBook('codice')},
  ask:{t:'Preguntar',k:'svc',show:(np,id)=>askAvail(id).length>0,dot:(np,id)=>askNew(id),run:(np,id)=>askMenu(id)},
+ buyFior:{t:'Adquirir el Piano Fiorentino · 500 florines',k:'trade',show:()=>C5.garden()&&!hasInstr('piano_fiorentino'),run:()=>{const P=INSTR_STATS.piano_fiorentino.price,ok=(S.coins||0)>=P;sheet(`<span class="eyebrow">Beatrice</span><h2>El Piano Fiorentino</h2><p>Rareza: rara · 4 corazones en los encuentros musicales · sonido de mayor calidad.</p><p>Dentro del jardín puedes tocarlo gratis. Si lo adquieres, podrás invocarlo en cualquier lugar. <b>No es necesario para continuar la historia.</b></p><p>Precio: <b>${P} florines</b> · tienes ${S.coins||0}.</p>${ok?'<button class="cta gold" type="button" id="bfY">Adquirirlo</button>':'<p class="small">Todavía no tienes suficientes florines.</p>'}<button class="ghost" type="button" id="bfN">Ahora no</button>`);const y=$('#bfY');if(y)y.onclick=()=>{closeSheet();if(buyFiorentino())toast('El Piano Fiorentino ahora es tuyo.')};$('#bfN').onclick=closeSheet}},
  bye:{t:'Despedirse',k:'bye',run:()=>{}}};
 function closeNpc(){const p=$('#npcP');if(p){p.classList.remove('in');setTimeout(()=>p.remove(),250)}}
 function npcPanel({img,bg,name,prof,hi,hiHtml,fl,ops,cls}){{const old=$('#npcP');if(old&&cls==='talk'||old&&ops.some(o=>o.keep))old.remove();else closeNpc()}const p=document.createElement('div');p.id='npcP';p.className='npcp '+(cls||'');
@@ -1323,7 +1327,7 @@ function openNpc(id){const np=NPCS[id];const ops=np.sv.filter(k=>{const v=SVC[k]
  npcPanel({img:np.img,bg:np.bg,name:np.n,prof:np.p,hi:npcGreet(np),ops,cls:routeHere(np.where())&&routeTracked()?'has-route':''})}
 
 function freeLoc(k){const here=npcsAt(k);if(here.length===1){openNpc(here[0]);return}if(here.length>1){const l=TOWN_LOC[k];npcPanel({img:null,name:l.n,prof:'¿Con quién quieres hablar?',hi:'',ops:here.map(id=>({ic:'play',t:NPCS[id].n+' · '+NPCS[id].p,k:'svc',f:()=>openNpc(id)})).concat(routeHere(k)?[{ic:'route',t:'Seguir la ruta del héroe',k:'route',f:()=>resumeRoute()}]:[]).concat([{ic:'bye',t:'Despedirse',k:'bye',f:()=>{}}])});return}
- const gate0=(k==='oeste'||k==='este'||k==='norte')?k:null;{const l=TOWN_LOC[k],np=LOC_NPC[k],ops=[];if(routeHere(k))ops.push({ic:'route',t:'Seguir la ruta del héroe',k:'route',f:()=>resumeRoute()});if(gate0&&gateOpen(gate0)&&gate0!=='norte')ops.push({ic:'gate',t:gate0==='oeste'?'Salir al bosque':'Salir a los pastizales',k:'svc',f:()=>enterRegion(gate0==='oeste'?'bosque':'pastizales')});ops.push({ic:'bye',t:'Despedirse',k:'bye',f:()=>{}});
+ const gate0=(k==='oeste'||k==='este'||k==='norte')?k:null;{const l=TOWN_LOC[k],np=LOC_NPC[k],ops=[];if(routeHere(k))ops.push({ic:'route',t:'Seguir la ruta del héroe',k:'route',f:()=>resumeRoute()});if(gate0==='norte'&&gateOpen('norte'))ops.push({ic:'gate',t:'Entrar al jardín de Beatrice',k:'svc',f:()=>enterRegion('jardin')});if(gate0&&gateOpen(gate0)&&gate0!=='norte')ops.push({ic:'gate',t:gate0==='oeste'?'Salir al bosque':'Salir a los pastizales',k:'svc',f:()=>enterRegion(gate0==='oeste'?'bosque':'pastizales')});ops.push({ic:'bye',t:'Despedirse',k:'bye',f:()=>{}});
   npcPanel({img:gate0?(gateOpen(gate0)?'town/p_puerta_'+(gate0==='norte'?'norte_jardin':gate0):'town/p_puerta_'+(gate0==='norte'?'norte_jardin':gate0)+'_c'):null,name:l.n,prof:gate0?(gateOpen(gate0)?'La puerta está abierta':'La puerta está cerrada'):(np?np.p:''),hi:gate0?'«'+GATE_TXT[gate0]+'»':(np&&!np.img?np.hi:'Todavía no hay nadie que te atienda aquí.'),ops,cls:'place'});return}
 }
 function freeLocOld(k){const l=TOWN_LOC[k],o=routeObjective(),here=o&&o.loc===k&&!o.book,np=LOC_NPC[k],gate=(k==='oeste'||k==='este'||k==='norte')?k:null,ops=[];
@@ -1350,7 +1354,7 @@ function openPracticeLog(){const rows=practiceRows(),all=rows.flatMap(r=>r.acts)
  npcPanel({img:null,name:'Mi práctica',prof:'Tu diario musical',hiHtml:html,ops:[{ic:'bye',t:'Cerrar',k:'bye',f:()=>{}}],cls:'place plogp'})}
 function toggleTrack(){S.route=S.route||{ch:'w1m01',step:0};S.route.track=!routeTracked();save();if(LS&&LS.L&&LS.L.free&&!LS.mrun&&!LS.fzone)renderStep()}
 function openRouteBook(){const v=$('#vLesson');gameFS(false);micOff();ACTIVE_KB=null;v.hidden=true;document.body.style.overflow='';LS=null;drawMap()}
-function bootWorld(){if(!freeOn()||LS)return;if(S.route&&S.route.ch==='w1m03'&&S.route.step>0&&S.wstate&&S.wstate.time&&!S.wstate.time.set3){S.wstate.time.phase='noche';S.wstate.time.set3=1;save()}openFree();const r=S.loc&&S.loc.region;if(S.loc&&S.loc.route&&r!=='florencia'){resumeRoute();return}if(r==='bosque'||r==='pastizales')setTimeout(()=>enterRegion(r),60)}
+function bootWorld(){if(!freeOn()||LS)return;if(S.route&&S.route.ch==='w1m03'&&S.route.step>0&&S.wstate&&S.wstate.time&&!S.wstate.time.set3){S.wstate.time.phase='noche';S.wstate.time.set3=1;save()}openFree();const r=S.loc&&S.loc.region;if(S.loc&&S.loc.route&&r!=='florencia'){resumeRoute();return}if(r==='bosque'||r==='pastizales'||(r==='jardin'&&gateOpen('norte')))setTimeout(()=>enterRegion(r),60)}
 
 /* los hechos ocurren una sola vez; las recompensas de la historia los consultan */
 function fact(k){S.facts=S.facts||{};if(S.facts[k])return false;S.facts[k]=Date.now();save();return true}
@@ -1936,7 +1940,7 @@ function gateOpen(k){if(S.wstate&&S.wstate.gates&&S.wstate.gates[k])return true;
 function gateRule(k){const L=LS&&LS.L,li=L?WORLDS[0].lessons.indexOf(L):-1;
  if(k==='oeste')return !!(S.done&&S.done.w1m01)||li>=1;
  if(k==='este')return !!(S.done&&S.done.w1m04)||li>=4||(L&&L.id==='w1m04'&&LS.i>=L.steps.findIndex(x=>x.go==='este'));
- if(k==='norte')return !!S.m5open;return true}
+ if(k==='norte')return !!S.m5open||hasFact('puerta_norte');return true}
 const TOWN_BUBBLE=[{k:'oeste',x:104,y:1420,img:'puerta_oeste',lbl:'Bosque oscuro'},{k:'este',x:1396,y:1420,img:'puerta_este',lbl:'Pastizales del eco'}];
 const TIMG={},TOWN_USE_TEX=false;function timg(k,src){if(!TIMG[k]){const i=new Image();i.src=src;TIMG[k]=i}return TIMG[k]}
 function townAssets(){TEX.forEach(k=>timg(k,V()+'town/'+(k==='pasto'?'pasto':'t_'+k)+'.webp'+TOWN_V));DEC.forEach(k=>timg(k,V()+'town/'+k+'.webp'));[...new Set(TOWN_OBJ.map(o=>o.k).concat(TOWN_OBJ.filter(o=>o.alt).map(o=>o.alt))),'espiritu_ruido','espiritu_calmo','espiritu_estruendo_calmo','espiritu_caos_calmo','espiritu_bosque','espiritu_estruendo','espiritu_caos','scriptorium_noche','farol_doble_on','farol_simple_on','puerta_oeste','puerta_oeste_c','puerta_este','puerta_este_c','puerta_norte_jardin_c'].forEach(k=>timg(k,V()+'town/p_'+k+'.webp'+TOWN_V));['frente_1','frente_2','frente_3','lado_1','lado_2','lado_3','quieto_1','quieto_2'].forEach(k=>timg('h_'+k,V()+'h_'+k+'.webp'+TOWN_V))}
@@ -2294,6 +2298,151 @@ let FOREST_GROUND=null;function forestGround(){if(FOREST_GROUND)return FOREST_GR
  FOREST_GROUND=c;return c}
 function forestGrid(zk){const C=TW.CELL,gw=Math.ceil(FW.W/C),gh=Math.ceil(FW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
  block(0,0,FW.W,170);block(0,0,40,FW.H);block(FW.W-40,0,FW.W,FW.H);block(0,FW.H-20,FW.W,FW.H);forestLayout(zk).forEach(o=>{if(o.fp)block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});return {b,gw,gh}}
+
+/*MEL-START*/
+/* ===================== LA MELODÍA DEL MAESTRO (formato sustituible) =====================
+   Cada compás: rh (mano derecha) y lh (mano izquierda), listas de [altura, duración, opciones].
+   altura: 'A4' (La4), 'C#5', 'Bb3'… o null = silencio. duración: w redonda · h blanca · q negra · e corchea · s semicorchea; con punto: 'q.'.
+   opciones: dyn 'pp'|'p'|'mp'|'mf'|'f'|'ff' · hair '<' o '>' (abre) y hairEnd:1 (cierra) · art 'stacc'|'leg' · slur 'start'|'end' · tie:1.
+   frag: fragmento de la historia en que se recupera ese compás. Santiago puede sustituir MC_THEME por su propia versión. */
+const DUR={w:4,h:2,q:1,e:.5,s:.25};
+function durOf(d){const dot=/\.$/.test(d),b=DUR[dot?d.slice(0,-1):d];if(b==null)throw new Error('duración desconocida: '+d);return dot?b*1.5:b}
+const NOTE_PC={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+function midiOf(n){if(n==null)return null;const m=/^([A-G])(#|b)?(-?\d)$/.exec(n);if(!m)throw new Error('altura desconocida: '+n);return 12*(+m[3]+1)+NOTE_PC[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0)}
+const MC_THEME={id:'tema_maestro',v:1,provisional:true,title:'La melodía de las voces dormidas',key:'La menor',time:[4,4],bpm:72,
+ range:{rh:['C4','E5'],lh:['G2','E3']},
+ bars:[
+  {frag:1,rh:[['A4','q',{dyn:'p'}],['C5','q'],['E5','h']],lh:[['A2','w']]},
+  {frag:2,rh:[['D5','q'],['C5','e'],['B4','e'],['A4','h']],lh:[['D3','w']]},
+  {frag:3,rh:[['G4','q',{hair:'<'}],['A4','q'],['B4','q'],['C5','q',{hairEnd:1}]],lh:[['C3','w']]},
+  {frag:3,rh:[['D5','h',{dyn:'f'}],[null,'q'],['E5','q']],lh:[['E3','w']]},
+  {frag:5,rh:[['E5','q',{hair:'>'}],['D5','e'],['C5','e'],['B4','q'],['A4','q',{hairEnd:1}]],lh:[['A2','w']]},
+  {frag:6,rh:[['B4','q',{art:'stacc'}],['C5','q',{art:'stacc'}],['D5','q',{art:'stacc'}],['B4','q',{art:'stacc'}]],lh:[['E3','w']]},
+  {frag:7,rh:[['C5','h',{slur:'start'}],['B4','q'],['G4','q',{slur:'end'}]],lh:[['D3','h'],['E3','h']]},
+  {frag:8,rh:[['A4','w',{dyn:'p'}]],lh:[['A2','w']]}]};
+/* comprueba que la melodía es correcta: duraciones de cada compás, alturas, registros y reguladores cerrados */
+function validateTheme(T){const err=[],beats=T.time[0]*4/T.time[1];let open=null;
+ T.bars.forEach((b,i)=>['rh','lh'].forEach(hd=>{const L=b[hd]||[];if(!L.length)return;let sum=0;
+  L.forEach(([p,d,o],j)=>{try{sum+=durOf(d)}catch(e){err.push(`compás ${i+1} ${hd}: ${e.message}`)}
+   if(p!=null){let m;try{m=midiOf(p)}catch(e){err.push(`compás ${i+1} ${hd}: ${e.message}`);return}const R=T.range&&T.range[hd];if(R&&(m<midiOf(R[0])||m>midiOf(R[1])))err.push(`compás ${i+1} ${hd}: ${p} fuera del registro ${R.join('–')}`)}
+   o=o||{};if(o.hair){if(open)err.push(`compás ${i+1}: regulador abierto dos veces`);open=o.hair}if(o.hairEnd){if(!open)err.push(`compás ${i+1}: regulador cerrado sin abrir`);open=null}});
+  if(Math.abs(sum-beats)>1e-9)err.push(`compás ${i+1} ${hd}: dura ${sum} tiempos y debería durar ${beats}`)}));
+ if(open)err.push('un regulador queda abierto al final');return err}
+/* conceptos que exige cada parte: así nunca pedimos algo que todavía no se ha enseñado */
+function themeNeeds(T,bars){const need=new Set(['negra']),B=T.bars.slice(...(bars||[0,T.bars.length]));
+ B.forEach(b=>{['rh','lh'].forEach(hd=>(b[hd]||[]).forEach(([p,d,o])=>{o=o||{};const base=d.replace('.','');
+  need.add({w:'redonda',h:'blanca',q:'negra',e:'corchea',s:'semicorchea'}[base]);if(/\./.test(d))need.add('puntillo');if(p==null)need.add('silencio');
+  if(o.dyn)need.add('dinamica');if(o.hair)need.add('reguladores');if(o.art==='stacc')need.add('staccato');if(o.art==='leg'||o.slur)need.add('legato')}));
+  if((b.lh||[]).length)need.add('clave_fa');if((b.lh||[]).length&&(b.rh||[]).length)need.add('dos_manos')});return need}
+/* versión simplificada para lo que el jugador ya sabe: une corcheas y semicorcheas en negras,
+   separa las manos si todavía no se enseñó a tocarlas juntas y marca qué signos se muestran sin evaluarse */
+function simplifyTheme(T,known,bars){const K=new Set(known),B=T.bars.slice(...(bars||[0,T.bars.length])),out={rh:[],lh:[],together:K.has('dos_manos'),evalDyn:K.has('dinamica')&&K.has('reguladores'),evalArt:K.has('staccato')&&K.has('legato'),bars:[]};
+ const fold=L=>{const r=[];let acc=null;L.forEach(([p,d,o])=>{const v=durOf(d),base=d.replace('.','');const ok=(base==='e'&&K.has('corchea'))||(base==='s'&&K.has('semicorchea'))||!['e','s'].includes(base);
+   if(ok&&!acc){r.push({p,m:midiOf(p),d:v,o:o||{}});return}if(!acc)acc={p,m:midiOf(p),d:0,o:o||{}};acc.d+=v;if(Math.abs(acc.d-Math.round(acc.d))<1e-9){r.push(acc);acc=null}});if(acc)r.push(acc);
+  return r.map(n=>(n.p==null&&!K.has('silencio'))?Object.assign(n,{p:'(silencio sin evaluar)',m:null,skip:1}):n)};
+ B.forEach(b=>{const rh=fold(b.rh||[]),lh=K.has('clave_fa')?fold(b.lh||[]):[];out.rh.push(...rh);out.lh.push(...lh);out.bars.push({rh,lh})});return out}
+/* secuencia de alturas para los ejercicios (sin silencios) */
+const themeSeq=L=>L.filter(n=>n.m!=null).map(n=>n.m);
+/*MEL-END*/
+
+/* ===================== CAPÍTULOS V-VI · CIMIENTOS (C0) =====================
+   Estado del jardín de Beatrice. Solo c5Event() puede cambiarlo: así cada regla (por ejemplo, que el jardín solo lo abra Beatrice)
+   vive en un único sitio, y dentro de un recuerdo nunca se toca el mundo real. */
+const C5_INSTR=['arpa','clavicordio','clavecin','virginal','organo','salterio','viola'];
+const wPlace=k=>S.wstate&&S.wstate.places?S.wstate.places[k]:undefined;
+const C5={gate:()=>gateOpen('norte'),beatrice:()=>hasFact('beatrice_restaurada'),garden:()=>wPlace('jardin')==='abierto',
+ voces:()=>Object.assign({},S.wstate&&S.wstate.voces),frags:()=>Object.keys(S.facts||{}).filter(k=>/^melodia:\d+$/.test(k)).map(k=>+k.split(':')[1]).sort((a,b)=>a-b),
+ resonance:()=>hasFact('skill:resonancia'),observatory:()=>wPlace('observatorio')||'oculto',sala:n=>hasFact('sala:'+n)};
+function c5Event(k,arg){if(MEMORY)return false;S.wstate=S.wstate||{};const W=S.wstate;W.places=W.places||{};W.gates=W.gates||{};
+ switch(k){
+  case 'puerta_norte':fact('puerta_norte');W.gates.norte=true;break;
+  case 'beatrice':if(!W.gates.norte)return false;fact('beatrice_hallada');fact('beatrice_restaurada');break;
+  case 'jardin':if(!hasFact('beatrice_restaurada'))return false;/* solo Beatrice concede el acceso */W.places.jardin='abierto';fact('jardin_revelado');break;
+  case 'resonancia':fact('skill:resonancia');break;
+  case 'voz':if(!C5_INSTR.includes(arg))return false;W.voces=W.voces||{};W.voces[arg]=1;fact('voz:'+arg);break;
+  case 'fragmento':if(!(arg>=1&&arg<=8))return false;fact('melodia:'+arg);break;
+  case 'sala':if(!(arg>=1&&arg<=7))return false;fact('sala:'+arg);break;
+  case 'observatorio':if(arg!=='visible'&&arg!=='abierto')return false;if(arg==='visible'&&W.places.observatorio==='abierto')break;W.places.observatorio=arg;break;
+  default:return false}
+ save();return true}
+/* instrumentos con estadísticas: el Piano Fiorentino se presta gratis dentro del jardín y se compra para invocarlo fuera */
+const INSTR_STATS={piano_viejo:{rar:'comun',hearts:3,power:1},piano_fiorentino:{rar:'raro',hearts:4,power:2,price:500,lend:'jardin',tone:'piano'}};
+const instrHearts=id=>(INSTR_STATS[id]||{}).hearts||3;
+function canInvoke(id){if(hasInstr(id))return true;const st=INSTR_STATS[id];return !!(st&&st.lend&&S.loc&&S.loc.region===st.lend&&C5.garden())}
+function buyFiorentino(){const st=INSTR_STATS.piano_fiorentino;if(MEMORY||hasInstr('piano_fiorentino')||!C5.garden())return false;if((S.coins||0)<st.price)return false;S.coins-=st.price;S.instr=S.instr||[];S.instr.push('piano_fiorentino');fact('instr:piano_fiorentino');save();return true}
+/* Resonancia de la memoria: genérica. Cada objeto declara región, tipo y el hecho que guarda; para usarla en otro mundo basta con añadir objetos. */
+const MEM_MOTIF=[57,60,64,69];/* La-Do-Mi-La: las mismas notas que abren la melodía del Maestro */
+const MEM_KIND={inscripcion:'Revela una inscripción',mecanismo:'Activa un mecanismo',fragmento:'Recupera un fragmento de melodía',instrumento:'Despierta un instrumento',recuerdo:'Muestra un recuerdo'};
+const MEM_OBJ=[{id:'manuscrito_blanco',region:'jardin',at:'taller',kind:'inscripcion',teaches:true,title:'El manuscrito en blanco',text:'La tinta aparece despacio, como si alguien escribiera desde muy lejos.'}];
+const memAwake=id=>hasFact('mem:'+id);
+function resonate(id,onDone){const o=MEM_OBJ.find(x=>x.id===id);if(!o)return;if(!o.teaches&&!C5.resonance()){toast('Tu laúd todavía no sabe escuchar los recuerdos de los objetos.');return}
+ lutePlay({title:'Resonancia de la memoria',tag:o.title,hero:'h_quieto_1',kind:'lute',cls:'read',seq:MEM_MOTIF,lo:55,hi:72,names:'all',hint:'always',say:'—Toca el motivo de la memoria: La, Do, Mi, La.',sub:MEM_KIND[o.kind]+'.',winText:o.text,okText:'Continuar',cancelText:'Ahora no',
+  onDone:()=>{if(!MEMORY){fact('mem:'+o.id);if(o.teaches)c5Event('resonancia');if(o.kind==='instrumento'&&o.voz)c5Event('voz',o.voz);if(o.kind==='fragmento'&&o.frag)c5Event('fragmento',o.frag)}if(onDone)onDone(o)}})}
+/* ---------------- región del jardín (arte provisional de Florencia hasta recibir el definitivo) ---------------- */
+const GW={W:1400,H:2000},G_ENTRY=[700,1900];
+const G_PATH=[[700,2000],[700,1500],[700,1000],[700,760]];
+const G_FOG=[440,470,960,840];/* el jardín principal: infranqueable hasta que Beatrice lo abra */
+const G_PTS={entrada:[700,1880],taller:[330,1330],jardin:[700,880],limonaia:[1090,1180],observatorio:[700,330]};
+const G_SPOT={taller:{n:'Taller de Beatrice',at:[330,1330],img:'casa_c',x:300,y:1290,s:1,fp:[220,70]},limonaia:{n:'La limonaia',at:[1090,1180],img:'casa_a',x:1110,y:1140,s:1,fp:[230,70],need:()=>C5.garden()},
+ observatorio:{n:'El observatorio',at:[700,330],img:'campanario',x:700,y:300,s:.9,fp:[120,50],need:()=>C5.observatory()!=='oculto'}};
+const G_OBJ=[...[[560,1760],[840,1760],[560,1560],[840,1560],[560,1360],[840,1360],[560,1160],[840,1160]].map(([x,y],i)=>({k:i%2?'cipres_2':'cipres_1',x,y,fp:[26,16]})),
+ ...[[620,1650],[780,1650],[620,1250],[780,1250]].map(([x,y])=>({k:'limonero',x,y,fp:[30,14]})),
+ ...[[470,1880],[930,1880],[470,1460],[930,1460]].map(([x,y])=>({k:'seto',x,y,fp:[100,24]})),
+ {k:'banco',x:930,y:1640,fp:[60,14]},{k:'banco',x:470,y:1640,fp:[60,14]},...[[640,1030],[760,1030],[640,1900],[760,1900]].map(([x,y])=>({k:'farol_simple',x,y,fp:[16,10]}))];
+function gardenGrid(){const C=TW.CELL,gw=Math.ceil(GW.W/C),gh=Math.ceil(GW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
+ block(0,0,GW.W,150);block(0,0,60,GW.H);block(GW.W-60,0,GW.W,GW.H);G_OBJ.forEach(o=>block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y));
+ Object.values(G_SPOT).forEach(s=>{if(!s.need||s.need())block(s.x-s.fp[0]/2,s.y-s.fp[1],s.x+s.fp[0]/2,s.y)});
+ if(!C5.garden())block(...G_FOG);/* sin puerta secreta: mientras la niebla exista, no hay camino */
+ if(C5.observatory()==='oculto')block(0,0,GW.W,560);return {b,gw,gh}}
+function stepGarden(st,box){townAssets();const pt=(S.loc&&S.loc.region==='jardin'&&G_PTS[S.loc.pt])?S.loc.pt:'entrada';const H=(LS.ghero=LS.ghero||G_PTS[pt].slice());let G=gardenGrid(),alive=true;
+ const gi=k=>timg('p_'+k,V()+'town/p_'+k+'.webp'+TOWN_V);G_OBJ.forEach(o=>gi(o.k));Object.values(G_SPOT).forEach(s=>gi(s.img));
+ box.innerHTML=`<div class="cmap tmap fmap" id="cmap"><canvas id="tcv"></canvas><div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Exploración libre')} · Jardín de Beatrice</small><b id="fmis"></b></div><div class="cm-hint">Arte provisional (C0). Toca el suelo para caminar; toca un edificio para entrar.</div>${booksHTML()}</div>`;
+ bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
+ $('#fmis').textContent=C5.garden()?'El jardín está abierto. El Piano Fiorentino te espera en el centro.':'Una niebla dorada cubre el jardín principal. Sigue los caminos exteriores.';
+ const fit=()=>{dpr=Math.min(2,devicePixelRatio||1);VW=wrap.clientWidth;VH=wrap.clientHeight;cv.width=VW*dpr;cv.height=VH*dpr;cv.style.width=VW+'px';cv.style.height=VH+'px'};fit();
+ const cam={x:H[0]-VW/2,y:H[1]-VH*.55},clampCam=()=>{cam.x=Math.max(0,Math.min(GW.W-VW,cam.x));cam.y=Math.max(0,Math.min(GW.H-VH,cam.y))};clampCam();
+ let hdir='front',path=[],moving=false,facing=1,walkT=0,last=performance.now(),busy=false,arriving=null,pingP=null,pingT=0,fogT=0;
+ const savePt=k=>{setLoc('jardin',G_PTS[k][0],G_PTS[k][1],{pt:k})};
+ const walkTo=(p,cb)=>{const pth=townPath(G,H,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=cb||null};
+ const inFog=(x,y)=>!C5.garden()&&x>G_FOG[0]-30&&x<G_FOG[2]+30&&y>G_FOG[1]-30&&y<G_FOG[3]+40;
+ const leave=()=>{alive=false;LS.ghero=null;backToTown('norte')};
+ const enter=k=>{savePt(k);if(k==='taller'){if(C5.beatrice()){openNpc('beatrice');return}toast('El taller está en silencio. (La llegada de Beatrice se construye en la fase C1.)');return}
+  if(k==='limonaia'){toast('La limonaia de los instrumentos olvidados (fase C2).');return}if(k==='observatorio'){toast(C5.observatory()==='abierto'?'El observatorio de las armonías (Capítulo VI).':'Tres cerraduras sellan la puerta: un engranaje, una horquilla y dos manos.');return}};
+ cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),wx=e.clientX-r.left+cam.x,wy=e.clientY-r.top+cam.y;pingP=[wx,wy];pingT=performance.now();
+  if(wy>GW.H-110&&Math.abs(wx-700)<160){walkTo([700,GW.H-40],leave);return}
+  if(inFog(wx,wy)){walkTo([Math.max(G_FOG[0]+20,Math.min(G_FOG[2]-20,wx)),G_FOG[3]+50],()=>toast('La niebla dorada te rodea con suavidad y te devuelve al camino. Algo, o alguien, protege este jardín.'));return}
+  const sp=Object.entries(G_SPOT).find(([k,s])=>(!s.need||s.need())&&Math.abs(wx-s.x)<s.fp[0]*.6&&wy<s.y+20&&wy>s.y-260);if(sp){walkTo(sp[1].at,()=>enter(sp[0]));return}
+  if(C5.garden()&&Math.hypot(wx-700,wy-650)<90){walkTo(G_PTS.jardin,()=>{savePt('jardin');toast(canInvoke('piano_fiorentino')?'El Piano Fiorentino: aquí puedes tocarlo gratis. (Escena y práctica en la fase C1.)':'El Piano Fiorentino.')});return}
+  walkTo([wx,wy])});
+ const ro=new ResizeObserver(fit);ro.observe(wrap);
+ const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
+  if(!busy&&moving&&path.length){const p=path[0],dx=p[0]-H[0],dy=p[1]-H[1],d=Math.hypot(dx,dy),v=150*dt;if(Math.abs(dx)>2)facing=dx<0?-1:1;hdir=dy>Math.abs(dx)*1.1?'front':'side';if(d<=v){H[0]=p[0];H[1]=p[1];path.shift();if(!path.length){moving=false;const a=arriving;arriving=null;if(a)a()}}else{H[0]+=dx/d*v;H[1]+=dy/d*v}walkT+=dt}
+  cam.x+=(H[0]-VW/2-cam.x)*Math.min(1,dt*5);cam.y+=(H[1]-VH*.55-cam.y)*Math.min(1,dt*5);clampCam();
+  g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6f8a4a';g.fillRect(0,0,VW,VH);g.translate(-cam.x,-cam.y);
+  /* suelo provisional: césped y camino de grava */
+  g.fillStyle='#7d9655';g.fillRect(0,0,GW.W,GW.H);g.strokeStyle='#d9ccaa';g.lineWidth=70;g.lineCap='round';g.beginPath();G_PATH.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();
+  g.lineWidth=46;g.beginPath();g.moveTo(700,1330);g.lineTo(G_PTS.taller[0],G_PTS.taller[1]);g.stroke();if(C5.garden()){g.beginPath();g.moveTo(700,1180);g.lineTo(G_PTS.limonaia[0],G_PTS.limonaia[1]);g.stroke()}
+  if(C5.garden()){g.fillStyle='#ece6d6';g.beginPath();g.ellipse(700,650,120,62,0,0,6.3);g.fill();g.fillStyle='#5a3a1e';g.fillRect(650,600,100,40);g.fillStyle='#e8c27a';g.fillRect(650,632,100,8)}
+  const list=[];G_OBJ.forEach(o=>{const im=TIMG['p_'+o.k];if(!im||!im.complete||!im.width)return;const s=.5,w=im.width*s,h=im.height*s;list.push({y:o.y,d:()=>g.drawImage(im,o.x-w/2,o.y-h,w,h)})});
+  Object.entries(G_SPOT).forEach(([k,sp])=>{if(sp.need&&!sp.need())return;const im=TIMG['p_'+sp.img];if(!im||!im.complete||!im.width)return;const s=.5*sp.s,w=im.width*s,h=im.height*s;list.push({y:sp.y,d:()=>{g.drawImage(im,sp.x-w/2,sp.y-h,w,h);g.font='700 11px Cinzel, serif';g.textAlign='center';const tw=g.measureText(sp.n).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(sp.x-tw/2,sp.y+6,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(sp.n,sp.x,sp.y+19)}})});
+  const fi=[1,2,3,2][Math.floor(walkT/.16)%4],hi=TIMG[moving?(hdir==='front'?'h_frente_'+fi:'h_lado_'+fi):'h_quieto_1'];
+  list.push({y:H[1],d:()=>{g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(H[0],H[1],13,4,0,0,6.3);g.fill();if(hi&&hi.complete&&hi.naturalWidth){const k=68/144,w=hi.width*k,h=hi.height*k;g.save();g.translate(H[0],H[1]);if(moving&&hdir==='side'&&facing<0)g.scale(-1,1);g.drawImage(hi,-w/2,-h+2,w,h);g.restore()}}});
+  list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
+  /* la niebla dorada: se arremolina y no deja ver el jardín */
+  if(!C5.garden()){fogT+=dt;const [x0,y0,x1,y1]=G_FOG,cx=(x0+x1)/2,cy=(y0+y1)/2;for(let i=0;i<14;i++){const a=fogT*.25+i*.9,r=60+((i*53)%140),x=cx+Math.cos(a)*r*1.4,y=cy+Math.sin(a*1.3)*r*.7,R=170+((i*37)%90);const gr=g.createRadialGradient(x,y,0,x,y,R);gr.addColorStop(0,'rgba(255,236,180,.55)');gr.addColorStop(.6,'rgba(240,205,120,.28)');gr.addColorStop(1,'rgba(240,205,120,0)');g.fillStyle=gr;g.fillRect(x-R,y-R,R*2,R*2)}
+   g.fillStyle='rgba(255,240,200,.35)';g.fillRect(x0,y0,x1-x0,y1-y0)}
+  if(C5.observatory()==='oculto'){g.fillStyle='rgba(60,80,40,.55)';g.fillRect(0,0,GW.W,560)}
+  g.textAlign='center';g.font='700 11px Cinzel, serif';const lbl='Puerta norte · volver a Florencia',tw=g.measureText(lbl).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(700-tw/2,GW.H-62,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(lbl,700,GW.H-49);
+  if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}};
+ requestAnimationFrame(frame);if(DEV)window.__G={H,get G(){return G},walkTo,inFog,enter,regrid:()=>{G=gardenGrid()}}}
+/* política para partidas que avanzaron por los capítulos provisionales V y VI (se activa cuando el nuevo capítulo los sustituya):
+   - las estrellas provisionales se guardan aparte (provV) y como hecho, y el capítulo vuelve a «sin completar» para vivir la historia nueva;
+   - el Códice, el Archivo, los florines y los instrumentos se conservan; los capítulos VII-XII provisionales no se tocan. */
+function migrateProvisional(o,ids){const S2=JSON.parse(JSON.stringify(o||{}));S2.done=S2.done||{};S2.facts=S2.facts||{};S2.provV=S2.provV||{};
+ (ids||['w1m05','w1m06']).forEach(id=>{if(S2.done[id]){S2.provV[id]=S2.done[id];S2.facts['prov:'+id]=S2.facts['prov:'+id]||Date.now();delete S2.done[id];delete S2.facts['cap:'+id]}});
+ if(S2.route&&(ids||['w1m05','w1m06']).includes(S2.route.ch))S2.route.step=0;
+ if(S2.route){const first=CH_IDS.find(id=>!S2.done[id]);if(first&&CH_IDS.indexOf(first)<CH_IDS.indexOf(S2.route.ch))S2.route={ch:first,step:0,track:S2.route.track!==false}}
+ return S2}
 
 /* ===================== MÓDULO 4 · PASTIZALES DEL ECO (criaturas físicas) ===================== */
 const MW={W:1400,H:2000},M_ENTRY=[700,1900];
@@ -3388,7 +3537,7 @@ function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*d
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
 if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))setTimeout(bootWorld,80);
-window.__apr={saneSave,get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},regenReady,regenLeft,migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc,openNpc,NPCS,toggleTrack,ASKQ,askAvail,openBook};
+window.__apr={c5Event,C5,canInvoke,buyFiorentino,resonate,MEM_OBJ,MC_THEME,validateTheme,simplifyTheme,migrateProvisional,instrHearts,saneSave,get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},regenReady,regenLeft,migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc,openNpc,NPCS,toggleTrack,ASKQ,askAvail,openBook};
 })();
 </script>
 </body></html>
