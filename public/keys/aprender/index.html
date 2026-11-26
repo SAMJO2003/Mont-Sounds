@@ -1196,7 +1196,7 @@ const NPCS={
   hi:[[()=>hasInstr('laud'),'—¡Tienes un laúd! Yo todavía me equivoco con los arpegios… practiquemos.'],[()=>true,'—Los acordes se me resisten, pero los arpegios ya me salen. ¿Tocamos?']],sv:['route','play','ask','bye'],
   mel:[[60,64,67,72,67,64,60],[65,69,72,77,72,69,65],[67,71,74,79,74,71,67]],mel2:[[60,64,67,72,65,69,72,77],[67,71,74,79,60,64,67,72]]}};
 /* Beatrice vive en su taller del jardín (fuera de Florencia): se abre desde la región del jardín. Arte provisional hasta recibir el definitivo. */
-NPCS.beatrice={n:'Beatrice',p:'Fabricante de instrumentos de teclado',img:null,bg:'m2/taller_int',where:()=>'jardin_taller',avail:()=>C5.beatrice(),
+NPCS.beatrice={n:'Beatrice',p:'Fabricante de instrumentos de teclado',img:'m5/beatrice_pie',bg:'m5/int_sala_instrumentos',where:()=>'jardin_taller',avail:()=>C5.beatrice(),
  hi:[[()=>C5.garden(),'—El jardín te recuerda. Y yo también. ¿Qué quieres estudiar hoy?'],[()=>true,'—Así que tú eres quien despertó mi taller. Pasa… y no toques nada sin preguntar.']],sv:['route','buyFior','ask','bye']};
 /* preguntas: ver CONVERSACIONES más abajo (si un personaje no tiene, la opción se oculta) */
 const ASK={};
@@ -2388,29 +2388,41 @@ function resonate(id,onDone){const o=MEM_OBJ.find(x=>x.id===id);if(!o)return;if(
 const GW={W:1400,H:2000},G_ENTRY=[700,1900];
 const G_PATH=[[700,2000],[700,1500],[700,1000],[700,760]];
 const G_FOG=[440,470,960,840];/* el jardín principal: infranqueable hasta que Beatrice lo abra */
-const G_PTS={entrada:[700,1880],taller:[330,1330],jardin:[700,880],limonaia:[1090,1180],observatorio:[700,330]};
-const G_SPOT={taller:{n:'Taller de Beatrice',at:[330,1330],img:'casa_c',x:300,y:1290,s:1,fp:[220,70]},limonaia:{n:'La limonaia',at:[1090,1180],img:'casa_a',x:1110,y:1140,s:1,fp:[230,70],need:()=>C5.garden()},
+const G_PTS={entrada:[700,1880],taller:[330,1330],jardin:[700,640],limonaia:[1090,1180],observatorio:[700,330]};
+const G_SPOT={taller:{n:'Taller de Beatrice',at:[330,1330],img:'m5/b_taller_beatrice',x:300,y:1290,s:.52,fp:[200,60]},limonaia:{n:'La limonaia',at:[1100,1180],img:'m5/b_limonaia',x:1110,y:1140,s:.43,fp:[250,55],need:()=>C5.garden()},
  observatorio:{n:'El observatorio',at:[700,330],img:'campanario',x:700,y:300,s:.9,fp:[120,50],need:()=>C5.observatory()!=='oculto'}};
 const G_OBJ=[...[[560,1760],[840,1760],[560,1560],[840,1560],[560,1360],[840,1360],[560,1160],[840,1160]].map(([x,y],i)=>({k:i%2?'cipres_2':'cipres_1',s:1.3,x,y,fp:[26,16]})),
  ...[[620,1650],[780,1650],[620,1250],[780,1250]].map(([x,y])=>({k:'limonero',x,y,fp:[30,14]})),
  ...[[470,1880],[930,1880],[470,1460],[930,1460],[470,1080],[930,1080]].map(([x,y],i)=>({img:'m5/obj_seto',s:.19,x,y,fp:[90,20],flip:i%2})),
  ...[[380,1760],[1020,1760],[380,1560],[1020,1560]].map(([x,y],i)=>({img:'m5/obj_jardinera',s:.2,x,y,fp:[62,16],flip:i%2})),
- {img:'m5/obj_banco_lira',s:.17,x:930,y:1660,fp:[74,14],flip:1},{img:'m5/obj_banco_lira',s:.17,x:470,y:1660,fp:[74,14]},...[[640,1030],[760,1030],[640,1900],[760,1900]].map(([x,y])=>({k:'farol_simple',x,y,fp:[16,10]})),
+ {img:'m5/obj_banco_lira',s:.17,x:930,y:1660,fp:[74,14],flip:1},{img:'m5/obj_banco_lira',s:.17,x:470,y:1660,fp:[74,14]}, ...[[640,1030],[760,1030],[640,1900],[760,1900]].map(([x,y],i)=>({img:'m5/obj_farol_jardin',s:.29,x,y,fp:[18,10],flip:i%2})),
+ {img:'m5/obj_estatua_musa',s:.27,x:572,y:912,fp:[44,16]},{img:'m5/obj_estatua_musa',s:.27,x:828,y:912,fp:[44,16],flip:1},
+ {img:'m5/obj_busto',s:.26,x:625,y:1460,fp:[34,14]},{img:'m5/obj_busto',s:.26,x:775,y:1460,fp:[34,14],flip:1},
+ {img:'m5/obj_topiaria',s:.21,x:612,y:1830,fp:[30,14]},{img:'m5/obj_topiaria',s:.21,x:788,y:1830,fp:[30,14]},
+ {img:'m5/obj_pergola',s:.36,x:445,y:1350,fp:[0,0]},
+ ...[[430,1395],[240,1395],[1000,1235],[1225,1235],[470,1960],[930,1960]].map(([x,y],i)=>({img:'m5/obj_rosal',s:.21,x,y,fp:[40,14],flip:i%2})),
+ {img:'m5/obj_seto_esquina',s:.19,x:380,y:1965,fp:[86,20]},{img:'m5/obj_seto_esquina',s:.19,x:1020,y:1965,fp:[86,20],flip:1},
+ ...[[520,455],[880,455],[300,455],[1100,455]].map(([x,y],i)=>({img:'m5/obj_balaustrada',s:.23,x,y,fp:[100,16],flip:i%2})),
+ {img:'m5/b_villa',s:.48,x:230,y:820,fp:[230,60]},
+ /* dentro del jardín principal (se ve al disiparse la niebla) */
+ {img:'m5/obj_seto',s:.19,x:545,y:720,fp:[90,20],inner:1},{img:'m5/obj_seto',s:.19,x:855,y:720,fp:[90,20],flip:1,inner:1},
+ {img:'m5/obj_rosal',s:.21,x:520,y:800,fp:[40,14],inner:1},{img:'m5/obj_rosal',s:.21,x:880,y:800,fp:[40,14],flip:1,inner:1},
+ {img:'m5/obj_topiaria',s:.21,x:500,y:600,fp:[30,14],inner:1},{img:'m5/obj_topiaria',s:.21,x:900,y:600,fp:[30,14],inner:1},
  {img:'m5/obj_portal_jardin',s:.43,x:700,y:880,fp:[0,0],portal:1}];
-const gImg=o=>o.img||('town/p_'+o.k);let G_GROUND=null;
+const gImg=o=>o.img||('town/p_'+o.k),spImg=s=>s.img.includes('/')?s.img:'town/p_'+s.img;let G_GROUND=null;
 function gardenGround(){const ok=k=>TIMG[k]&&TIMG[k].complete&&TIMG[k].width;if(G_GROUND&&G_GROUND.open===C5.garden())return G_GROUND.c;if(!['g_cesped','g_grava','g_losa'].every(ok))return null;
  const c=document.createElement('canvas');c.width=GW.W;c.height=GW.H;const g=c.getContext('2d'),pat=k=>g.createPattern(TIMG[k],'repeat');g.fillStyle=pat('g_cesped');g.fillRect(0,0,GW.W,GW.H);
  g.lineCap='round';g.lineJoin='round';g.strokeStyle=pat('g_grava');g.lineWidth=86;g.beginPath();G_PATH.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.stroke();g.lineWidth=56;g.beginPath();g.moveTo(700,1330);g.lineTo(G_PTS.taller[0],G_PTS.taller[1]);g.stroke();
- if(C5.garden()){g.beginPath();g.moveTo(700,1180);g.lineTo(G_PTS.limonaia[0],G_PTS.limonaia[1]);g.stroke();g.fillStyle=pat('g_losa');g.beginPath();g.ellipse(700,660,200,110,0,0,6.3);g.fill()}
+ if(C5.garden()){g.beginPath();g.moveTo(700,1180);g.lineTo(G_PTS.limonaia[0],G_PTS.limonaia[1]);g.stroke();g.fillStyle=pat('g_losa');g.beginPath();g.ellipse(700,585,190,95,0,0,6.3);g.fill()}
  g.fillStyle=pat('g_losa');g.beginPath();g.ellipse(700,330,230,90,0,0,6.3);g.fill();
  const vg=g.createRadialGradient(GW.W/2,GW.H/2,500,GW.W/2,GW.H/2,1300);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(20,30,10,.3)');g.fillStyle=vg;g.fillRect(0,0,GW.W,GW.H);G_GROUND={c,open:C5.garden()};return c}
 function gardenGrid(){const C=TW.CELL,gw=Math.ceil(GW.W/C),gh=Math.ceil(GW.H/C),b=new Uint8Array(gw*gh);const block=(x0,y0,x1,y1)=>{for(let y=Math.max(0,Math.floor(y0/C));y<=Math.min(gh-1,Math.floor(y1/C));y++)for(let x=Math.max(0,Math.floor(x0/C));x<=Math.min(gw-1,Math.floor(x1/C));x++)b[y*gw+x]=1};
- block(0,0,GW.W,150);block(0,0,60,GW.H);block(GW.W-60,0,GW.W,GW.H);G_OBJ.forEach(o=>{if(o.fp[0])block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});
+ block(0,0,GW.W,150);block(0,0,60,GW.H);block(GW.W-60,0,GW.W,GW.H);G_OBJ.forEach(o=>{if(o.fp[0]&&(!o.inner||C5.garden()))block(o.x-o.fp[0]/2,o.y-o.fp[1],o.x+o.fp[0]/2,o.y)});
  Object.values(G_SPOT).forEach(s=>{if(!s.need||s.need())block(s.x-s.fp[0]/2,s.y-s.fp[1],s.x+s.fp[0]/2,s.y)});
  if(!C5.garden())block(...G_FOG);/* sin puerta secreta: mientras la niebla exista, no hay camino */
- if(C5.observatory()==='oculto')block(0,0,GW.W,560);return {b,gw,gh}}
+ if(C5.observatory()==='oculto')block(0,0,GW.W,440);return {b,gw,gh}}
 function stepGarden(st,box){townAssets();const pt=(S.loc&&S.loc.region==='jardin'&&G_PTS[S.loc.pt])?S.loc.pt:'entrada';const H=(LS.ghero=LS.ghero||G_PTS[pt].slice());let G=gardenGrid(),alive=true;
- const gi=k=>timg('p_'+k,V()+'town/p_'+k+'.webp'+TOWN_V);G_OBJ.forEach(o=>timg(gImg(o),V()+gImg(o)+'.webp'+TOWN_V));Object.values(G_SPOT).forEach(s=>gi(s.img));timg('g_cesped',V()+'m5/t_cesped_b.webp'+TOWN_V);timg('g_grava',V()+'m5/t_grava.webp'+TOWN_V);timg('g_losa',V()+'m5/t_losa.webp'+TOWN_V);
+ const gi=k=>timg('p_'+k,V()+'town/p_'+k+'.webp'+TOWN_V);G_OBJ.forEach(o=>timg(gImg(o),V()+gImg(o)+'.webp'+TOWN_V));Object.values(G_SPOT).forEach(s=>timg(spImg(s),V()+spImg(s)+'.webp'+TOWN_V));timg('m5/clavecin',V()+'m5/clavecin.webp'+TOWN_V);timg('g_cesped',V()+'m5/t_cesped_b.webp'+TOWN_V);timg('g_grava',V()+'m5/t_grava.webp'+TOWN_V);timg('g_losa',V()+'m5/t_losa.webp'+TOWN_V);
  box.innerHTML=`<div class="cmap tmap fmap" id="cmap"><canvas id="tcv"></canvas><div class="cm-quest ${QMINI()}"><small>${esc(st.act||'Exploración libre')} · Jardín de Beatrice</small><b id="fmis"></b></div><div class="cm-hint">Jardín en construcción. Toca el suelo para caminar; toca un edificio para entrar.</div>${C5_PREVIEW?'<button class="c5pv" type="button" id="c5pvT"></button>':''}${booksHTML()}</div>`;
  bindBooks(box);const cv=$('#tcv'),g=cv.getContext('2d'),wrap=$('#cmap');let VW=0,VH=0,dpr=1;
  const mis=()=>{$('#fmis').textContent=(C5_PREVIEW?'Vista previa (no cambia tu partida) · ':'')+(C5.garden()?'El jardín está abierto. El Piano Fiorentino te espera en el centro.':'Una niebla dorada cubre el jardín principal. Sigue los caminos exteriores.');const b=$('#c5pvT');if(b)b.textContent=C5.garden()?'Vista previa: volver a poner la niebla':'Vista previa: disipar la niebla'};mis();
@@ -2422,13 +2434,13 @@ function stepGarden(st,box){townAssets();const pt=(S.loc&&S.loc.region==='jardin
  const walkTo=(p,cb)=>{const pth=townPath(G,H,p);if(!pth||!pth.length){pingP=p;pingT=performance.now();return}path=pth;moving=true;arriving=cb||null};
  const inFog=(x,y)=>!C5.garden()&&x>G_FOG[0]-30&&x<G_FOG[2]+30&&y>G_FOG[1]-30&&y<G_FOG[3]+40;
  const leave=()=>{alive=false;LS.ghero=null;const pv=C5_PREVIEW;C5_PREVIEW=null;if(pv){closeSheet();openFree();return}backToTown('norte')};
- const enter=k=>{savePt(k);if(k==='taller'){if(C5.beatrice()||C5_PREVIEW){if(C5_PREVIEW)toast('Vista previa: Beatrice todavía no tiene retrato.');openNpc('beatrice');return}toast('El taller está en silencio. (La llegada de Beatrice se construye en la fase C1.)');return}
+ const enter=k=>{savePt(k);if(k==='taller'){if(C5.beatrice()||C5_PREVIEW){openNpc('beatrice');return}toast('El taller está en silencio. (La llegada de Beatrice se construye en la fase C1.)');return}
   if(k==='limonaia'){toast('La limonaia de los instrumentos olvidados (fase C2).');return}if(k==='observatorio'){toast(C5.observatory()==='abierto'?'El observatorio de las armonías (Capítulo VI).':'Tres cerraduras sellan la puerta: un engranaje, una horquilla y dos manos.');return}};
  cv.addEventListener('click',e=>{if(busy)return;const r=cv.getBoundingClientRect(),wx=e.clientX-r.left+cam.x,wy=e.clientY-r.top+cam.y;pingP=[wx,wy];pingT=performance.now();
   if(wy>GW.H-110&&Math.abs(wx-700)<160){walkTo([700,GW.H-40],leave);return}
   if(inFog(wx,wy)){walkTo([Math.max(G_FOG[0]+20,Math.min(G_FOG[2]-20,wx)),G_FOG[3]+50],()=>toast('La niebla dorada te rodea con suavidad y te devuelve al camino. Algo, o alguien, protege este jardín.'));return}
   const sp=Object.entries(G_SPOT).find(([k,s])=>(!s.need||s.need())&&Math.abs(wx-s.x)<s.fp[0]*.6&&wy<s.y+20&&wy>s.y-260);if(sp){walkTo(sp[1].at,()=>enter(sp[0]));return}
-  if(C5.garden()&&Math.hypot(wx-700,wy-650)<90){walkTo(G_PTS.jardin,()=>{savePt('jardin');toast(canInvoke('piano_fiorentino')?'El Piano Fiorentino: aquí puedes tocarlo gratis. (Escena y práctica en la fase C1.)':'El Piano Fiorentino.')});return}
+  if(C5.garden()&&Math.hypot(wx-700,wy-560)<90){walkTo(G_PTS.jardin,()=>{savePt('jardin');toast(canInvoke('piano_fiorentino')?'El Piano Fiorentino: aquí puedes tocarlo gratis. (Escena y práctica en la fase C1.)':'El Piano Fiorentino.')});return}
   walkTo([wx,wy])});
  const ro=new ResizeObserver(fit);ro.observe(wrap);
  const frame=t=>{if(!alive||!cv.isConnected){ro.disconnect();return}requestAnimationFrame(frame);const dt=Math.min(.05,(t-last)/1000);last=t;
@@ -2437,16 +2449,16 @@ function stepGarden(st,box){townAssets();const pt=(S.loc&&S.loc.region==='jardin
   g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6f8a4a';g.fillRect(0,0,VW,VH);g.translate(-cam.x,-cam.y);
   /* suelo provisional: césped y camino de grava */
   {const gc=gardenGround();if(gc)g.drawImage(gc,0,0);else{g.fillStyle='#5f7a3c';g.fillRect(0,0,GW.W,GW.H)}}
-  if(C5.garden()){/* Piano Fiorentino provisional hasta recibir su imagen */g.fillStyle='rgba(0,0,0,.25)';g.beginPath();g.ellipse(700,668,80,22,0,0,6.3);g.fill();g.fillStyle='#5a3a1e';g.fillRect(650,600,100,40);g.fillStyle='#e8c27a';g.fillRect(650,632,100,8)}
-  const list=[];G_OBJ.forEach(o=>{const im=TIMG[gImg(o)];if(!im||!im.complete||!im.width)return;const s=o.s||1,w=im.width*s,h=im.height*s;list.push({y:o.portal?o.y+2:o.y,d:()=>{g.save();if(o.flip){g.translate(o.x,0);g.scale(-1,1);g.translate(-o.x,0)}if(!o.portal){g.fillStyle='rgba(15,25,5,.28)';g.beginPath();g.ellipse(o.x,o.y-2,w*.3,Math.max(3,w*.06),0,0,6.3);g.fill()}g.drawImage(im,o.x-w/2,o.y-h,w,h);g.restore()}})});
-  Object.entries(G_SPOT).forEach(([k,sp])=>{if(sp.need&&!sp.need())return;const im=TIMG['p_'+sp.img];if(!im||!im.complete||!im.width)return;const s=sp.s,w=im.width*s,h=im.height*s;list.push({y:sp.y,d:()=>{g.drawImage(im,sp.x-w/2,sp.y-h,w,h);g.font='700 11px Cinzel, serif';g.textAlign='center';const tw=g.measureText(sp.n).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(sp.x-tw/2,sp.y+6,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(sp.n,sp.x,sp.y+19)}})});
+  const FIOR=()=>{const im=TIMG['m5/clavecin'];if(!im||!im.complete||!im.width)return;const s=.3,w=im.width*s,hh=im.height*s,gl=g.createRadialGradient(700,560,10,700,560,140);gl.addColorStop(0,'rgba(255,220,120,.45)');gl.addColorStop(1,'rgba(255,220,120,0)');g.fillStyle=gl;g.fillRect(560,420,280,280);g.drawImage(im,700-w/2,600-hh,w,hh)};
+  const list=[];if(C5.garden())list.push({y:600,d:FIOR});G_OBJ.forEach(o=>{const im=TIMG[gImg(o)];if(!im||!im.complete||!im.width)return;const s=o.s||1,w=im.width*s,h=im.height*s;list.push({y:o.portal?o.y+2:o.y,d:()=>{g.save();if(o.flip){g.translate(o.x,0);g.scale(-1,1);g.translate(-o.x,0)}if(!o.portal){g.fillStyle='rgba(15,25,5,.28)';g.beginPath();g.ellipse(o.x,o.y-2,w*.3,Math.max(3,w*.06),0,0,6.3);g.fill()}g.drawImage(im,o.x-w/2,o.y-h,w,h);g.restore()}})});
+  Object.entries(G_SPOT).forEach(([k,sp])=>{if(sp.need&&!sp.need())return;const im=TIMG[spImg(sp)];if(!im||!im.complete||!im.width)return;const s=sp.s,w=im.width*s,h=im.height*s;list.push({y:sp.y,d:()=>{g.drawImage(im,sp.x-w/2,sp.y-h,w,h);g.font='700 11px Cinzel, serif';g.textAlign='center';const tw=g.measureText(sp.n).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(sp.x-tw/2,sp.y+6,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(sp.n,sp.x,sp.y+19)}})});
   const fi=[1,2,3,2][Math.floor(walkT/.16)%4],hi=TIMG[moving?(hdir==='front'?'h_frente_'+fi:'h_lado_'+fi):'h_quieto_1'];
   list.push({y:H[1],d:()=>{g.fillStyle='rgba(0,0,0,.3)';g.beginPath();g.ellipse(H[0],H[1],13,4,0,0,6.3);g.fill();if(hi&&hi.complete&&hi.naturalWidth){const k=68/144,w=hi.width*k,h=hi.height*k;g.save();g.translate(H[0],H[1]);if(moving&&hdir==='side'&&facing<0)g.scale(-1,1);g.drawImage(hi,-w/2,-h+2,w,h);g.restore()}}});
   list.sort((a,b)=>a.y-b.y).forEach(o=>o.d());
   /* la niebla dorada: se arremolina y no deja ver el jardín */
   if(!C5.garden()){fogT+=dt;const [x0,y0,x1,y1]=G_FOG,cx=(x0+x1)/2,cy=(y0+y1)/2;for(let i=0;i<14;i++){const a=fogT*.25+i*.9,r=60+((i*53)%140),x=cx+Math.cos(a)*r*1.4,y=cy+Math.sin(a*1.3)*r*.7,R=170+((i*37)%90);const gr=g.createRadialGradient(x,y,0,x,y,R);gr.addColorStop(0,'rgba(255,236,180,.55)');gr.addColorStop(.6,'rgba(240,205,120,.28)');gr.addColorStop(1,'rgba(240,205,120,0)');g.fillStyle=gr;g.fillRect(x-R,y-R,R*2,R*2)}
    g.save();g.translate(cx,cy);g.scale(1,(y1-y0+120)/(x1-x0+160));const R0=(x1-x0+160)/2,eg=g.createRadialGradient(0,0,R0*.35,0,0,R0);eg.addColorStop(0,'rgba(255,240,200,.42)');eg.addColorStop(.75,'rgba(255,236,190,.3)');eg.addColorStop(1,'rgba(255,236,190,0)');g.fillStyle=eg;g.beginPath();g.arc(0,0,R0,0,6.3);g.fill();g.restore()}
-  if(C5.observatory()==='oculto'){g.fillStyle='rgba(60,80,40,.55)';g.fillRect(0,0,GW.W,560)}
+  if(C5.observatory()==='oculto'){g.fillStyle='rgba(60,80,40,.55)';g.fillRect(0,0,GW.W,440)}
   g.textAlign='center';g.font='700 11px Cinzel, serif';const lbl='Puerta norte · volver a Florencia',tw=g.measureText(lbl).width+14;g.fillStyle='rgba(20,15,10,.75)';g.beginPath();g.roundRect(700-tw/2,GW.H-62,tw,18,9);g.fill();g.fillStyle='#fff3dc';g.fillText(lbl,700,GW.H-49);
   if(pingP&&t-pingT<600){const k=(t-pingT)/600;g.strokeStyle=`rgba(255,213,110,${1-k})`;g.lineWidth=2;g.beginPath();g.arc(pingP[0],pingP[1],6+k*14,0,6.3);g.stroke()}};
  requestAnimationFrame(frame);if(DEV)window.__G={H,get G(){return G},walkTo,inFog,enter,regrid:()=>{G=gardenGrid()}}}
@@ -3552,7 +3564,7 @@ function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*d
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
 if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))setTimeout(bootWorld,80);
-window.__apr={c5Event,C5,canInvoke,buyFiorentino,resonate,MEM_OBJ,MC_THEME,validateTheme,simplifyTheme,migrateProvisional,instrHearts,saneSave,get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},regenReady,regenLeft,migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc,openNpc,NPCS,toggleTrack,ASKQ,askAvail,openBook};
+window.__apr={previewGarden,c5Event,C5,canInvoke,buyFiorentino,resonate,MEM_OBJ,MC_THEME,validateTheme,simplifyTheme,migrateProvisional,instrHearts,saneSave,get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},regenReady,regenLeft,migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc,openNpc,NPCS,toggleTrack,ASKQ,askAvail,openBook};
 })();
 </script>
 </body></html>
