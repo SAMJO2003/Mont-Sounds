@@ -601,6 +601,7 @@ body>.enc{position:fixed}
 .npcp-op.k-route{background:linear-gradient(180deg,#f6dc9a,#d4a447);color:#3a2410;border-color:#a8782c;box-shadow:0 0 16px rgba(255,200,90,.55);animation:vitP 1.8s ease-in-out infinite}.npcp-op.k-route svg{stroke:#3a2410;fill:rgba(58,36,16,.15)}.npcp-badge{font:700 10px Cinzel,serif;font-style:normal;padding:2px 7px;border-radius:999px;background:#3a2410;color:#ffd98c}
 .npcp-op.k-trade{border-color:rgba(255,207,90,.45)}.npcp-op.k-trade svg{stroke:#ffcf5a}.npcp-op.k-music{border-color:rgba(120,220,170,.45);background:rgba(90,230,150,.07)}.npcp-op.k-music svg{stroke:#9dffc4}
 .npcp-op.k-bye{opacity:.8;border-style:dashed}
+.plogp .npcp-say{max-height:58vh;overflow:auto;font-style:normal;background:rgba(22,15,9,.88);color:#f3e6c8;border:1px solid rgba(232,194,122,.35)}.plogp .npcp-say::before,.plogp .npcp-say::after{display:none}.plog-sum{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:6px;margin-bottom:8px}.plog-sum div{background:rgba(232,194,122,.1);border:1px solid rgba(232,194,122,.3);border-radius:10px;padding:7px 4px;text-align:center}.plog-sum b{display:block;color:#ffd98a;font-size:17px;line-height:1.15}.plog-sum small{font-size:11px;opacity:.75}.plog-h{margin:10px 0 4px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#e8c27a}.plog-bar{display:grid;grid-template-columns:8.5em 1fr 2em;align-items:center;gap:6px;font-size:13px;margin:3px 0}.plog-bar i{height:8px;border-radius:4px;background:linear-gradient(90deg,#5fe0a0 var(--w),rgba(255,255,255,.1) var(--w))}.plog-bar b{text-align:right;color:#ffd98a}.plog-np{display:flex;gap:8px;align-items:flex-start;margin:6px 0;padding:6px;border-radius:10px;background:rgba(0,0,0,.18)}.plog-np img{width:44px;height:44px;object-fit:contain;flex:none}.plog-np>div{flex:1;min-width:0}.plog-np b{color:#ffd98a}.plog-act{display:flex;justify-content:space-between;gap:6px;font-size:13px;padding:2px 0;border-top:1px dashed rgba(232,194,122,.18)}.plog-act small{opacity:.8;text-align:right}.plog-act.none{opacity:.55}.plog-note{font-size:12px;opacity:.75;margin-top:8px}
 .enc.lute.read{background:radial-gradient(120% 80% at 50% 10%,#2c2416,#0d0a06 72%)}
 .npcp.noanim .npcp-card{transition:none;transform:none;opacity:1}.npcp.noanim .npcp-bd{transition:none}
 .npcp-dot{width:10px;height:10px;border-radius:50%;background:#ffcf5a;box-shadow:0 0 8px #ffcf5a;flex:none}.npcp-op.read{color:#d6c7a6}.npcp-op.read svg{stroke:#b9a27a}
@@ -1100,7 +1101,14 @@ const save=()=>{if(MEMORY)return;try{localStorage.setItem(KEY,JSON.stringify(S))
    Los campos antiguos (done, inv, instr, codex, m3, m4…) se conservan tal cual. */
 const SAVE_FMT=2,KEY_BAK='mk-aprender-backup-v1';
 const CH_IDS=['w1m01','w1m02','w1m03','w1m04','w1m05','w1m06','w1m07','w1m08','w1m09','w1m10','w1m11','w1m12'];
-function migrateSave(old){const S2=JSON.parse(JSON.stringify(old||{}));const done=S2.done||{},inv=S2.inv||{},instr=S2.instr||[],codex=S2.codex||[],fog=(S2.mundo&&S2.mundo.fog)||{},now=Date.now();
+/* M5 · estabilidad: normaliza datos dañados o de formatos muy antiguos sin perder nada */
+function saneSave(o){if(!o||typeof o!=='object')return o;const obj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+ if(o.instr&&!Array.isArray(o.instr))o.instr=obj(o.instr)?Object.keys(o.instr).filter(k=>o.instr[k]):[];
+ ['codex','chords','archive','comps'].forEach(k=>{if(o[k]!=null&&!Array.isArray(o[k]))o[k]=obj(o[k])?Object.keys(o[k]):[]});
+ ['done','inv','chests','facts','quests','regen','talk','practice'].forEach(k=>{if(o[k]!=null&&!obj(o[k]))o[k]={}});
+ if(o.mundo!=null&&!obj(o.mundo))o.mundo={};if(o.mundo){if(!obj(o.mundo.spirits))o.mundo.spirits={};if(!obj(o.mundo.fog))o.mundo.fog={}}
+ if(typeof o.coins!=='number'||!isFinite(o.coins)||o.coins<0)o.coins=Math.max(0,+o.coins||0);return o}
+function migrateSave(old){const S2=JSON.parse(JSON.stringify(old||{}));saneSave(S2);const done=S2.done||{},inv=S2.inv||{},instr=S2.instr||[],codex=S2.codex||[],fog=(S2.mundo&&S2.mundo.fog)||{},now=Date.now();
  const facts={},fact=k=>{facts[k]=facts[k]||now};
  CH_IDS.forEach(id=>{if(done[id])fact('cap:'+id)});instr.forEach(i=>fact('instr:'+i));codex.forEach(c=>fact('codex:'+c));
  if(S2.vital)fact('skill:vital');if(S2.metRam)fact('met:carnero');if(instr.includes('laud'))fact('laud_fabricado');if(instr.includes('piccolo_raro'))fact('piccolo_reforzado');
@@ -1166,7 +1174,7 @@ const NPCS={
   sv:['route','instr','craft','sell','ask','bye']},
  matteo:{n:'Matteo',p:'Campanero',img:'matteo',bg:'campanario_top',where:()=>'campanario',avail:()=>true,
   hi:[[()=>hasFact('cap:w1m03'),'—Desde que se abrió aquella puerta del scriptorium, las campanas suenan distintas al anochecer.'],[()=>hasFact('cap:w1m02'),'—Dicen que el bosque vuelve a cantar. Las campanas también lo notan.'],[()=>true,'—Las campanas siempre tienen algo que contarnos, joven viajero.']],
-  sv:['route','bells','ask','bye']},
+  sv:['route','bells','agua','faroles','ask','bye']},
  isabella:{n:'Isabella',p:'Copista del scriptorium',img:'m3/isabella_pie',bg:'m3/int_scrip_3',where:()=>'scriptorium',avail:()=>!!(S.done&&S.done.w1m02)||chIdx()>=2,
   hi:[[()=>hasFact('cap:w1m03'),'—Ya lees la música del Maestro. ¿Practicamos un poco? Las notas se olvidan si no se visitan.'],[()=>true,'—Cada página guarda una voz. ¿Vienes a leer conmigo?']],
   sv:['route','read','codex','ask','bye']},
@@ -1178,13 +1186,13 @@ const NPCS={
   sv:['route','buy','trade','ask','bye']},
  violinista:{n:'Chiara',p:'Violinista · aprendiz',img:'violinista_pie',where:()=>'escenario',avail:()=>freeOn(),kind:'strings',
   hi:[[()=>true,'—Todavía me tiembla el arco en las notas largas… ¿practicamos juntas un rato?']],sv:['route','play','ask','bye'],
-  mel:[[67,69,71,72,71,69,67],[64,67,72,71,69,67,64],[72,71,69,67,65,64,62,60]]},
+  mel:[[67,69,71,72,71,69,67],[64,67,72,71,69,67,64],[72,71,69,67,65,64,62,60]],mel2:[[64,65,67,69,71,72,71,69,67,65,64],[72,67,69,64,65,67,72]]},
  flautista:{n:'Tommaso',p:'Flautista · aprendiz',img:'flautista_pie',where:()=>'escenario',avail:()=>freeOn(),kind:'flute',
   hi:[[()=>true,'—Estoy aprendiendo a subir escalas sin quedarme sin aire. ¿Me acompañas?']],sv:['route','play','ask','bye'],
-  mel:[[72,71,69,67,69,71,72],[60,62,64,65,67,69,71,72],[67,69,71,69,67,65,64]]},
+  mel:[[72,71,69,67,69,71,72],[60,62,64,65,67,69,71,72],[67,69,71,69,67,65,64]],mel2:[[60,62,64,65,67,65,64,62,60,62,64],[72,71,69,67,65,64,62,60,62,64]]},
  laudista:{n:'Nico',p:'Laudista · aprendiz',img:'laudista_pie',where:()=>'escenario',avail:()=>freeOn(),kind:'lute',
   hi:[[()=>hasInstr('laud'),'—¡Tienes un laúd! Yo todavía me equivoco con los arpegios… practiquemos.'],[()=>true,'—Los acordes se me resisten, pero los arpegios ya me salen. ¿Tocamos?']],sv:['route','play','ask','bye'],
-  mel:[[60,64,67,72,67,64,60],[65,69,72,77,72,69,65],[67,71,74,79,74,71,67]]}};
+  mel:[[60,64,67,72,67,64,60],[65,69,72,77,72,69,65],[67,71,74,79,74,71,67]],mel2:[[60,64,67,72,65,69,72,77],[67,71,74,79,60,64,67,72]]}};
 /* preguntas: ver CONVERSACIONES más abajo (si un personaje no tiene, la opción se oculta) */
 const ASK={};
 /* fabricación libre: recetas fuera de la historia (el laúd se fabrica en la ruta y es único) */
@@ -1192,14 +1200,34 @@ const CRAFTS=[{id:'laud',by:'bernardo',story:true,unique:true}];
 const freeCrafts=npc=>CRAFTS.filter(c=>c.by===npc&&!c.story&&!(c.unique&&hasInstr(c.id)));
 /* práctica libre: nunca toca la historia; se guarda solo una estadística para el futuro */
 function practiceStat(id,ok){if(MEMORY)return;S.practice=S.practice||{};const p=S.practice[id]=S.practice[id]||{n:0,ok:0};p.n++;if(ok)p.ok++;p.last=Date.now();save()}
-const PRACTICE_STEPS={bells:()=>{const B=WORLDS[0].lessons[0].steps.filter(x=>x.type==='bells').map(x=>Object.assign({},x,{ph:'Práctica con Matteo'}));const pick=B.sort(()=>Math.random()-.5).slice(0,3);return pick}};
-function startPractice(id){const steps=PRACTICE_STEPS[id]();MEMORY={snap:JSON.stringify(S),practice:id};runLesson(WORLDS[0],{id:'practice_'+id,t:'Práctica libre',practice:true,game:true,scene:true,steps},false,true)}
+/* M5 · el héroe crece: nivel según los capítulos vividos (solo lectura del progreso) */
+const KNOW_CH=['w1m01','w1m02','w1m03','w1m04'];
+function knowLevel(){const D=S.done||{};return KNOW_CH.filter(id=>D[id]).length}
+const KNOW_N=['Aprendiz','Oído despierto','Conoce la madera','Lee la música','Voz propia'];
+/* disciplinas y profesores: para añadir un maestro futuro basta con una entrada nueva */
+const DISC={altura:'Altura y oído',ritmo:'Ritmo y pulso',expresion:'Expresión',lectura:'Lectura musical',conjunto:'Tocar en conjunto',teclado:'Instrumentos de teclado'};
+const TEACHERS=[
+ {id:'matteo',acts:[{id:'bells',t:'Campanas',d:'altura'},{id:'agua',t:'El agua de la fuente',d:'ritmo'},{id:'faroles',t:'Los faroles',d:'expresion'}]},
+ {id:'isabella',acts:[{id:'lectura',t:'Lectura con Isabella',d:'lectura'}]},
+ {id:'violinista',acts:[{id:'tocar_violinista',t:'Tocar con Chiara',d:'conjunto'}]},
+ {id:'flautista',acts:[{id:'tocar_flautista',t:'Tocar con Tommaso',d:'conjunto'}]},
+ {id:'laudista',acts:[{id:'tocar_laudista',t:'Tocar con Nico',d:'conjunto'}]},
+ {id:'beatrice',future:true,acts:[]}];
+const pick=(a,n)=>[...a].sort(()=>Math.random()-.5).slice(0,n);
+const lessonSteps=(type)=>WORLDS[0].lessons[0].steps.filter(x=>x.type===type);
+const PRACTICE_STEPS={
+ bells:()=>{const L=knowLevel();return pick(lessonSteps('bells'),3).map(x=>{const o=Object.assign({},x,{ph:'Práctica con Matteo'});if(L>=3&&o.n&&o.mode!=='repeat'&&o.mode!=='broken')o.n=Math.min(o.n+1,6);if(L>=3&&o.time)o.time=Math.round(o.time*.85);if(L>=3&&o.len)o.len++;return o})},
+ agua:()=>{const L=knowLevel();return pick(lessonSteps('water'),2).map(x=>Object.assign({},x,{ph:'Práctica con Matteo · El agua',n:x.n+(L>=3?1:0)}))},
+ faroles:()=>{const L=knowLevel();const pool=[{do:'soft',say:'Toca una nota suave (piano)'},{do:'strong',say:'Ahora una nota fuerte (forte)'},{chord:'C',art:'s',say:'Do mayor staccato: tócalo y suéltalo enseguida'},{chord:'C',art:'l',say:'Do mayor legato: mantenlo sonando'},{chord:'F',say:'Fa mayor: Fa, La y Do'},{do:'trill',say:'Trino: alterna Mi y Fa, cada vez más rápido'}];
+  if(L>=2)pool.push({do:'cresc',say:'Crescendo: cinco notas, cada una más fuerte'},{do:'dim',say:'Diminuendo: cinco notas, cada una más suave'});
+  return [{type:'lights',who:'matteo',ph:'Práctica con Matteo · Los faroles',q:'—Enciende los faroles con la intensidad y la articulación justas.',tasks:pick(pool,L>=3?4:3)}]}};
+function startPractice(id){const steps=PRACTICE_STEPS[id]();if(!steps||!steps.length)return;MEMORY={snap:JSON.stringify(S),practice:id};runLesson(WORLDS[0],{id:'practice_'+id,t:'Práctica libre',practice:true,game:true,scene:true,steps},false,true)}
 /* lectura con Isabella: frases generadas solo con lo que el jugador ya sabe */
-function knownNotes(){return [64,65,67,69,71,72]}
+function knownNotes(){return knowLevel()>=4?[60,64,65,67,69,71,72,74]:[64,65,67,69,71,72]}
 function readPhrase(n,leap){const W2=knownNotes();let j=Math.floor(Math.random()*W2.length);const out=[W2[j]];for(let i=1;i<n;i++){let st=leap?[-3,-2,2,3][Math.floor(Math.random()*4)]:[-1,1][Math.floor(Math.random()*2)];let q=j+st;if(q<0||q>=W2.length)q=j-st;q=Math.max(0,Math.min(W2.length-1,q));if(q===j)q=j+(j<W2.length-1?1:-1);if(Math.abs(W2[q]-W2[j])===6)q=j+(st>0?1:-1);q=Math.max(0,Math.min(W2.length-1,q));j=q;out.push(W2[j])}return out}
-function readDrill(){const R=[{n:4,leap:false,names:'all',hint:'always',say:'—Primero con ayuda: lee y toca.'},{n:5,leap:false,names:'first',hint:'miss',say:'—Ahora solo te digo la primera nota.'},{n:6,leap:true,names:'none',hint:'miss',say:'—La última, con saltos. Solo leyendo.'}];let r=0;
+function readDrill(){const R=[{n:4,leap:false,names:'all',hint:'always',say:'—Primero con ayuda: lee y toca.'},{n:5,leap:false,names:'first',hint:'miss',say:'—Ahora solo te digo la primera nota.'},{n:6,leap:true,names:'none',hint:'miss',say:'—La última, con saltos. Solo leyendo.'}];if(knowLevel()>=4){R[2].say='—Ahora con saltos. Solo leyendo.';R.push({n:7,leap:true,names:'none',hint:'miss',say:'—Ya conoces el Do central: esta frase baja hasta él. Solo leyendo.'})}let r=0;
  const go=()=>{const c=R[r];lutePlay({title:'Práctica de lectura',tag:'Isabella · ronda '+(r+1)+' de '+R.length,hero:'h_quieto_1',kind:'piano',cls:'read',seq:readPhrase(c.n,c.leap),names:c.names,hint:c.hint,who:'isabella',say:c.say,sub:'Si te equivocas, la frase vuelve a empezar. Es solo práctica.',winText:r<R.length-1?'¡Bien leído!':'¡Práctica completada!',okText:r<R.length-1?'Siguiente frase':'Terminar',cancelText:'Dejar la práctica',onDone:()=>{r++;if(r<R.length)setTimeout(go,350);else practiceStat('lectura',true)}})};go()}
-function playWith(id){const np=NPCS[id];const m=np.mel[Math.floor(Math.random()*np.mel.length)];lutePlay({title:'Tocar con '+np.n,tag:np.p,hero:'h_quieto_1',kind:np.kind,cls:'read',seq:m,names:'all',hint:'always',say:'—Sigue las teclas iluminadas, yo te acompaño.',sub:'Práctica libre: puedes repetirla siempre que quieras.',winText:'¡Qué bien sonamos juntos!',okText:'Terminar',cancelText:'Dejarlo por ahora',again:false,onDone:()=>practiceStat('tocar_'+id,true)})}
+function playWith(id){const np=NPCS[id],L=knowLevel(),pool=np.mel.concat(L>=3&&np.mel2?np.mel2:[]);const m=pool[Math.floor(Math.random()*pool.length)];const rd=L>=3;lutePlay({title:'Tocar con '+np.n,tag:np.p,hero:'h_quieto_1',kind:np.kind,cls:'read',seq:m,names:rd?'first':'all',hint:rd?'miss':'always',say:rd?'—Ya sabes leer: te digo la primera nota y seguimos juntos.':'—Sigue las teclas iluminadas, yo te acompaño.',sub:'Práctica libre: puedes repetirla siempre que quieras.',winText:'¡Qué bien sonamos juntos!',okText:'Terminar',cancelText:'Dejarlo por ahora',again:false,onDone:()=>practiceStat('tocar_'+id,true)})}
 
 /* ===================== CONVERSACIONES («Preguntar») =====================
    Cada pregunta: id, personaje, texto, respuesta (2–4 frases), categoría, condición de desbloqueo, imágenes opcionales y referencias.
@@ -1259,7 +1287,7 @@ function talkCodexHTML(){const read=ASKQ.filter(x=>talked(x.id));if(!read.length
  return `<h3 class="tk-h">Conversaciones</h3>${chips}${Object.entries(by).map(([n,xs])=>`<div class="tk-g"><b>${esc(NPCS[n].n)} · ${esc(NPCS[n].p)}</b>${xs.map(x=>`<button type="button" class="tk-it" data-tk="${n}|${x.id}"><span>${esc(x.q)}</span><i class="tk-c ${x.cat}">${ASK_CAT[x.cat]}</i></button>`).join('')}</div>`).join('')||'<p class="small">No hay conversaciones de esta categoría.</p>'}`}
 
 /* iconos propios (sin emojis) para el panel */
-const ICO={route:'<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/>',instr:'<ellipse cx="9" cy="15" rx="6" ry="6.5"/><path d="M13 11l7-7M18 3l3 3"/><circle cx="9" cy="15" r="1.6"/>',
+const ICO={stats:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',agua:'<path d="M12 3c3 4 6 7 6 11a6 6 0 01-12 0c0-4 3-7 6-11z"/>',faroles:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0012 3z"/>',route:'<path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 21l1.6-7L2 9.2l7.1-.6z"/>',instr:'<ellipse cx="9" cy="15" rx="6" ry="6.5"/><path d="M13 11l7-7M18 3l3 3"/><circle cx="9" cy="15" r="1.6"/>',
  craft:'<path d="M3 21l9-9M14 4l6 6-3 3-6-6zM12 6l3-3"/>',sell:'<circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/><path d="M9 9v6M15 9v6"/>',buy:'<path d="M5 8h14l-1.5 12h-11zM9 8a3 3 0 016 0"/>',
  cook:'<path d="M4 11h16v3a6 6 0 01-6 6h-4a6 6 0 01-6-6zM8 7c0-2 2-2 2-4M14 7c0-2 2-2 2-4"/>',trade:'<path d="M4 8h14l-3-3M20 16H6l3 3"/>',bells:'<path d="M12 3a5 5 0 015 5v5l2 3H5l2-3V8a5 5 0 015-5zM10 19a2 2 0 004 0"/>',
  read:'<path d="M4 5h6a2 2 0 012 2v12a2 2 0 00-2-2H4zM20 5h-6a2 2 0 00-2 2v12a2 2 0 012-2h6z"/>',play:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
@@ -1276,7 +1304,9 @@ const SVC={route:{t:'Seguir la ruta del héroe',k:'route',show:np=>routeHere(np.
  buy:{t:'Comprar alimentos',k:'trade',show:np=>!!(np.shop&&SHOPS[np.shop].buy.length),run:np=>openShop(np.shop,'buy')},
  cook:{t:'Cocinar',k:'trade',show:np=>!!(np.shop&&SHOPS[np.shop].cook.length),run:np=>openShop(np.shop,'cook')},
  trade:{t:'Hacer un trueque',k:'trade',show:np=>!!(np.shop&&SHOPS[np.shop].trade.length),run:np=>openShop(np.shop,'trade')},
- bells:{t:'Practicar con las campanas',k:'music',run:()=>startPractice('bells')},
+ bells:{t:'Campanas · altura de los sonidos',k:'music',run:()=>startPractice('bells')},
+ agua:{t:'El agua · ritmo y silencio',k:'music',run:()=>startPractice('agua')},
+ faroles:{t:'Los faroles · intensidad y articulación',k:'music',run:()=>startPractice('faroles')},
  read:{t:'Practicar lectura musical',k:'music',run:()=>readDrill()},
  play:{t:'Tocar juntos',k:'music',run:(np,id)=>playWith(id)},
  codex:{t:'Consultar el Códice',k:'svc',show:()=>(S.codex||[]).length>0,run:()=>openBook('codice')},
@@ -1306,8 +1336,18 @@ function freeLocOld(k){const l=TOWN_LOC[k],o=routeObjective(),here=o&&o.loc===k&
   :`<span class="eyebrow">${esc(np?np.p:l.n)}</span><h2>${esc(np?np.n:l.n)}</h2><p class="npc-hi">${esc(np?np.hi:'')}</p>`;
  sheet(`<div class="npc">${img}<div class="npc-tx">${head}</div></div><div class="npc-ops">${ops.map((x,i)=>`<button type="button" class="npc-op ${x.gold?'gold':''}" data-op="${i}"><span>${x.ic}</span>${esc(x.t)}</button>`).join('')}</div>`);
  $$('[data-op]').forEach(b=>b.onclick=()=>ops[+b.dataset.op].f())}
-function heroMenu(){const tr=routeTracked();sheet(`<span class="eyebrow">Menú del héroe</span><h2>${esc(S.route?('Ruta: Capítulo '+CH_N(S.route.ch)):'Florencia')}</h2><div class="npc-ops"><button class="npc-op" type="button" id="hmBook"><span>📖</span>Libro de la ruta</button><button class="npc-op" type="button" id="hmTrack"><span>${tr?'🙈':'⭐'}</span>${tr?'Ocultar la ruta':'Mostrar la ruta'}</button><button class="npc-op" type="button" id="hmX"><span>✕</span>Cerrar</button></div>`);
- $('#hmBook').onclick=()=>{closeSheet();openRouteBook()};$('#hmTrack').onclick=()=>{toggleTrack();closeSheet()};$('#hmX').onclick=closeSheet}
+function heroMenu(){const tr=routeTracked();sheet(`<span class="eyebrow">Menú del héroe</span><h2>${esc(S.route?('Ruta: Capítulo '+CH_N(S.route.ch)):'Florencia')}</h2><div class="npc-ops"><button class="npc-op" type="button" id="hmBook"><span>📖</span>Libro de la ruta</button><button class="npc-op" type="button" id="hmPrac"><span>🎹</span>Mi práctica</button><button class="npc-op" type="button" id="hmTrack"><span>${tr?'🙈':'⭐'}</span>${tr?'Ocultar la ruta':'Mostrar la ruta'}</button><button class="npc-op" type="button" id="hmX"><span>✕</span>Cerrar</button></div>`);
+ $('#hmBook').onclick=()=>{closeSheet();openRouteBook()};$('#hmPrac').onclick=()=>{closeSheet();setTimeout(openPracticeLog,230)};$('#hmTrack').onclick=()=>{toggleTrack();closeSheet()};$('#hmX').onclick=closeSheet}
+/* M5 · Mi práctica: solo lee S.practice (nunca la cambia) */
+function practiceRows(){const P=S.practice||{};return TEACHERS.filter(t=>!t.future&&NPCS[t.id]&&NPCS[t.id].avail()).map(t=>({t,np:NPCS[t.id],acts:t.acts.map(a=>Object.assign({},a,P[a.id]||{n:0,ok:0}))}))}
+function fmtAgo(ms){if(!ms)return 'nunca';const d=(Date.now()-ms)/864e5;return d<1?'hoy':d<2?'ayer':d<7?'hace '+Math.floor(d)+' días':new Date(ms).toLocaleDateString('es')}
+function openPracticeLog(){const rows=practiceRows(),all=rows.flatMap(r=>r.acts),tn=all.reduce((s,a)=>s+a.n,0),tok=all.reduce((s,a)=>s+a.ok,0),L=knowLevel();
+ const byD={};all.forEach(a=>{byD[a.d]=(byD[a.d]||0)+a.ok});const mx=Math.max(1,...Object.values(byD));
+ const html=`<div class="plog"><div class="plog-sum"><div><b>${tn}</b><small>sesiones</small></div><div><b>${tok}</b><small>completadas</small></div><div><b>${esc(KNOW_N[L])}</b><small>nivel del héroe</small></div></div>
+  <p class="plog-h">Por disciplina</p>${Object.keys(DISC).filter(d=>byD[d]!=null).map(d=>`<div class="plog-bar"><span>${esc(DISC[d])}</span><i style="--w:${Math.round(byD[d]/mx*100)}%"></i><b>${byD[d]}</b></div>`).join('')}
+  <p class="plog-h">Por personaje</p>${rows.map(r=>`<div class="plog-np"><img src="${V()}${r.np.img}.webp" alt=""><div><b>${esc(r.np.n)}</b>${r.acts.map(a=>`<div class="plog-act${a.n?'':' none'}"><span>${esc(a.t)}</span><small>${a.n?`${a.ok}/${a.n} completadas · ${fmtAgo(a.last)}`:'Sin practicar todavía'}</small></div>`).join('')}</div></div>`).join('')}
+  <p class="plog-note">La práctica nunca cambia la historia. Los ejercicios crecen contigo: cuanto más avanzas en la ruta, más notas y retos te proponen.</p></div>`;
+ npcPanel({img:null,name:'Mi práctica',prof:'Tu diario musical',hiHtml:html,ops:[{ic:'bye',t:'Cerrar',k:'bye',f:()=>{}}],cls:'place plogp'})}
 function toggleTrack(){S.route=S.route||{ch:'w1m01',step:0};S.route.track=!routeTracked();save();if(LS&&LS.L&&LS.L.free&&!LS.mrun&&!LS.fzone)renderStep()}
 function openRouteBook(){const v=$('#vLesson');gameFS(false);micOff();ACTIVE_KB=null;v.hidden=true;document.body.style.overflow='';LS=null;drawMap()}
 function bootWorld(){if(!freeOn()||LS)return;if(S.route&&S.route.ch==='w1m03'&&S.route.step>0&&S.wstate&&S.wstate.time&&!S.wstate.time.set3){S.wstate.time.phase='noche';S.wstate.time.set3=1;save()}openFree();const r=S.loc&&S.loc.region;if(S.loc&&S.loc.route&&r!=='florencia'){resumeRoute();return}if(r==='bosque'||r==='pastizales')setTimeout(()=>enterRegion(r),60)}
@@ -1331,7 +1371,7 @@ function regenLeft(kind,id){const r=(S.regen||{})[kind+':'+id];return r?Math.max
 function regenMark(kind,id){if(MEMORY)return;S.regen=S.regen||{};S.regen[kind+':'+id]=Date.now();save()}
 
 /* migración: una sola vez, con copia independiente del guardado anterior */
-try{if(S.world&&typeof S.world==='object'){S.world=0;S.fmt=0}if(!S.fmt||S.fmt<SAVE_FMT){const raw=localStorage.getItem(KEY);if(raw&&!localStorage.getItem(KEY_BAK))localStorage.setItem(KEY_BAK,raw);S=migrateSave(S);save()}}catch(e){console.warn('migración',e)}
+try{saneSave(S)}catch(e){}try{if(S.world&&typeof S.world==='object'){S.world=0;S.fmt=0}if(!S.fmt||S.fmt<SAVE_FMT){const raw=localStorage.getItem(KEY);if(raw&&!localStorage.getItem(KEY_BAK))localStorage.setItem(KEY_BAK,raw);S=migrateSave(S);save()}}catch(e){console.warn('migración',e)}
 const worldDoneCount=w=>w.lessons.filter(l=>S.done[l.id]).length+(w.finale&&w.finale.id&&S.done[w.finale.id]?1:0);
 const worldComplete=w=>!!(w.finale&&w.finale.id&&S.done[w.finale.id]);
 function today(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
@@ -3343,7 +3383,7 @@ function rs(){DW=cv.width=innerWidth*devicePixelRatio;DH=cv.height=innerHeight*d
 const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
 (function tick(){cx.clearRect(0,0,DW,DH);for(const p of parts){if(!still){p.y-=p.s*devicePixelRatio;p.a+=.01;p.x+=Math.sin(p.a)*.2;if(p.y<-5){p.y=DH+5;p.x=Math.random()*DW}}cx.globalAlpha=.3+.3*Math.sin(p.a*2);cx.fillStyle=dustColor;cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()}if(!still)requestAnimationFrame(tick)})();
 if(/^(localhost|127\.0\.0\.1)$/.test(location.hostname))setTimeout(bootWorld,80);
-window.__apr={get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},regenReady,regenLeft,migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc,openNpc,NPCS,toggleTrack,ASKQ,askAvail,openBook};
+window.__apr={saneSave,get LS(){return LS},WORLDS,runLesson,renderStep,earStart,bpLoad,bpScores,resample22,ac,EAR,BP,NAMES,get KB(){return ACTIVE_KB},townEncounter,creatureEncounter,get S(){return S},regenReady,regenLeft,migrateSave,openFree,resumeRoute,routeObjective,startMemory,get MEMORY(){return MEMORY},enterRegion,freeLoc,openNpc,NPCS,toggleTrack,ASKQ,askAvail,openBook};
 })();
 </script>
 </body></html>
